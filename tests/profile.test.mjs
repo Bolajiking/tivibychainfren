@@ -93,3 +93,42 @@ test("extractEvmWalletAddressesFromUnknown finds unique linked EVM wallets", () 
     "0x0000000000000000000000000000000000000002",
   ]);
 });
+
+test("extractEvmWalletAddressesFromUnknown puts the embedded (privy) wallet first regardless of array order", () => {
+  const addresses = wallets.extractEvmWalletAddressesFromUnknown({
+    linked_accounts: [
+      { type: "email", address: "ada@example.com" },
+      // An external wallet linked BEFORE the embedded one in Privy's array —
+      // the server must still treat the embedded wallet as primary, matching
+      // the client's SessionBridge priority, or owner-scoped DB lookups
+      // (keyed by walletAddresses[0]) silently split from the client's idea
+      // of "your wallet."
+      { type: "wallet", address: "0xEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", connector_type: "external" },
+      {
+        type: "wallet",
+        address: "0xFA9d000000000000000000000000000000000001",
+        connector_type: "embedded",
+        wallet_client_type: "privy",
+      },
+    ],
+  });
+
+  assert.deepEqual(addresses, [
+    "0xfa9d000000000000000000000000000000000001",
+    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  ]);
+});
+
+test("extractEvmWalletAddressesFromUnknown falls back to discovery order when no wallet is embedded", () => {
+  const addresses = wallets.extractEvmWalletAddressesFromUnknown({
+    linked_accounts: [
+      { type: "wallet", address: "0xAAAA000000000000000000000000000000000001", connector_type: "external" },
+      { type: "wallet", address: "0xBBBB000000000000000000000000000000000002", connector_type: "external" },
+    ],
+  });
+
+  assert.deepEqual(addresses, [
+    "0xaaaa000000000000000000000000000000000001",
+    "0xbbbb000000000000000000000000000000000002",
+  ]);
+});

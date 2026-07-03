@@ -12,6 +12,7 @@ import { config } from "@/lib/config";
 import { provisionCreatorProfile, redeemInvite, uploadChannelArt, checkCreatorAccess, getMyCreatorProfile } from "@/lib/profile-client";
 import { slugifyUsername } from "@/lib/profile";
 import { buildAuthHref } from "@/lib/auth/redirect";
+import { useHydrated } from "@/lib/store/useHydrated";
 import { MOCK_MODE } from "@/lib/config";
 import { cn } from "@/lib/cn";
 import type { Creator } from "@/lib/types";
@@ -40,6 +41,7 @@ function OnboardingFlow() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, user, creator: sessionCreator, setCreator } = useSession();
+  const hydrated = useHydrated();
   const entryChecked = useRef(false);
 
   const username = slugifyUsername(name || user?.displayName || "") || "yourname";
@@ -62,7 +64,11 @@ function OnboardingFlow() {
   //  • A wallet that redeemed an invite (but has no channel yet) skips to the
   //    channel-details step; everyone else passes the invite gate first.
   useEffect(() => {
-    if (!user || entryChecked.current) return;
+    // Wait for the persisted session to settle first — otherwise a returning
+    // creator briefly flashes the invite-code screen before the redirect to
+    // their dashboard lands (the persisted `user`/`creator` aren't readable
+    // until zustand's persist middleware rehydrates from localStorage).
+    if (!hydrated || !user || entryChecked.current) return;
     entryChecked.current = true;
     let alive = true;
     (async () => {
@@ -91,7 +97,7 @@ function OnboardingFlow() {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [hydrated, user]);
 
   // Invite gate: sign in (preserving the code), then redeem before channel setup.
   async function continueToProfile() {
@@ -167,6 +173,11 @@ function OnboardingFlow() {
       setSaving(false);
     }
   }
+
+  // Never show the invite/create UI before we know whether this is a
+  // returning creator — the persisted session (and thus `user`/`sessionCreator`)
+  // isn't readable until this resolves.
+  if (!hydrated) return <OnboardingFallback />;
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-4 py-10">
