@@ -1,0 +1,23 @@
+# TLS front for the bridge host. Raw TCP 443 is reserved for MediaMTX ICE-TCP,
+# so the HTTPS listener lives on 8443 (only the TVinBio app server calls it).
+# Use the DNS-01 challenge: port 443 is not available for HTTP-01.
+{
+	email ops@example.com
+}
+
+https://BRIDGE_PUBLIC_HOST:8443 {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+
+	# Agent control API (HMAC-verified) + health.
+	@control path /v1/* /healthz
+	handle @control {
+		reverse_proxy 127.0.0.1:8091
+	}
+
+	# Everything else is WHIP signaling to MediaMTX (per-lease opaque paths).
+	handle {
+		reverse_proxy 127.0.0.1:8889
+	}
+}

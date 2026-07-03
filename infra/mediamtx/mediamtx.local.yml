@@ -1,0 +1,53 @@
+logLevel: info
+logDestinations: [stdout]
+
+authMethod: internal
+authInternalUsers:
+  - user: local-publisher
+    pass: local-validation-secret
+    ips: []
+    permissions:
+      - action: publish
+        path: bridge
+  - user: any
+    ips: [127.0.0.1, "::1"]
+    permissions:
+      - action: read
+        path: bridge
+      - action: playback
+        path: bridge
+      - action: api
+
+rtspAddress: 127.0.0.1:8554
+rtspTransports: [tcp]
+rtmp: false
+hls: false
+srt: false
+moq: false
+
+api: true
+apiAddress: 127.0.0.1:9997
+metrics: false
+pprof: false
+playback: false
+
+webrtc: true
+webrtcAddress: 127.0.0.1:8889
+webrtcEncryption: false
+webrtcAllowOrigins: ["http://127.0.0.1:7788"]
+webrtcLocalUDPAddress: ""
+webrtcLocalTCPAddress: 127.0.0.1:8190
+webrtcIPsFromInterfaces: false
+webrtcAdditionalHosts: [127.0.0.1]
+
+pathDefaults:
+  source: publisher
+
+paths:
+  bridge:
+    runOnReady: >-
+      ffmpeg -nostdin -loglevel warning -rtsp_transport tcp
+      -i rtsp://127.0.0.1:$RTSP_PORT/$MTX_PATH
+      -c:v copy -c:a aac -b:a 128k -ar 48000
+      -f flv "$TVINBIO_RTMP_DESTINATION"
+    runOnReadyRestart: true

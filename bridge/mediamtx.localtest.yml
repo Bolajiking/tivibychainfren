@@ -1,0 +1,43 @@
+# Local integration variant of mediamtx.production.yml: identical semantics —
+# HTTP auth via the bridge agent, agent-driven runOnReady/runOnNotReady hooks,
+# publisher-only wildcard paths, UDP off — with loopback ports instead of the
+# privileged public :443 (raw 443 needs root and is host-level concern only).
+logLevel: info
+logDestinations: [stdout]
+
+authMethod: http
+authHTTPAddress: http://127.0.0.1:9998/internal/auth
+
+rtsp: yes
+rtspAddress: 127.0.0.1:8554
+rtspTransports: [tcp]
+
+rtmp: no
+hls: no
+srt: no
+moq: no
+playback: no
+
+api: yes
+apiAddress: 127.0.0.1:9997
+metrics: no
+pprof: no
+
+webrtc: yes
+webrtcAddress: 127.0.0.1:8889
+webrtcEncryption: no
+# The harness drives WHIP from a local browser page (cross-origin), unlike
+# production where only the TVinBio server calls signaling (no Origin header).
+webrtcAllowOrigins: ['*']
+webrtcLocalUDPAddress: ""
+webrtcLocalTCPAddress: 127.0.0.1:8190
+webrtcIPsFromInterfaces: no
+webrtcAdditionalHosts: [127.0.0.1]
+
+pathDefaults:
+  source: publisher
+  runOnReady: curl -fsS -X POST "http://127.0.0.1:9998/internal/ready?path=$MTX_PATH"
+  runOnNotReady: curl -fsS -X POST "http://127.0.0.1:9998/internal/not-ready?path=$MTX_PATH"
+
+paths:
+  all_others:

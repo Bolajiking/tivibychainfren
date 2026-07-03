@@ -1,0 +1,13 @@
+# Bridge agent + pinned ffmpeg. Record the resulting image digest and the
+# ffmpeg version output in README.md when building for production.
+FROM node:20-alpine
+
+# ffmpeg 6.x from Alpine 3.20+ carries the flv muxer + aac encoder used by the
+# proven copy command. Pin the apk version at build time and record it.
+RUN apk add --no-cache ffmpeg curl && ffmpeg -version | head -1
+
+WORKDIR /opt/bridge
+COPY agent/ ./agent/
+
+USER node
+CMD ["node", "agent/index.mjs"]

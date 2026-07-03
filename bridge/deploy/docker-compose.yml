@@ -1,0 +1,48 @@
+# TVinBio production bridge host — single-box v1 (plan §7).
+# Public ports: 443/tcp (ICE), 8443/tcp (TLS front for signaling + control).
+# Everything else is loopback inside the shared network namespace.
+services:
+  mediamtx:
+    image: bluenviron/mediamtx:1.19.2
+    restart: unless-stopped
+    network_mode: host # raw TCP 443 ICE + loopback hooks to the agent
+    volumes:
+      - ../mediamtx.production.yml:/mediamtx.yml:ro
+    depends_on:
+      agent:
+        condition: service_healthy
+
+  agent:
+    image: node:20-alpine
+    restart: unless-stopped
+    network_mode: host
+    working_dir: /opt/bridge
+    command: ["node", "agent/index.mjs"]
+    volumes:
+      - ../:/opt/bridge:ro
+    environment:
+      TVINBIO_BRIDGE_CONTROL_SECRET: ${TVINBIO_BRIDGE_CONTROL_SECRET:?set in .env}
+      BRIDGE_PUBLIC_WHIP_BASE: ${BRIDGE_PUBLIC_WHIP_BASE:?e.g. https://bridge.example.com:8443}
+      BRIDGE_CONTROL_PORT: "8091"
+      BRIDGE_LOOPBACK_PORT: "9998"
+      MEDIAMTX_API: "http://127.0.0.1:9997"
+      MEDIAMTX_RTSP_BASE: "rtsp://127.0.0.1:8554"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8091/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    # ffmpeg lives in the agent container image in production; for the pinned
+    # build install it via the Dockerfile below instead of node:20-alpine.
+
+  caddy:
+    image: caddy:2.10
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+
+volumes:
+  caddy-data:

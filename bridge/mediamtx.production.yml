@@ -1,0 +1,49 @@
+# TVinBio production bridge — MediaMTX 1.19.2 (pinned; record checksum in deploy/README.md).
+# Public surface: ICE-TCP on :443 only. WHIP signaling (:8889) is loopback and
+# reached exclusively through the TLS front (caddy) that only the TVinBio app
+# calls. RTSP and the API stay loopback. UDP is disabled end to end.
+
+logLevel: info
+logDestinations: [stdout]
+
+# Every auth decision is delegated to the bridge agent's loopback surface:
+# publish requires a live lease path + credential; reads/API stay loopback-only.
+authMethod: http
+authHTTPAddress: http://127.0.0.1:9998/internal/auth
+
+rtsp: yes
+rtspAddress: 127.0.0.1:8554
+rtspTransports: [tcp]
+
+rtmp: no
+hls: no
+srt: no
+moq: no
+playback: no
+
+api: yes
+apiAddress: 127.0.0.1:9997
+metrics: no
+pprof: no
+
+webrtc: yes
+# Signaling stays private; the TLS front proxies the app's server-side WHIP calls here.
+webrtcAddress: 127.0.0.1:8889
+webrtcEncryption: no
+webrtcAllowOrigins: []
+# Media plane: public ICE-TCP on raw 443. No UDP candidates.
+webrtcLocalUDPAddress: ""
+webrtcLocalTCPAddress: :443
+webrtcIPsFromInterfaces: no
+# Hostname only (verified MediaMTX semantics) — set to the bridge DNS name.
+webrtcAdditionalHosts: [BRIDGE_PUBLIC_HOST]
+
+pathDefaults:
+  source: publisher
+  # The agent owns the forwarder lifecycle; these hooks only report the media
+  # plane's state. The RTMP destination never appears in this file or in env.
+  runOnReady: curl -fsS -X POST "http://127.0.0.1:9998/internal/ready?path=$MTX_PATH"
+  runOnNotReady: curl -fsS -X POST "http://127.0.0.1:9998/internal/not-ready?path=$MTX_PATH"
+
+paths:
+  all_others:

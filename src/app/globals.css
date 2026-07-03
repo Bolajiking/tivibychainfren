@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+/* ============================================================
+   TVinBio — "The Stream Is the Stage"
+   Dark canvas · electric-blue accent · Funnel Display + Host Grotesk
+   Tokens extracted from the hi-fi design files.
+   ============================================================ */
+
+@theme {
+  /* Surfaces (dark, layered) */
+  --color-canvas: #060606;
+  --color-surface: #080808;
+  --color-surface-2: #0b0b0b;
+  --color-raised: #0f0f12;
+  --color-elevated: #0c0c0f;
+
+  /* Borders */
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-soft: rgba(255, 255, 255, 0.06);
+  --color-line-strong: rgba(255, 255, 255, 0.12);
+
+  /* Text */
+  --color-ink: #ffffff;
+  --color-ink-soft: #f0f0f2;
+  --color-ink-dim: #cfcfd4;
+  --color-muted: #9a9aa2;
+  --color-faint: #7a7a82;
+  --color-ghost: #555555;
+
+  /* Accent — electric blue */
+  --color-blue: #0091ff;
+  --color-blue-light: #40acff;
+  --color-blue-soft: #9fd3ff;
+
+  /* Status */
+  --color-live: #ef4444;
+  --color-online: #22c55e;
+
+  /* Chat name pastels */
+  --color-cyan: #5acdff;
+  --color-lime: #c8eb6d;
+  --color-peri: #8daaff;
+
+  /* Radii */
+  --radius-pill: 999px;
+  --radius-sheet: 24px;
+  --radius-card: 18px;
+
+  /* Fonts (wired by next/font) */
+  --font-display: var(--font-funnel), "Funnel Display", system-ui, sans-serif;
+  --font-body: var(--font-host), "Host Grotesk", "Inter", system-ui, sans-serif;
+
+  /* Motion */
+  --ease-expo: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-live: tvLive 1.5s infinite;
+  --animate-glow: tvGlow 6s ease-in-out infinite;
+  --animate-spin-slow: tvSpin 1s linear infinite;
+  --animate-bob: tvBob 1.6s ease-in-out infinite;
+  --animate-pop: tvPop 0.5s var(--ease-expo) both;
+  --animate-drop: tvDrop 0.5s var(--ease-expo) both;
+  --animate-rise: tvRise 0.4s var(--ease-expo) both;
+}
+
+@keyframes tvLive {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.82); }
+}
+@keyframes tvGlow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.85; }
+}
+@keyframes tvSpin { to { transform: rotate(360deg); } }
+@keyframes tvBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes tvConf {
+  0% { transform: translateY(0) rotate(0); opacity: 1; }
+  100% { transform: translateY(-44px) rotate(180deg); opacity: 0; }
+}
+@keyframes tvPop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes tvDrop {
+  0% { transform: translateY(-12px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes tvRise {
+  0% { transform: translateY(14px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+/* Mobile bottom-sheet slide (prototype: tvSheet) + matching exit. */
+@keyframes tvSheet {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes tvSheetOut {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+@keyframes tvFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tvFadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes tvPopOut {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.96); opacity: 0; }
+}
+/* Desktop right-docked panel — slides in from the right edge (wallet). */
+@keyframes tvSlideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes tvSlideOutRight {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+/* Centered (desktop) sheet pop — keeps the translate so it stays centered. */
+@keyframes tvCenterIn {
+  from { transform: translate(-50%, -50%) scale(0.94); opacity: 0; }
+  60% { transform: translate(-50%, -50%) scale(1.02); }
+  to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+@keyframes tvCenterOut {
+  from { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  to { transform: translate(-50%, -50%) scale(0.96); opacity: 0; }
+}
+/* Wallet balance-card sheen (prototype: wSheen). */
+@keyframes wSheen {
+  0% { transform: translateX(-120%) rotate(8deg); }
+  100% { transform: translateX(260%) rotate(8deg); }
+}
+/* Stage hero breathing zoom (prototype: tvZoomIO). */
+@keyframes tvZoomIO {
+  0% { transform: scale(0.92); opacity: 0.5; }
+  22%, 78% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.94); opacity: 0.55; }
+}
+
+* { border-color: var(--color-line); }
+
+html { color-scheme: dark; }
+
+/* Respect reduced-motion: keep state changes, drop the motion (perf + a11y). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Utility shorthands used across the app */
+.font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
+.cta-gradient { background-image: linear-gradient(120deg, #0091ff, #40ffcc); }
+.golive-gradient { background-image: linear-gradient(100deg, #0091ff, #22c55e); }
+.glow-blue { box-shadow: 0 8px 24px rgba(0, 145, 255, 0.4); }
+.confetti { position: absolute; border-radius: 1px; }
