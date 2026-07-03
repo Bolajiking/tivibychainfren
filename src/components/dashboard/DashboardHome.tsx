@@ -7,6 +7,7 @@ import { Film, HandCoins, Radio, Settings, ShoppingBag, TrendingUp, UserPlus, La
 import { DashboardSidebar, CreatorBottomNav } from "@/components/nav/Rails";
 import { OwnerToggleStatic } from "@/components/dashboard/OwnerToggleStatic";
 import { Button } from "@/components/ui/Button";
+import { InstallButton } from "@/components/pwa/InstallButton";
 import { Avatar } from "@/components/ui/Media";
 import { SectionLabel, GateBadge } from "@/components/ui/Badges";
 import { useSession } from "@/lib/store/session";
@@ -105,6 +106,7 @@ export function DashboardHome() {
           <div className="mt-1 text-[12.5px] text-muted">/{creator.username} is ready for the next drop.</div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <InstallButton subject="app" size="pill" variant="secondary" label="Install app" />
           <Button asChild variant="secondary" size="pill"><Link href="/dashboard/settings" aria-label="Channel settings"><Settings className="size-4" /></Link></Button>
           <Button asChild variant="secondary" size="pill"><Link href="/dashboard/videos"><Film className="size-4" /> Videos</Link></Button>
           <Button asChild variant="golive" size="pill" className="flex-1 sm:flex-none"><Link href="/dashboard/broadcast"><Radio className="size-4" /> Go live</Link></Button>

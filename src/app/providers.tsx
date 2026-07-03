@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth/PrivyProvider";
 import { CreatorHydrator } from "@/lib/auth/CreatorHydrator";
 import { WalletSheet } from "@/components/wallet/WalletSheet";
+import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(
@@ -19,6 +20,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={client}>
       <AuthProvider>
         <CreatorHydrator />
+        <ServiceWorkerRegistrar />
         {children}
         <WalletSheet />
       </AuthProvider>
