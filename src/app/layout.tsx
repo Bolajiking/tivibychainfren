@@ -23,12 +23,20 @@ export const metadata: Metadata = {
   title: "TVinBio — Your Audience. Your Platform. Your Revenue.",
   description:
     "A creator-owned streaming platform that lives behind a single bio link. Live, video, store, community — owned by the creator.",
+  applicationName: "TVinBio",
+  manifest: "/site.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "TVinBio",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: "#060606",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

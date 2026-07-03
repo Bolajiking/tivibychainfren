@@ -11,7 +11,7 @@ import { UnlockGate } from "@/components/money/UnlockGate";
 import { FundSheet } from "@/components/money/FundSheet";
 import { PurchaseSheet } from "@/components/money/PurchaseSheet";
 import { Player } from "@/components/watch/Player";
-import { Tile } from "@/components/ui/Media";
+import { Tile, Avatar } from "@/components/ui/Media";
 import { useSession } from "@/lib/store/session";
 import { hasAccess } from "@/lib/access";
 import { MOCK_MODE } from "@/lib/config";
@@ -208,11 +208,20 @@ export function LiveWatch({
       <div className="relative flex-1 overflow-hidden" style={{ background: "linear-gradient(150deg,#1d1f24,#0a0a0c 78%)" }}>
         <div className="absolute inset-0" style={{ background: "radial-gradient(55% 45% at 50% 36%,rgba(0,145,255,.14),transparent 70%)" }} />
 
-        <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between p-4">
-          <Link href={`/${creator.username}`} className="flex size-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur">
-            <ChevronLeft className="size-[18px]" />
-          </Link>
-          <div className="flex items-center gap-2">
+        <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-2 bg-gradient-to-b from-black/55 to-transparent p-4">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <Link href={`/${creator.username}`} className="flex size-9 shrink-0 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur">
+              <ChevronLeft className="size-[18px]" />
+            </Link>
+            <Link href={`/${creator.username}`} className="flex min-w-0 items-center gap-2 rounded-full bg-black/35 py-1 pl-1 pr-3 backdrop-blur">
+              <Avatar seed={creator.avatarColor} src={creator.avatarUrl} size={30} />
+              <span className="min-w-0">
+                <span className="block truncate text-[12.5px] font-semibold leading-tight text-white">{creator.displayName}</span>
+                <span className="block truncate text-[10.5px] leading-tight text-white/60">@{creator.username}</span>
+              </span>
+            </Link>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
             {liveStream.isActive ? (
               <LivePill small />
             ) : (
@@ -294,7 +303,7 @@ export function LiveWatch({
         </div>
       </div>
 
-      <aside className="hidden w-[340px] shrink-0 flex-col border-l border-white/[0.06] bg-surface md:flex">
+      <aside className="hidden w-[360px] shrink-0 flex-col border-l border-white/[0.06] bg-surface md:flex">
         <div className="flex h-[52px] shrink-0 items-center justify-between border-b border-white/[0.06] px-4">
           <span className="text-xs font-semibold tracking-[0.04em] text-ink-dim">LIVE CHAT</span>
           <span className="text-[11px] text-faint">{viewers.toLocaleString()}</span>

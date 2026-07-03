@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Check, Copy, Eye, KeyRound, Loader2, PackageCheck, Radio, RotateCcw, X } from "lucide-react";
+import { Check, Copy, Eye, KeyRound, Loader2, MessageSquare, PackageCheck, Radio, RotateCcw, SlidersHorizontal, ShoppingBag, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Sheet } from "@/components/ui/Sheet";
 import { Tile } from "@/components/ui/Media";
+import { useIsDesktop } from "@/lib/use-media-query";
 import { useSession } from "@/lib/store/session";
 import { getMyCreatorProfile } from "@/lib/profile-client";
 import { featureCreatorProduct, updateCreatorStream } from "@/lib/creator-client";
@@ -55,6 +57,10 @@ export default function Broadcast() {
   const livePersistRetryRef = useRef<number | null>(null);
   const shopPanelRef = useRef<HTMLDivElement>(null);
   const obsPanelRef = useRef<HTMLDivElement>(null);
+  const isDesktop = useIsDesktop();
+  const [railTab, setRailTab] = useState<"chat" | "setup" | "shop">("chat");
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetTab, setSheetTab] = useState<"live" | "setup">("live");
 
   useEffect(() => {
     // Wait for the persisted session before deciding (avoids a hard-refresh hang).
@@ -323,13 +329,25 @@ export default function Broadcast() {
       toast("Add inventory before featuring products live");
       return;
     }
-    shopPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    // Surface the shopping controls where they live for this viewport.
+    if (isDesktop) {
+      setRailTab("shop");
+    } else {
+      setSheetTab("live");
+      setSheetOpen(true);
+    }
+    window.requestAnimationFrame(() => shopPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }));
   }
 
   function handleBrowserObsFallback() {
     const handoff = browserObsFallbackHandoff({ hasIngest: Boolean(ingest), keyShown });
     if (handoff.revealKey) setKeyShown(true);
     if (handoff.focusObsPanel) {
+      if (isDesktop) setRailTab("setup");
+      else {
+        setSheetTab("setup");
+        setSheetOpen(true);
+      }
       window.requestAnimationFrame(() => {
         obsPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       });
@@ -422,135 +440,248 @@ export default function Broadcast() {
     );
   }
 
+  const setupPanel = (
+    <div ref={shopPanelRef} className="p-4">
+      <div className="mb-3 text-xs font-semibold tracking-[0.04em] text-ink-dim">STREAM SETUP</div>
+      <div className="flex flex-col gap-2.5">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Stream title" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none" />
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" className="min-h-20 resize-none rounded-[12px] border border-white/12 bg-white/[0.06] px-3 py-2.5 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none" />
+        <div className="grid grid-cols-2 gap-2">
+          <select value={viewMode} onChange={(e) => setViewMode(e.target.value as ViewMode)} className="h-11 rounded-[12px] border border-white/12 bg-[#151518] px-3 text-sm text-white focus:border-blue focus:outline-none">
+            <option value="free">Free</option>
+            <option value="one-time">One-time</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          <input value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} disabled={viewMode === "free"} placeholder="Price" inputMode="decimal" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none disabled:opacity-45" />
+        </div>
+        <label className="flex h-10 items-center gap-2.5 rounded-[12px] border border-white/10 bg-white/[0.035] px-3 text-[12px] text-ink-dim">
+          <input type="checkbox" checked={record} onChange={(e) => setRecord(e.target.checked)} className="size-4 accent-[#0091ff]" />
+          Record replay
+        </label>
+        <Button size="lg" onClick={() => saveStream(live)} disabled={savingStream}>
+          {savingStream ? <Loader2 className="size-4 animate-spin" /> : <PackageCheck className="size-4" />}
+          Save setup
+        </Button>
+      </div>
+    </div>
+  );
+
+  const obsPanel = !MOCK_MODE ? (
+    <div ref={obsPanelRef} className="border-t border-white/[0.06] p-4">
+      <div className="mb-1 flex items-center justify-between">
+        <span className="text-xs font-semibold tracking-[0.04em] text-ink-dim">STREAM WITH OBS · ALTERNATIVE TO BROWSER</span>
+        {stream.livepeerId && <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-blue-soft"><span className="size-[6px] rounded-full bg-blue-light" /> Connected</span>}
+      </div>
+      <p className="mb-3 text-[11px] leading-relaxed text-faint">Go live straight from the browser above, or use these credentials in OBS / any encoder — handy if browser live won&apos;t connect on your network.</p>
+
+      {stream.livepeerId || ingest ? (
+        <div className="flex flex-col gap-2.5">
+          <CopyRow label="OBS server" value={ingest?.rtmpIngestUrl ?? "rtmp://rtmp.livepeer.com/live"} />
+          {ingest && keyShown ? (
+            <CopyRow label="Stream key" value={ingest.streamKey} secret />
+          ) : (
+            <Button size="lg" variant="secondary" onClick={revealIngest} disabled={ingestBusy}>
+              {ingestBusy ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />}
+              Reveal stream key
+            </Button>
+          )}
+          <p className="text-[11px] leading-relaxed text-faint">In OBS, set Server to this URL and Stream Key to the key below. Keep the key private — anyone with it can stream to your channel.</p>
+          <Button size="lg" variant="secondary" onClick={regenerateIngest} disabled={ingestBusy || live}>
+            {ingestBusy ? <Loader2 className="size-4 animate-spin" /> : <RotateCcw className="size-4" />}
+            Regenerate ingest
+          </Button>
+          <p className="text-[11px] leading-relaxed text-faint">Use this if Livepeer stays idle or OBS cannot connect. TVinBio will create a fresh Livepeer stream and update this channel.</p>
+          {setupError && <p className="text-[11px] leading-relaxed text-red-200">Could not reveal the browser ingest details. Retry the key reveal or refresh the studio.</p>}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2.5">
+          <p className="text-[11.5px] leading-relaxed text-muted">Generate ingest credentials to broadcast from OBS, a hardware encoder, or a mobile app.</p>
+          <Button size="lg" onClick={connectEncoder} disabled={ingestBusy}>
+            {ingestBusy ? <Loader2 className="size-4 animate-spin" /> : <Radio className="size-4" />}
+            {ingestBusy ? "Setting up ingest" : "Generate ingest"}
+          </Button>
+          {setupError && <p className="text-[11px] leading-relaxed text-red-200">Stream setup did not finish. Retry here or refresh the studio.</p>}
+        </div>
+      )}
+    </div>
+  ) : null;
+
+  const shoppingPanel = (
+    <div className="p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-xs font-semibold tracking-[0.04em] text-ink-dim">LIVE SHOPPING</span>
+        <Link href="/dashboard/store" className="text-[11px] font-semibold text-blue">Store</Link>
+      </div>
+      {products.length ? (
+        <div className="flex flex-col gap-2">
+          <ProductPinRow product={null} active={!pinnedProductId} busy={pinningId === "none"} onClick={() => pinProduct(null)} />
+          {products.map((product) => (
+            <ProductPinRow
+              key={product.id}
+              product={product}
+              active={pinnedProductId === product.id}
+              busy={pinningId === product.id}
+              disabled={!canFeatureProduct(product)}
+              onClick={() => pinProduct(product)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-white/10 px-3 py-4 text-center text-[11.5px] text-faint">Add products before pinning a live offer.</div>
+      )}
+    </div>
+  );
+
+  const chatHeader = (
+    <div className="flex h-[50px] shrink-0 items-center justify-between border-b border-white/[0.06] px-4">
+      <span className="text-xs font-semibold tracking-[0.04em] text-ink-dim">LIVE CHAT · MOD</span>
+      <span className="inline-flex items-center gap-1.5 text-[11px] text-faint"><Eye className="size-[13px]" /> {live ? liveViewers.toLocaleString() : "0"}</span>
+    </div>
+  );
+
+  const broadcaster =
+    !MOCK_MODE && ingest?.whipUrl ? (
+      <BrowserBroadcaster
+        ingestUrl={ingest.whipUrl}
+        livepeerId={ingest.id}
+        walletAddress={user.walletAddress}
+        title={stream.title}
+        username={creator.username}
+        activeProduct={activeProduct}
+        hasProducts={pinnableProducts.length > 0}
+        onLiveChange={handleLiveChange}
+        onOpenShopping={openLiveShoppingPanel}
+        onObsFallback={handleBrowserObsFallback}
+        transportPlan={transportPlan}
+        onPlanConsumed={() => setPlanEpoch((epoch) => epoch + 1)}
+      />
+    ) : (
+      <ReadyRoomFallback creator={creator} title={stream.title} setupError={setupError} mock={MOCK_MODE} />
+    );
+
   return (
     <BroadcastShell live={live} clock={clock} viewerCount={liveViewers}>
-      <div className="flex flex-1 flex-col lg:flex-row">
-        <div className="flex flex-1 flex-col gap-3.5 p-4">
-          {!MOCK_MODE && ingest?.whipUrl ? (
-            <BrowserBroadcaster
-              ingestUrl={ingest.whipUrl}
-              livepeerId={ingest.id}
-              walletAddress={user.walletAddress}
-              title={stream.title}
-              username={creator.username}
-              activeProduct={activeProduct}
-              hasProducts={pinnableProducts.length > 0}
-              onLiveChange={handleLiveChange}
-              onOpenShopping={openLiveShoppingPanel}
-              onObsFallback={handleBrowserObsFallback}
-              transportPlan={transportPlan}
-              onPlanConsumed={() => setPlanEpoch((epoch) => epoch + 1)}
-            />
-          ) : (
-            <ReadyRoomFallback creator={creator} title={stream.title} setupError={setupError} mock={MOCK_MODE} />
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        {/* Camera stage — dominant, contained, centered; fills the viewport on mobile. */}
+        <div className="relative flex min-h-0 flex-1 flex-col p-0 lg:p-4">
+          <div className="relative flex min-h-0 flex-1 overflow-hidden lg:mx-auto lg:w-full lg:max-w-[min(100%,calc((100vh-84px)*16/9))]">
+            {broadcaster}
+          </div>
+
+          {/* Mobile: right-edge action rail to reach chat / shopping / setup. */}
+          {!isDesktop && (
+            <div className="pointer-events-none absolute inset-y-0 right-3 z-30 flex flex-col items-center justify-end gap-2.5 pb-28">
+              <StageAction label="Chat" onClick={() => { setSheetTab("live"); setSheetOpen(true); }}>
+                <MessageSquare className="size-5" />
+              </StageAction>
+              {pinnableProducts.length > 0 && (
+                <StageAction label="Shopping" active={Boolean(activeProduct)} onClick={openLiveShoppingPanel}>
+                  <ShoppingBag className="size-5" />
+                </StageAction>
+              )}
+              <StageAction label="Stream setup" onClick={() => { setSheetTab("setup"); setSheetOpen(true); }}>
+                <SlidersHorizontal className="size-5" />
+              </StageAction>
+            </div>
           )}
         </div>
 
-        <aside className="flex w-full shrink-0 flex-col border-t border-white/[0.06] bg-[#0a0a0c] lg:w-[340px] lg:border-l lg:border-t-0">
-          <div ref={shopPanelRef} className="border-b border-white/[0.06] p-4">
-            <div className="mb-3 text-xs font-semibold tracking-[0.04em] text-ink-dim">STREAM SETUP</div>
-            <div className="flex flex-col gap-2.5">
-              <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Stream title" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none" />
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" className="min-h-20 resize-none rounded-[12px] border border-white/12 bg-white/[0.06] px-3 py-2.5 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none" />
-              <div className="grid grid-cols-2 gap-2">
-                <select value={viewMode} onChange={(e) => setViewMode(e.target.value as ViewMode)} className="h-11 rounded-[12px] border border-white/12 bg-[#151518] px-3 text-sm text-white focus:border-blue focus:outline-none">
-                  <option value="free">Free</option>
-                  <option value="one-time">One-time</option>
-                  <option value="monthly">Monthly</option>
-                </select>
-                <input value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} disabled={viewMode === "free"} placeholder="Price" inputMode="decimal" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none disabled:opacity-45" />
-              </div>
-              <label className="flex h-10 items-center gap-2.5 rounded-[12px] border border-white/10 bg-white/[0.035] px-3 text-[12px] text-ink-dim">
-                <input type="checkbox" checked={record} onChange={(e) => setRecord(e.target.checked)} className="size-4 accent-[#0091ff]" />
-                Record replay
-              </label>
-              <Button size="lg" onClick={() => saveStream(live)} disabled={savingStream}>
-                {savingStream ? <Loader2 className="size-4 animate-spin" /> : <PackageCheck className="size-4" />}
-                Save setup
-              </Button>
+        {/* Desktop: tabbed side rail keeps chat primary, setup + shop one tap away. */}
+        {isDesktop && (
+          <aside className="flex w-[360px] shrink-0 flex-col border-l border-white/[0.06] bg-[#0a0a0c]">
+            <div className="flex shrink-0 gap-1 border-b border-white/[0.06] p-1.5">
+              <RailTabButton active={railTab === "chat"} onClick={() => setRailTab("chat")} icon={<MessageSquare className="size-4" />} label="Chat" />
+              <RailTabButton active={railTab === "setup"} onClick={() => setRailTab("setup")} icon={<SlidersHorizontal className="size-4" />} label="Setup" />
+              <RailTabButton active={railTab === "shop"} onClick={() => setRailTab("shop")} icon={<ShoppingBag className="size-4" />} label="Shop" badge={activeProduct ? 1 : 0} />
             </div>
-          </div>
 
-          {!MOCK_MODE && (
-            <div ref={obsPanelRef} className="border-b border-white/[0.06] p-4">
-              <div className="mb-1 flex items-center justify-between">
-                <span className="text-xs font-semibold tracking-[0.04em] text-ink-dim">STREAM WITH OBS · ALTERNATIVE TO BROWSER</span>
-                {stream.livepeerId && <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-blue-soft"><span className="size-[6px] rounded-full bg-blue-light" /> Connected</span>}
+            {railTab === "chat" && (
+              <div className="flex min-h-0 flex-1 flex-col">
+                {chatHeader}
+                <BroadcastChat streamId={stream.playbackId} hostName={creator.displayName} live={live} />
               </div>
-              <p className="mb-3 text-[11px] leading-relaxed text-faint">Go live straight from the browser above, or use these credentials in OBS / any encoder — handy if browser live won&apos;t connect on your network.</p>
+            )}
+            {railTab === "setup" && (
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                {setupPanel}
+                {obsPanel}
+              </div>
+            )}
+            {railTab === "shop" && <div className="min-h-0 flex-1 overflow-y-auto">{shoppingPanel}</div>}
+          </aside>
+        )}
+      </div>
 
-              {stream.livepeerId || ingest ? (
-                <div className="flex flex-col gap-2.5">
-                  <CopyRow label="OBS server" value={ingest?.rtmpIngestUrl ?? "rtmp://rtmp.livepeer.com/live"} />
-                  {ingest && keyShown ? (
-                    <CopyRow label="Stream key" value={ingest.streamKey} secret />
-                  ) : (
-                    <Button size="lg" variant="secondary" onClick={revealIngest} disabled={ingestBusy}>
-                      {ingestBusy ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />}
-                      Reveal stream key
-                    </Button>
-                  )}
-                  <p className="text-[11px] leading-relaxed text-faint">In OBS, set Server to this URL and Stream Key to the key below. Keep the key private — anyone with it can stream to your channel.</p>
-                  <Button size="lg" variant="secondary" onClick={regenerateIngest} disabled={ingestBusy || live}>
-                    {ingestBusy ? <Loader2 className="size-4 animate-spin" /> : <RotateCcw className="size-4" />}
-                    Regenerate ingest
-                  </Button>
-                  <p className="text-[11px] leading-relaxed text-faint">Use this if Livepeer stays idle or OBS cannot connect. TVinBio will create a fresh Livepeer stream and update this channel.</p>
-                  {setupError && <p className="text-[11px] leading-relaxed text-red-200">Could not reveal the browser ingest details. Retry the key reveal or refresh the studio.</p>}
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2.5">
-                  <p className="text-[11.5px] leading-relaxed text-muted">Generate ingest credentials to broadcast from OBS, a hardware encoder, or a mobile app.</p>
-                  <Button size="lg" onClick={connectEncoder} disabled={ingestBusy}>
-                    {ingestBusy ? <Loader2 className="size-4 animate-spin" /> : <Radio className="size-4" />}
-                    {ingestBusy ? "Setting up ingest" : "Generate ingest"}
-                  </Button>
-                  {setupError && <p className="text-[11px] leading-relaxed text-red-200">Stream setup did not finish. Retry here or refresh the studio.</p>}
-                </div>
-              )}
+      {/* Mobile: bottom-up sheet — Live (chat + shop) on one side, Stream setup on the other. */}
+      {!isDesktop && (
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen} title="Broadcast controls" className="flex h-[82vh] flex-col p-0 pb-0">
+          <div className="flex shrink-0 gap-1 px-3 pb-2 pt-1">
+            <SheetTabButton active={sheetTab === "live"} onClick={() => setSheetTab("live")} icon={<MessageSquare className="size-4" />} label="Chat & shop" />
+            <SheetTabButton active={sheetTab === "setup"} onClick={() => setSheetTab("setup")} icon={<SlidersHorizontal className="size-4" />} label="Stream setup" />
+          </div>
+          {sheetTab === "live" ? (
+            <div className="flex min-h-0 flex-1 flex-col border-t border-white/[0.06]">
+              {pinnableProducts.length > 0 && <div className="shrink-0 border-b border-white/[0.06]">{shoppingPanel}</div>}
+              <div className="flex min-h-0 flex-1 flex-col">
+                {chatHeader}
+                <BroadcastChat streamId={stream.playbackId} hostName={creator.displayName} live={live} />
+              </div>
+            </div>
+          ) : (
+            <div className="min-h-0 flex-1 overflow-y-auto border-t border-white/[0.06] pb-[env(safe-area-inset-bottom)]">
+              {setupPanel}
+              {obsPanel}
             </div>
           )}
-
-          <div className="border-b border-white/[0.06] p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="text-xs font-semibold tracking-[0.04em] text-ink-dim">LIVE SHOPPING</span>
-              <Link href="/dashboard/store" className="text-[11px] font-semibold text-blue">Store</Link>
-            </div>
-            {products.length ? (
-              <div className="flex max-h-[210px] flex-col gap-2 overflow-y-auto pr-1">
-                <ProductPinRow product={null} active={!pinnedProductId} busy={pinningId === "none"} onClick={() => pinProduct(null)} />
-                {products.map((product) => (
-                  <ProductPinRow
-                    key={product.id}
-                    product={product}
-                    active={pinnedProductId === product.id}
-                    busy={pinningId === product.id}
-                    disabled={!canFeatureProduct(product)}
-                    onClick={() => pinProduct(product)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-xl border border-dashed border-white/10 px-3 py-4 text-center text-[11.5px] text-faint">Add products before pinning a live offer.</div>
-            )}
-          </div>
-
-          <div className="flex min-h-[260px] flex-1 flex-col">
-            <div className="flex h-[50px] shrink-0 items-center justify-between border-b border-white/[0.06] px-4">
-              <span className="text-xs font-semibold tracking-[0.04em] text-ink-dim">LIVE CHAT · MOD</span>
-              <span className="text-[11px] text-faint">{live ? liveViewers.toLocaleString() : "0"}</span>
-            </div>
-            <BroadcastChat streamId={stream.playbackId} hostName={creator.displayName} live={live} />
-          </div>
-        </aside>
-      </div>
+        </Sheet>
+      )}
     </BroadcastShell>
+  );
+}
+
+function RailTabButton({ active, onClick, icon, label, badge = 0 }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string; badge?: number }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`relative flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[10px] text-[12px] font-semibold transition-colors ${active ? "bg-white/[0.08] text-white" : "text-ghost hover:text-white"}`}
+    >
+      {icon}
+      {label}
+      {badge > 0 && <span className="absolute right-1.5 top-1.5 size-[6px] rounded-full bg-blue-light" />}
+    </button>
+  );
+}
+
+function SheetTabButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex h-11 flex-1 items-center justify-center gap-2 rounded-[12px] text-[13px] font-semibold transition-colors ${active ? "bg-white/[0.08] text-white" : "text-ghost hover:text-white"}`}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function StageAction({ label, onClick, active, children }: { label: string; onClick: () => void; active?: boolean; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className={`pointer-events-auto flex size-11 items-center justify-center rounded-full border backdrop-blur transition-colors ${active ? "border-blue/40 bg-blue/20 text-blue-light" : "border-white/12 bg-black/45 text-white hover:bg-black/60"}`}
+    >
+      {children}
+    </button>
   );
 }
 
 function BroadcastShell({ live, clock, viewerCount, children }: { live: boolean; clock: string; viewerCount?: number; children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-canvas">
+    <div className="flex min-h-[100dvh] flex-col bg-canvas lg:h-screen lg:min-h-0 lg:overflow-hidden">
       <div
         className="flex h-[50px] shrink-0 items-center justify-between border-b px-5"
         style={{

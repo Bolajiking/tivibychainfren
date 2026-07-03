@@ -5,6 +5,7 @@ import { Tile } from "@/components/ui/Media";
 import { Button } from "@/components/ui/Button";
 import { LivePill, ViewerPill } from "@/components/ui/Badges";
 import { Player } from "@/components/watch/Player";
+import { InstallButton } from "@/components/pwa/InstallButton";
 import { cn, formatCount } from "@/lib/cn";
 import type { Creator, Stream } from "@/lib/types";
 
@@ -165,6 +166,7 @@ export function Stage({
             <>
               <Button variant="secondary" size="pill" onClick={onUpload} className="flex-1 md:flex-none"><Upload className="size-4" /> Upload</Button>
               <Button variant="golive" size="pill" onClick={onGoLive} className="flex-1 md:flex-none"><Radio className="size-4" /> Go live</Button>
+              <InstallButton subject="channel" size="pill" variant="secondary" className="flex-1 md:flex-none" />
             </>
           ) : (
             <>
@@ -177,6 +179,7 @@ export function Stage({
                 {subscribed ? "Subscribed" : "Subscribe"}
               </Button>
               <Button variant="secondary" size="pill" onClick={onTip} className="min-w-[96px] flex-1 md:flex-none"><HandCoins className="size-4" /> Tip</Button>
+              <InstallButton subject="channel" size="pill" variant="secondary" className="flex-1 md:flex-none" />
             </>
           )}
         </div>
