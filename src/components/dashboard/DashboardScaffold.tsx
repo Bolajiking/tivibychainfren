@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Radio } from "lucide-react";
+import { ChevronLeft, Radio } from "lucide-react";
 import { DashboardSidebar, CreatorBottomNav } from "@/components/nav/Rails";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Media";
@@ -93,6 +93,30 @@ export function useCreatorProfile() {
   return { user, payload, creator, loading, setPayload };
 }
 
+/** Primary bottom-nav destinations — these never show a mobile back button. */
+const PRIMARY_DASHBOARD_TABS = new Set(["overview", "streams", "money", "stats"]);
+
+/**
+ * Mobile-only top bar for dashboard pages: a back affordance (only where the
+ * page isn't reachable from the bottom tab bar) plus the page title. Sticky so
+ * it stays put while the content scrolls.
+ */
+export function DashboardMobileTopbar({ title, active }: { title: string; active: string }) {
+  const showBack = !PRIMARY_DASHBOARD_TABS.has(active);
+  return (
+    <div className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-1.5 border-b border-white/[0.06] bg-canvas/90 px-3 backdrop-blur md:hidden">
+      {showBack ? (
+        <Link href="/dashboard" aria-label="Back to dashboard" className="-ml-1 flex size-10 shrink-0 items-center justify-center rounded-full text-ink-dim transition-transform active:scale-90 hover:text-white">
+          <ChevronLeft className="size-[22px]" />
+        </Link>
+      ) : (
+        <span className="w-1 shrink-0" />
+      )}
+      <div className="min-w-0 flex-1 truncate font-display text-[16px] font-semibold">{title}</div>
+    </div>
+  );
+}
+
 export function DashboardShell({
   title,
   active,
@@ -111,7 +135,7 @@ export function DashboardShell({
       <div className="hidden md:flex">
         <DashboardSidebar active={active} creator={creator} />
       </div>
-      <main className="flex min-h-screen flex-1 flex-col">
+      <main className="flex min-h-screen min-w-0 flex-1 flex-col">
         <div className="hidden h-14 shrink-0 items-center justify-between border-b border-white/[0.06] px-6 md:flex">
           <div className="font-display text-[16px] font-semibold">{title}</div>
           <div className="flex items-center gap-2.5">
@@ -119,7 +143,8 @@ export function DashboardShell({
             <Avatar seed={creator?.avatarColor ?? "#2a2a2a"} src={creator?.avatarUrl} size={32} />
           </div>
         </div>
-        <div className="flex-1 px-4 py-5 md:px-6">{children}</div>
+        <DashboardMobileTopbar title={title} active={active} />
+        <div className="min-w-0 flex-1 overflow-x-clip px-4 py-5 md:px-6">{children}</div>
         <div className="md:hidden">
           <CreatorBottomNav />
         </div>

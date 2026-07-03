@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { LayoutGrid, ShoppingBag } from "lucide-react";
 import { Stage } from "./Stage";
@@ -42,6 +42,9 @@ export function ChannelExperience({
   featured: FeaturedProductWithProduct[];
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // "?install=1" (from a Save-channel link) auto-opens the install flow on arrival.
+  const autoInstall = searchParams.get("install") === "1";
   const { user, requireAuth } = useAuthIntent("viewer");
   const { isSubscribed, subscribe, isUnlocked } = useSession();
   const hydrated = useHydrated();
@@ -270,6 +273,7 @@ export function ChannelExperience({
           onEditHeader={canManage ? () => headerInputRef.current?.click() : undefined}
           headerUrl={headerUrl}
           headerUploading={headerUploading}
+          autoInstall={autoInstall}
         >
           {room === "watch" && currentStream?.isActive && featuredProduct && !locked && (
             <div className="absolute inset-x-4 top-[34%] z-20 animate-[tvDrop_.5s_cubic-bezier(.22,1,.36,1)] rounded-2xl border-[1.5px] border-blue bg-[#08080a]/90 p-3.5 backdrop-blur-md shadow-[0_16px_50px_rgba(0,145,255,.32)] md:left-auto md:right-4 md:w-[280px]">
