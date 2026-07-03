@@ -11,7 +11,7 @@ import { Avatar } from "@/components/ui/Media";
 import { useSession } from "@/lib/store/session";
 import { getMyCreatorProfile } from "@/lib/profile-client";
 import { MOCK_MODE } from "@/lib/config";
-import { useStoreHydrated } from "@/components/dashboard/DashboardScaffold";
+import { useStoreHydrated, DashboardMobileTopbar } from "@/components/dashboard/DashboardScaffold";
 import type { Creator, CreatorProfilePayload, Stream } from "@/lib/types";
 
 export function StoreDashboard() {
@@ -90,12 +90,13 @@ function StoreShell({ creator, children }: { creator?: Creator | null; children:
   return (
     <div className="flex min-h-screen bg-canvas">
       <div className="hidden md:flex"><DashboardSidebar active="store" creator={creator} /></div>
-      <main className="flex min-h-screen flex-1 flex-col">
+      <main className="flex min-h-screen min-w-0 flex-1 flex-col">
         <div className="hidden h-14 shrink-0 items-center justify-between border-b border-white/[0.06] px-6 md:flex">
           <div className="font-display text-[16px] font-semibold">Store</div>
           <Avatar seed={creator?.avatarColor ?? "#2a2a2a"} src={creator?.avatarUrl} size={32} />
         </div>
-        <div className="flex-1 px-4 py-5 md:px-6">{children}</div>
+        <DashboardMobileTopbar title="Store" active="store" />
+        <div className="min-w-0 flex-1 overflow-x-clip px-4 py-5 md:px-6">{children}</div>
         <div className="md:hidden"><CreatorBottomNav /></div>
       </main>
     </div>

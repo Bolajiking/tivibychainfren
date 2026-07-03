@@ -3,13 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Film, HandCoins, Radio, Settings, ShoppingBag, TrendingUp, UserPlus, LayoutGrid } from "lucide-react";
+import { Download, Film, HandCoins, Radio, Settings, ShoppingBag, TrendingUp, UserPlus, LayoutGrid } from "lucide-react";
 import { DashboardSidebar, CreatorBottomNav } from "@/components/nav/Rails";
 import { OwnerToggleStatic } from "@/components/dashboard/OwnerToggleStatic";
 import { Button } from "@/components/ui/Button";
-import { InstallButton } from "@/components/pwa/InstallButton";
 import { Avatar } from "@/components/ui/Media";
-import { SectionLabel, GateBadge } from "@/components/ui/Badges";
+import { GateBadge } from "@/components/ui/Badges";
 import { useSession } from "@/lib/store/session";
 import { getMyCreatorProfile } from "@/lib/profile-client";
 import { MOCK_MODE } from "@/lib/config";
@@ -105,10 +104,10 @@ export function DashboardHome() {
           <h1 className="truncate font-display text-[22px] font-semibold tracking-[-0.02em]">Welcome back, {creator.displayName}</h1>
           <div className="mt-1 text-[12.5px] text-muted">/{creator.username} is ready for the next drop.</div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <InstallButton subject="app" size="pill" variant="secondary" label="Install app" />
-          <Button asChild variant="secondary" size="pill"><Link href="/dashboard/settings" aria-label="Channel settings"><Settings className="size-4" /></Link></Button>
-          <Button asChild variant="secondary" size="pill"><Link href="/dashboard/videos"><Film className="size-4" /> Videos</Link></Button>
+        <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:shrink-0">
+          <Button asChild variant="secondary" size="pill" className="shrink-0"><Link href={`/${creator.username}?install=1`}><Download className="size-4" /> Save channel</Link></Button>
+          <Button asChild variant="secondary" size="pill" className="shrink-0"><Link href="/dashboard/settings" aria-label="Channel settings"><Settings className="size-4" /></Link></Button>
+          <Button asChild variant="secondary" size="pill" className="shrink-0"><Link href="/dashboard/videos"><Film className="size-4" /> Videos</Link></Button>
           <Button asChild variant="golive" size="pill" className="flex-1 sm:flex-none"><Link href="/dashboard/broadcast"><Radio className="size-4" /> Go live</Link></Button>
         </div>
       </div>
@@ -169,7 +168,6 @@ export function DashboardHome() {
         </div>
       </div>
 
-      <SectionLabel className="mt-6 md:hidden">Tip</SectionLabel>
     </DashboardShell>
   );
 }
@@ -178,7 +176,7 @@ function DashboardShell({ creator, children }: { creator?: CreatorProfilePayload
   return (
     <div className="flex min-h-screen bg-canvas">
       <div className="hidden md:flex"><DashboardSidebar active="overview" creator={creator} /></div>
-      <main className="flex min-h-screen flex-1 flex-col">
+      <main className="flex min-h-screen min-w-0 flex-1 flex-col">
         <div className="hidden h-14 shrink-0 items-center justify-between border-b border-white/[0.06] px-6 md:flex">
           <div className="font-display text-[16px] font-semibold">Overview</div>
           <div className="flex items-center gap-2.5">
@@ -186,7 +184,7 @@ function DashboardShell({ creator, children }: { creator?: CreatorProfilePayload
             <Avatar seed={creator?.avatarColor ?? "#2a2a2a"} src={creator?.avatarUrl} size={32} />
           </div>
         </div>
-        <div className="flex-1 px-4 py-5 md:px-6">{children}</div>
+        <div className="min-w-0 flex-1 overflow-x-clip px-4 py-5 md:px-6">{children}</div>
         <div className="md:hidden"><CreatorBottomNav /></div>
       </main>
     </div>

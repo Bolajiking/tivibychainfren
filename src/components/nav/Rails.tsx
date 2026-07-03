@@ -282,11 +282,11 @@ export function CreatorBottomNav() {
     { label: "Stats", icon: <BarChart3 className="size-[18px]" />, href: "/dashboard/analytics" },
   ];
   return (
-    <div className="flex h-[58px] shrink-0 items-center border-t border-white/[0.06] bg-surface-2 pt-1">
+    <div className="sticky bottom-0 z-30 flex shrink-0 items-center border-t border-white/[0.06] bg-surface-2/95 pt-1 backdrop-blur pb-[max(4px,env(safe-area-inset-bottom))]">
       {items.map((it) => {
         const active = path === it.href;
         return (
-          <Link key={it.label} href={it.href} className={cn("flex flex-1 flex-col items-center gap-[3px]", active ? "text-blue" : "text-faint")}>
+          <Link key={it.label} href={it.href} className={cn("flex h-[54px] flex-1 flex-col items-center justify-center gap-[3px] transition-colors active:scale-95", active ? "text-blue" : "text-faint")}>
             {it.icon}
             <span className="text-[9px] font-semibold">{it.label}</span>
           </Link>
@@ -311,17 +311,17 @@ export function ViewerTabBar() {
     { label: "Following", icon: <Heart className="size-[19px]" />, href: "/explore" },
   ];
   return (
-    <div className="flex h-[62px] shrink-0 items-center border-t border-white/[0.06] bg-surface-2 pt-1">
+    <div className="sticky bottom-0 z-30 flex shrink-0 items-center border-t border-white/[0.06] bg-surface-2/95 pt-1 backdrop-blur pb-[max(4px,env(safe-area-inset-bottom))]">
       {links.map((it) => {
         const active = path === it.href;
         return (
-          <Link key={it.label} href={it.href} className={cn("flex flex-1 flex-col items-center gap-[3px]", active ? "text-blue" : "text-faint")}>
+          <Link key={it.label} href={it.href} className={cn("flex h-[54px] flex-1 flex-col items-center justify-center gap-[3px] transition-colors active:scale-95", active ? "text-blue" : "text-faint")}>
             {it.icon}
             <span className="text-[9px] font-semibold">{it.label}</span>
           </Link>
         );
       })}
-      <button onClick={onWallet} className="flex flex-1 flex-col items-center gap-[3px] text-faint hover:text-white">
+      <button onClick={onWallet} className="flex h-[54px] flex-1 flex-col items-center justify-center gap-[3px] text-faint transition-colors active:scale-95 hover:text-white">
         <User className="size-[19px]" />
         <span className="text-[9px] font-semibold">You</span>
       </button>

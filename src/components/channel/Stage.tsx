@@ -25,6 +25,7 @@ export function Stage({
   headerUrl,
   headerUploading,
   subscribed,
+  autoInstall = false,
   children,
 }: {
   creator: Creator;
@@ -42,6 +43,8 @@ export function Stage({
   headerUrl?: string | null;
   headerUploading?: boolean;
   subscribed?: boolean;
+  /** Arrived from a "Save channel" link → auto-open the install flow. */
+  autoInstall?: boolean;
   children?: React.ReactNode;
 }) {
   const isLive = !!stream?.isActive;
@@ -164,9 +167,9 @@ export function Stage({
         <div className="flex w-full shrink-0 flex-wrap items-center gap-2.5 md:w-auto md:flex-nowrap">
           {isOwner ? (
             <>
-              <Button variant="secondary" size="pill" onClick={onUpload} className="flex-1 md:flex-none"><Upload className="size-4" /> Upload</Button>
               <Button variant="golive" size="pill" onClick={onGoLive} className="flex-1 md:flex-none"><Radio className="size-4" /> Go live</Button>
-              <InstallButton subject="channel" size="pill" variant="secondary" className="flex-1 md:flex-none" />
+              <Button variant="secondary" size="pill" onClick={onUpload} className="flex-1 md:flex-none"><Upload className="size-4" /> Upload</Button>
+              <InstallButton subject="channel" name={creator.displayName} autoPrompt={autoInstall} size="pill" variant="secondary" className="flex-1 md:flex-none" />
             </>
           ) : (
             <>
@@ -179,7 +182,7 @@ export function Stage({
                 {subscribed ? "Subscribed" : "Subscribe"}
               </Button>
               <Button variant="secondary" size="pill" onClick={onTip} className="min-w-[96px] flex-1 md:flex-none"><HandCoins className="size-4" /> Tip</Button>
-              <InstallButton subject="channel" size="pill" variant="secondary" className="flex-1 md:flex-none" />
+              <InstallButton subject="channel" name={creator.displayName} autoPrompt={autoInstall} size="pill" variant="secondary" className="flex-1 md:flex-none" />
             </>
           )}
         </div>
