@@ -11,7 +11,7 @@ export function LivePill({ small }: { small?: boolean }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full bg-live/90 font-extrabold tracking-[0.08em] text-white",
+        "inline-flex items-center gap-1.5 rounded-full bg-live/90 font-semibold tracking-[0.12em] text-white",
         small ? "px-2.5 py-1 text-[9.5px]" : "px-3 py-1.5 text-[11px]",
       )}
     >
@@ -25,7 +25,7 @@ export function ViewerPill({ count, small }: { count: number; small?: boolean })
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full bg-black/45 font-semibold text-ink-dim backdrop-blur",
+        "receipt inline-flex items-center gap-1.5 rounded-full bg-black/45 font-medium text-ink-dim backdrop-blur",
         small ? "px-2.5 py-1 text-[9.5px]" : "px-3 py-1.5 text-[11.5px]",
       )}
     >
@@ -51,12 +51,12 @@ export function GateBadge({ viewMode, amount }: { viewMode: ViewMode; amount: nu
 
 function Pill({ children, tone }: { children: React.ReactNode; tone: "green" | "blue" | "muted" }) {
   const tones = {
-    green: "text-online border-online/40 bg-online/[0.08]",
-    blue: "text-blue-light border-blue/45 bg-blue/[0.12]",
+    green: "text-earn border-earn/40 bg-earn/[0.08]",
+    blue: "text-beam-soft border-beam/45 bg-beam/[0.12]",
     muted: "text-muted border-white/[0.16] bg-white/[0.04]",
   } as const;
   return (
-    <span className={cn("rounded-full border px-2.5 py-[3px] text-[9.5px] font-bold tracking-[0.04em]", tones[tone])}>
+    <span className={cn("receipt rounded-full border px-2.5 py-[3px] text-[9.5px] font-medium tracking-[0.04em]", tones[tone])}>
       {children}
     </span>
   );
