@@ -79,3 +79,4 @@ Purple gradients · icons-in-circles grids · gradient CTAs · shadows on dark �
 | 2026-07-19 | Accent retuned `#0091ff` → `#40ACFF` beam ramp | Chainfren lineage; `#0091ff` is parent's superseded palette; blue-on-black unclaimed in streaming |
 | 2026-07-19 | Geist Mono receipt layer added for all value numerals | Ownership rendered as UI; "numbers do the arguing" |
 | 2026-07-19 | Social-funnel surfaces (OG system, share-back kit, webview-first) elevated to brand surfaces | Operator directive: seamless integration with existing social platforms and behaviors |
+| 2026-07-19 | Designer packages 1–5 delivered and implemented | Viewport mark (idle/live state machine) chosen from 4 explorations; tokens, components, flows F1–F8, live-aware OG cards, theming guardrails shipped in code. Assets in `public/brand/`; packages archived in `Design work/` |
