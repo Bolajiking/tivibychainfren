@@ -21,9 +21,19 @@ import {
   type BroadcastTransportPlanPayload,
   type LiveIngest,
 } from "@/lib/livepeer-client";
+import dynamic from "next/dynamic";
 import { BroadcastChat } from "@/components/dashboard/BroadcastChat";
-import { BrowserBroadcaster } from "@/components/dashboard/BrowserBroadcaster";
 import { GoLiveMoment } from "@/components/dashboard/GoLiveMoment";
+
+// The browser broadcaster carries the whole WHIP/media stack — load it only
+// when the studio actually renders it, behind a stage-shaped skeleton.
+const BrowserBroadcaster = dynamic(
+  () => import("@/components/dashboard/BrowserBroadcaster").then((m) => m.BrowserBroadcaster),
+  {
+    ssr: false,
+    loading: () => <div className="flex-1 animate-pulse rounded-2xl bg-white/[0.05]" />,
+  },
+);
 import { LiveFavicon } from "@/components/brand/LiveFavicon";
 import { Mark } from "@/components/brand/Logo";
 import { useStreamPresence } from "@/lib/live-hooks";

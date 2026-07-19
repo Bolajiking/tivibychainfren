@@ -108,6 +108,6 @@ export function CreatorCard({ creator }: { creator: Creator }) {
 
 function LiveBadgeMini() {
   return (
-    <span className="rounded-[5px] bg-live px-[7px] py-0.5 text-[8.5px] font-extrabold text-white">LIVE</span>
+    <span className="rounded-[5px] bg-live px-[7px] py-0.5 text-[8.5px] font-semibold tracking-[0.12em] text-white">LIVE</span>
   );
 }

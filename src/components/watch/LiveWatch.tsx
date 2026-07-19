@@ -268,7 +268,7 @@ export function LiveWatch({
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-[14px] font-semibold">{featuredProduct.product.name}</div>
-                <div className="mt-1 font-display text-[19px] font-bold">${featuredProduct.product.price}</div>
+                <div className="receipt mt-1 text-[18px] text-ink-soft">${featuredProduct.product.price}</div>
               </div>
             </div>
             <button onClick={() => setBuy(featuredProduct.product)} className="mt-3 h-[46px] w-full rounded-[13px] bg-blue text-[13.5px] font-bold text-white">

@@ -96,7 +96,7 @@ export function UnlockGate({
                   {resource?.kind === "video" ? "This replay, yours forever" : "This stream + the replay, yours forever"}
                 </div>
               </div>
-              <div className="font-display text-[20px] font-bold">${oneTimeAmount}</div>
+              <div className="receipt text-[19px] text-ink-soft">${oneTimeAmount}</div>
             </button>
 
             <button
@@ -115,9 +115,9 @@ export function UnlockGate({
                 <div className="text-[13.5px] font-bold text-white">Subscribe</div>
                 <div className="mt-0.5 text-[11px] text-blue-soft">Every stream, the replays, the chat</div>
               </div>
-              <div className="font-display text-[20px] font-bold">
+              <div className="receipt text-[19px] text-ink-soft">
                 ${monthlyAmount}
-                <span className="text-[11px] font-medium text-blue-soft">/mo</span>
+                <span className="text-[11px] text-beam-soft">/mo</span>
               </div>
             </button>
 
@@ -133,8 +133,8 @@ export function UnlockGate({
             </div>
             <div className="mt-4 flex items-center justify-between border-y border-white/[0.07] py-3.5">
               <span className="text-[12.5px] text-muted">Total</span>
-              <span className="font-display text-[22px] font-bold">
-                ${amount.toFixed(2)}{door === "monthly" && <span className="text-[12px] font-medium text-faint">/mo</span>}
+              <span className="receipt text-[21px] text-ink-soft">
+                ${amount.toFixed(2)}{door === "monthly" && <span className="text-[12px] text-faint">/mo</span>}
               </span>
             </div>
 

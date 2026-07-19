@@ -3,6 +3,10 @@ import { Logo } from "@/components/brand/Logo";
 import { LiveCard } from "@/components/cards/Cards";
 import { LandingNav, LandingHeroCta } from "@/components/brand/LandingCtas";
 
+// ISR: serve the landing statically, refresh the live rail every 30s.
+// Client surfaces re-check live status themselves, so 30s staleness is safe.
+export const revalidate = 30;
+
 export default async function Landing() {
   const live = await getLiveStreams();
   const cards = await Promise.all(

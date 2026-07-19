@@ -189,7 +189,7 @@ export function StatTile({ label, value, hint }: { label: string; value: string;
   return (
     <div className="rounded-2xl border border-white/[0.06] bg-raised p-4">
       <div className="text-[10.5px] text-faint">{label}</div>
-      <div className="mt-1.5 font-display text-2xl font-bold">{value}</div>
+      <div className="receipt mt-1.5 text-2xl text-ink-soft">{value}</div>
       {hint && <div className="mt-1 text-[10px] text-faint">{hint}</div>}
     </div>
   );

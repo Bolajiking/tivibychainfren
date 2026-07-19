@@ -15,7 +15,7 @@ export function ClaimCta({ size = "lg", arrow, variant }: { size?: "sm" | "lg"; 
   const href = creator ? "/dashboard" : "/onboarding";
   const label = creator ? "Your dashboard" : "Claim your channel";
   return (
-    <Button asChild size={size} variant={variant}>
+    <Button asChild size={size} variant={variant} className="whitespace-nowrap">
       <Link href={href}>
         {label}
         {arrow && <ArrowRight className="size-4" />}

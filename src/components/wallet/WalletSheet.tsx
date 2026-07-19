@@ -207,7 +207,7 @@ export function WalletSheet() {
                     value={cashAmount}
                     placeholder={formatAmt(balance)}
                     onChange={(e) => setCashAmount(e.target.value.replace(/[^\d.]/g, ""))}
-                    className="h-[50px] flex-1 bg-transparent font-display text-[22px] font-bold text-white placeholder:text-[#55555c] focus:outline-none"
+                    className="h-[50px] flex-1 bg-transparent receipt text-[20px] text-white placeholder:text-[#55555c] focus:outline-none"
                   />
                   <button onClick={() => setCashAmount(balance.toFixed(2))} className="text-[11px] font-semibold text-blue-light">MAX</button>
                 </div>

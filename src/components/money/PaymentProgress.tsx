@@ -65,7 +65,7 @@ export function SuccessBurst({ title, subtitle, tone = "blue" }: { title: string
       <div className={`flex size-16 items-center justify-center rounded-full text-white ${ring}`}>
         <Check className="size-8" />
       </div>
-      <div className="font-display text-[20px] font-bold">{title}</div>
+      <div className="font-display text-[20px] font-semibold">{title}</div>
       {subtitle && <div className="text-[11.5px] text-muted">{subtitle}</div>}
     </div>
   );
