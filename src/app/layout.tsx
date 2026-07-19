@@ -28,6 +28,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://tvin.bio"),
   title: "TVinBio — Your Audience. Your Platform. Your Revenue.",
   description:
     "A creator-owned streaming platform that lives behind a single bio link. Live, video, store, community — owned by the creator.",
