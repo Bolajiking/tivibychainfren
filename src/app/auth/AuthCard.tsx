@@ -40,7 +40,7 @@ export function AuthCard({
   return (
     <div className="flex min-h-screen items-center justify-center bg-canvas px-5">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[320px]"
-        style={{ background: "radial-gradient(70% 100% at 50% 0%,rgba(0,145,255,.18),transparent 60%)" }} />
+        style={{ background: "radial-gradient(70% 100% at 50% 0%,rgba(64,172,255,.18),transparent 60%)" }} />
       <div className="relative w-full max-w-[360px]">
         <Logo size={44} href="" />
         <h1 className="font-display mt-6 text-[27px] font-semibold leading-[1.05] tracking-[-0.02em]">

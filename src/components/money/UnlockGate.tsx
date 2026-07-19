@@ -104,7 +104,7 @@ export function UnlockGate({
               className={cn(
                 "relative mt-2.5 flex w-full items-center justify-between rounded-2xl border p-3.5 text-left transition",
                 door === "monthly"
-                  ? "border-[1.5px] border-blue bg-blue/[0.1] shadow-[0_8px_28px_rgba(0,145,255,.18)]"
+                  ? "border-[1.5px] border-blue bg-blue/[0.1] shadow-[0_8px_28px_rgba(64,172,255,.18)]"
                   : "border-white/12",
               )}
             >

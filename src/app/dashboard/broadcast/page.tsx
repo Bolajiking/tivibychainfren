@@ -721,7 +721,7 @@ function BroadcastShell({ live, clock, viewerCount, children }: { live: boolean;
 function ReadyRoomFallback({ creator, title, setupError, mock }: { creator: Creator; title: string; setupError: boolean; mock: boolean }) {
   return (
     <div className="relative flex-1 overflow-hidden rounded-2xl border border-white/[0.08]" style={{ background: "linear-gradient(150deg,#1d1f24,#0a0a0c 78%)", minHeight: 320 }}>
-      <div className="absolute inset-0" style={{ background: `radial-gradient(55% 65% at 50% 40%,${creator.avatarColor ?? "#0091ff"}33,transparent 72%)` }} />
+      <div className="absolute inset-0" style={{ background: `radial-gradient(55% 65% at 50% 40%,${creator.avatarColor ?? "#40acff"}33,transparent 72%)` }} />
       <div className="absolute left-4 top-4 z-10 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 text-[11px] font-semibold text-ink-dim backdrop-blur">@{creator.username}</div>
       <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
         {mock ? (

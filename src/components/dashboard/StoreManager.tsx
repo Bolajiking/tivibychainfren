@@ -180,7 +180,7 @@ export function StoreManager({ initial, creator, stream }: { initial: Product[];
           </select>
           <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} placeholder="Description" className="min-h-24 resize-none rounded-[13px] border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none sm:col-span-2" />
           <label className="flex h-12 items-center gap-2.5 rounded-[13px] border border-white/12 bg-white/[0.04] px-4 text-[12px] text-ink-dim sm:col-span-2">
-            <input type="checkbox" checked={form.subsOnly} onChange={(e) => set({ subsOnly: e.target.checked })} className="size-4 accent-[#0091ff]" />
+            <input type="checkbox" checked={form.subsOnly} onChange={(e) => set({ subsOnly: e.target.checked })} className="size-4 accent-[#40acff]" />
             Subscribers only
           </label>
         </div>

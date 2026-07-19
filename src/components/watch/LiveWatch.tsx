@@ -390,7 +390,7 @@ function ChatRow({ m, overlay }: { m: ChatMessage; overlay?: boolean }) {
   return (
     <div className="flex items-baseline gap-1.5">
       <span className="shrink-0 text-[11.5px] font-semibold" style={{ color: m.nameColor }}>{m.sender}</span>
-      {m.role === "host" && <Badge color="#0091ff">HOST</Badge>}
+      {m.role === "host" && <Badge color="#40acff">HOST</Badge>}
       {m.role === "mod" && <Badge color="#c8eb6d">MOD</Badge>}
       <span className={cn("text-[12px]", overlay ? "text-[#e2e2e6] [text-shadow:0_1px_3px_rgba(0,0,0,.6)]" : "text-[#d6d6db]")}>{m.message}</span>
     </div>

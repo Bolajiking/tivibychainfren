@@ -69,7 +69,7 @@ export function FundSheet({
             className={cn(
               "rounded-[14px] py-[15px] text-center text-[15px] font-semibold transition",
               amount === p
-                ? "border-[1.5px] border-blue bg-blue/[0.18] text-white shadow-[0_6px_18px_rgba(0,145,255,.28)]"
+                ? "border-[1.5px] border-blue bg-blue/[0.18] text-white shadow-[0_6px_18px_rgba(64,172,255,.28)]"
                 : "border border-white/12 bg-white/[0.06] text-ink-dim",
             )}
           >

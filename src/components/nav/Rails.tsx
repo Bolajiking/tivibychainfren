@@ -163,7 +163,7 @@ function OwnedChannelIcon({ creator }: { creator: Creator }) {
   return (
     <Link href={`/${creator.username}`} aria-label={`${creator.displayName} (your channel)`} className="group relative">
       <span aria-hidden className="absolute -inset-1.5 rounded-full bg-blue/30 opacity-70 blur-md transition-opacity group-hover:opacity-100" />
-      <Avatar seed={creator.avatarColor ?? "#2a2a2a"} src={creator.avatarUrl} size={42} ring="#0091FF" className="relative" />
+      <Avatar seed={creator.avatarColor ?? "#2a2a2a"} src={creator.avatarUrl} size={42} ring="#40ACFF" className="relative" />
       <span className="absolute -right-1 -top-1 z-10 flex size-[15px] items-center justify-center rounded-full border-2 border-surface-2 bg-blue text-white shadow-[0_2px_8px_rgba(64,172,255,.45)]">
         <Crown className="size-[8px] fill-current" />
       </span>
@@ -178,7 +178,7 @@ function OwnedChannelRow({ href, name, handle, seed, src }: { href: string; name
       className="group relative flex items-center gap-2.5 overflow-hidden rounded-[12px] border border-blue/30 bg-gradient-to-r from-blue/[0.13] via-blue/[0.05] to-transparent px-2.5 py-2 transition-colors hover:border-blue/55"
     >
       <span className="relative shrink-0">
-        <Avatar seed={seed} src={src} size={32} ring="#0091FF" />
+        <Avatar seed={seed} src={src} size={32} ring="#40ACFF" />
         <span className="absolute -right-1 -top-1 flex size-[14px] items-center justify-center rounded-full border-2 border-surface-2 bg-blue text-white shadow-[0_2px_8px_rgba(64,172,255,.45)]">
           <Crown className="size-[7px] fill-current" />
         </span>

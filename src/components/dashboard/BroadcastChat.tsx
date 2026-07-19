@@ -94,7 +94,7 @@ export function BroadcastChat({ streamId, hostName, live }: { streamId: string; 
       message: draft,
     });
     if (!local) return;
-    const hostMessage: ChatMessage = { ...local, role: "host", nameColor: "#0091ff" };
+    const hostMessage: ChatMessage = { ...local, role: "host", nameColor: "#40acff" };
 
     setSending(true);
     setDraft("");
@@ -163,7 +163,7 @@ function ModRow({ m, busy, onRemove }: { m: ChatMessage; busy: boolean; onRemove
   return (
     <div className="group flex items-center gap-1.5">
       <span className="shrink-0 text-[11.5px] font-semibold" style={{ color: m.nameColor }}>{m.sender}</span>
-      {m.role === "host" && <Badge color="#0091ff">HOST</Badge>}
+      {m.role === "host" && <Badge color="#40acff">HOST</Badge>}
       {m.role === "mod" && <Badge color="#c8eb6d">MOD</Badge>}
       <span className="flex-1 text-[12px] text-[#d6d6db]">{m.message}</span>
       <RemoveBtn busy={busy} onRemove={onRemove} />
