@@ -116,8 +116,8 @@ export function DashboardHome() {
         {stats.map((s) => (
           <div key={s.label} className="rounded-2xl border border-white/[0.06] bg-raised p-4">
             <div className="text-[10.5px] text-faint">{s.label}</div>
-            <div className="mt-1.5 font-display text-2xl font-bold">{s.value}</div>
-            {s.delta && <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-online"><TrendingUp className="size-[11px]" /> {s.delta}</div>}
+            <div className="receipt mt-1.5 text-2xl text-ink-soft">{s.value}</div>
+            {s.delta && <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-earn"><TrendingUp className="size-[11px]" /> {s.delta}</div>}
           </div>
         ))}
       </div>

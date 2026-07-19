@@ -50,7 +50,7 @@ export function Stage({
   const isLive = !!stream?.isActive;
   const showPlayer = isLive && !locked;
   const livePlaybackId = stream ? stream.livepeerPlaybackId ?? stream.playbackId : "";
-  const glow = isOwner && !isLive ? "rgba(34,197,94,.12)" : "rgba(0,145,255,.14)";
+  const glow = isOwner && !isLive ? "rgba(34,197,94,.12)" : "rgba(64,172,255,.14)";
   const profileStatus = isLive ? `Live now · ${stream?.title ?? creator.displayName}` : statusLine;
 
   return (
@@ -64,7 +64,7 @@ export function Stage({
         background: "#0a0a0c",
         boxShadow: isLive
           ? "0 0 0 1px rgba(239,68,68,.28), 0 24px 70px rgba(0,0,0,.62), 0 0 60px rgba(239,68,68,.13)"
-          : `0 0 0 1px ${isOwner && !isLive ? "rgba(34,197,94,.14)" : "rgba(0,145,255,.14)"},0 24px 60px rgba(0,0,0,.55)`,
+          : `0 0 0 1px ${isOwner && !isLive ? "rgba(34,197,94,.14)" : "rgba(64,172,255,.14)"},0 24px 60px rgba(0,0,0,.55)`,
       }}
     >
       {isLive && (
@@ -157,10 +157,10 @@ export function Stage({
               <span className="truncate">{profileStatus}</span>
             </div>
           )}
-          <h1 className="truncate font-display text-[26px] font-bold uppercase leading-[0.96] tracking-[-0.025em] md:text-[38px]">{creator.displayName}</h1>
+          <h1 className="truncate font-display text-[26px] font-semibold leading-[0.98] tracking-[-0.02em] md:text-[38px]">{creator.displayName}</h1>
           <div className="mt-1.5 flex items-center gap-2.5 text-[12px] text-muted md:mt-2 md:text-[13px]">
-            <span className="shrink-0 font-medium text-ink-dim">@{creator.username}</span>
-            <Dot /> <span className="truncate">{formatCount(creator.subscriberCount)} subscribers</span>
+            <span className="receipt shrink-0 text-ink-dim">tvin.bio/{creator.username}</span>
+            <Dot /> <span className="receipt truncate">{formatCount(creator.subscriberCount)} subscribers</span>
           </div>
         </div>
         {/* Actions wrap to a full-width row below on mobile, inline on desktop. */}

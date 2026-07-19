@@ -126,7 +126,7 @@ export function StoreManager({ initial, creator, stream }: { initial: Product[];
             <div className="min-w-0 flex-1">
               <div className="truncate text-[13px] font-semibold">{p.name}</div>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-faint">
-                <span className="font-display font-bold text-white">${p.price}</span>
+                <span className="receipt text-white">${p.price}</span>
                 <span>· {p.inventory} in stock</span>
                 {p.subsOnly && <span className="rounded bg-blue/[0.18] px-1.5 py-px text-[8px] font-bold text-blue-soft">SUBS</span>}
                 <StatusBadge status={p.status} />

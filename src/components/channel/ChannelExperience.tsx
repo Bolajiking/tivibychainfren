@@ -15,6 +15,7 @@ import { PurchaseSheet } from "@/components/money/PurchaseSheet";
 import { DonationAlert } from "@/components/money/DonationAlert";
 import { Button } from "@/components/ui/Button";
 import { SectionLabel } from "@/components/ui/Badges";
+import { PlatformStamp } from "@/components/brand/Logo";
 import { useSession } from "@/lib/store/session";
 import { useAuthIntent } from "@/lib/auth/useAuthIntent";
 import { hasAccess, matchesAny } from "@/lib/access";
@@ -276,10 +277,10 @@ export function ChannelExperience({
           autoInstall={autoInstall}
         >
           {room === "watch" && currentStream?.isActive && featuredProduct && !locked && (
-            <div className="absolute inset-x-4 top-[34%] z-20 animate-[tvDrop_.5s_cubic-bezier(.22,1,.36,1)] rounded-2xl border-[1.5px] border-blue bg-[#08080a]/90 p-3.5 backdrop-blur-md shadow-[0_16px_50px_rgba(0,145,255,.32)] md:left-auto md:right-4 md:w-[280px]">
-              <div className="mb-2.5 inline-flex items-center gap-1.5 rounded-full bg-blue/[0.18] px-2.5 py-1">
-                <span className="size-[5px] rounded-full bg-blue-light" />
-                <span className="text-[8.5px] font-bold tracking-[0.08em] text-blue-soft">FEATURED NOW</span>
+            <div className="absolute inset-x-4 top-[34%] z-20 animate-[tvDrop_.5s_cubic-bezier(.22,1,.36,1)] rounded-2xl border border-beam/40 bg-[#08080a]/90 p-3.5 backdrop-blur-md md:left-auto md:right-4 md:w-[280px]">
+              <div className="mb-2.5 inline-flex items-center gap-1.5 rounded-full border border-beam/40 px-2.5 py-1">
+                <span className="size-[5px] rounded-full bg-beam" />
+                <span className="text-[8.5px] font-semibold tracking-[0.12em] text-beam">FEATURED NOW</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="relative size-[60px] shrink-0 overflow-hidden rounded-[13px]" style={{ background: `linear-gradient(140deg,${featuredProduct.product.imageColor},#101010)` }}>
@@ -290,7 +291,7 @@ export function ChannelExperience({
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-[14px] font-semibold">{featuredProduct.product.name}</div>
-                  <div className="mt-1 font-display text-[19px] font-bold">${featuredProduct.product.price}</div>
+                  <div className="receipt mt-1 text-[18px] text-ink-soft">${featuredProduct.product.price}</div>
                 </div>
               </div>
               <Button className="mt-3 w-full" onClick={() => setBuy(featuredProduct.product)}>Buy now</Button>
@@ -374,6 +375,10 @@ export function ChannelExperience({
         onSent={onTipSent}
       />
       <PurchaseSheet product={buy} open={!!buy} onOpenChange={(v) => !v && setBuy(null)} />
+
+      <div className="mt-10 flex justify-center">
+        <PlatformStamp />
+      </div>
     </div>
   );
 }
@@ -383,7 +388,7 @@ function Empty({ label, hint, icon }: { label: string; hint: string; icon?: bool
     <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-white/10 py-14 text-center">
       {icon && <ShoppingBag className="size-7 text-ghost" />}
       <div className="text-sm font-semibold text-ink-dim">{label}</div>
-      <div className="text-[11.5px] text-faint">{hint}</div>
+      <div className="outcome text-[12.5px] text-muted">{hint}</div>
     </div>
   );
 }
