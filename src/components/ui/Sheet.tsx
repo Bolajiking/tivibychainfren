@@ -2,11 +2,14 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useRef } from "react";
 import { cn } from "@/lib/cn";
 
 /**
  * Bottom sheet on mobile, centered card on desktop. The home for every
  * money surface (gate, fund, tip, purchase) — calm, legible, dismissible.
+ * Mobile: swipe-down to dismiss (platform muscle memory, F10) — drag follows
+ * the finger, past 90px it closes, otherwise it springs back.
  */
 export function Sheet({
   open,
@@ -23,11 +26,50 @@ export function Sheet({
   variant?: "bottom" | "center";
   className?: string;
 }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ startY: number; delta: number; dragging: boolean }>({ startY: 0, delta: 0, dragging: false });
+
+  function onTouchStart(e: React.TouchEvent) {
+    if (variant !== "bottom") return;
+    // Only start a dismiss-drag when the sheet body is scrolled to its top,
+    // so inner scrolling never fights the gesture.
+    const el = contentRef.current;
+    if (el && el.scrollTop > 0) return;
+    drag.current = { startY: e.touches[0].clientY, delta: 0, dragging: true };
+  }
+
+  function onTouchMove(e: React.TouchEvent) {
+    if (!drag.current.dragging) return;
+    const delta = Math.max(0, e.touches[0].clientY - drag.current.startY);
+    drag.current.delta = delta;
+    const el = contentRef.current;
+    if (el) {
+      el.style.transform = `translateY(${delta}px)`;
+      el.style.transition = "none";
+    }
+  }
+
+  function onTouchEnd() {
+    if (!drag.current.dragging) return;
+    const el = contentRef.current;
+    const shouldClose = drag.current.delta > 90;
+    if (el) {
+      el.style.transition = "transform .25s cubic-bezier(.22,1,.36,1)";
+      el.style.transform = shouldClose ? "translateY(100%)" : "";
+    }
+    drag.current.dragging = false;
+    if (shouldClose) setTimeout(() => onOpenChange(false), 180);
+  }
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm data-[state=open]:animate-[tvFadeIn_.22s_ease] data-[state=closed]:animate-[tvFadeOut_.2s_ease]" />
         <Dialog.Content
+          ref={contentRef}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
           className={cn(
             "fixed z-50 border border-white/12 bg-elevated text-white shadow-[0_24px_60px_rgba(0,0,0,.6)] focus:outline-none",
             // Bottom sheet (mobile): full slide up from below the viewport, slide back down on close.

@@ -12,6 +12,7 @@ import { config } from "@/lib/config";
 import { provisionCreatorProfile, redeemInvite, uploadChannelArt, checkCreatorAccess, getMyCreatorProfile } from "@/lib/profile-client";
 import { slugifyUsername } from "@/lib/profile";
 import { buildAuthHref } from "@/lib/auth/redirect";
+import { shareLink } from "@/lib/share";
 import { useHydrated } from "@/lib/store/useHydrated";
 import { MOCK_MODE } from "@/lib/config";
 import { cn } from "@/lib/cn";
@@ -270,7 +271,16 @@ function OnboardingFlow() {
               <span className="receipt text-[13.5px] text-beam-soft">tvin.bio/{profileUsername}</span>
               <button onClick={() => { navigator.clipboard?.writeText(`tvin.bio/${profileUsername}`); toast.success("Link copied"); }} className="ml-auto inline-flex items-center gap-1.5 text-[11px] font-semibold text-ink-dim"><Copy className="size-3" /> Copy</button>
             </div>
-            <Button size="lg" className="mt-3 w-full" onClick={() => setStep("firstrun")}>Share my link</Button>
+            <Button
+              size="lg"
+              className="mt-3 w-full"
+              onClick={async () => {
+                await shareLink({ url: `https://tvin.bio/${profileUsername}`, text: `My channel — tvin.bio/${profileUsername}` });
+                setStep("firstrun");
+              }}
+            >
+              Share my link
+            </Button>
           </div>
         )}
 
@@ -278,7 +288,7 @@ function OnboardingFlow() {
           <div className="animate-[tvRise_.3s_ease]">
             <h1 className="font-display text-[21px] font-semibold tracking-[-0.01em]">Let's set you up</h1>
             <div className="mt-1 text-[11.5px] text-muted">3 steps to your first dollar</div>
-            <div className="mt-2.5 h-[5px] overflow-hidden rounded-full bg-white/10"><div className="h-full w-1/3 golive-gradient" /></div>
+            <div className="mt-2.5 h-[5px] overflow-hidden rounded-full bg-white/10"><div className="h-full w-1/3 rounded-full bg-beam" /></div>
             <div className="mt-5 flex flex-col gap-2.5">
               <Task done icon={<Check className="size-4" />} title="Create your channel" sub="Done" tone="green" />
               <Task active icon={<Play className="size-[15px]" />} title="Go live or upload a video" sub="Give fans something to watch" onClick={() => router.push("/dashboard/broadcast")} />

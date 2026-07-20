@@ -145,7 +145,7 @@ export function UnlockGate({
                     <Wallet className="size-[18px]" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-[12.5px] font-semibold text-ink-soft">Your balance is ${user?.balanceUsd.toFixed(2)}</div>
+                    <div className="text-[12.5px] font-semibold text-ink-soft">Your balance is <span className="receipt">${user?.balanceUsd.toFixed(2)}</span></div>
                     <div className="mt-0.5 text-[11px] text-faint">Add a little to keep watching</div>
                   </div>
                 </div>

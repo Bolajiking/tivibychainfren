@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Mark } from "@/components/brand/Logo";
+import { shareLink } from "@/lib/share";
 
 /**
  * The go-live sequence (F5) — the brand's hero moment. Fires once when the
@@ -54,6 +55,23 @@ export function GoLiveMoment({ live, name, handle }: { live: boolean; name: stri
           You&apos;re live, {name}
         </div>
         <div className="receipt text-xs text-muted">tvin.bio/{handle}</div>
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={(e) => {
+            e.stopPropagation();
+            void shareLink({ url: `https://tvin.bio/${handle}`, text: `${name} is live now` });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.stopPropagation();
+              void shareLink({ url: `https://tvin.bio/${handle}`, text: `${name} is live now` });
+            }
+          }}
+          className="mt-3 inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-beam px-7 text-sm font-semibold text-canvas transition-transform duration-150 ease-[cubic-bezier(.22,1,.36,1)] hover:bg-beam-deep active:scale-[0.97]"
+        >
+          Share everywhere
+        </span>
       </div>
     </button>
   );

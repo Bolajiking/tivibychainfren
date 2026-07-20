@@ -504,7 +504,7 @@ export default function Broadcast() {
             Regenerate ingest
           </Button>
           <p className="text-[11px] leading-relaxed text-faint">Use this if Livepeer stays idle or OBS cannot connect. TVinBio will create a fresh Livepeer stream and update this channel.</p>
-          {setupError && <p className="text-[11px] leading-relaxed text-red-200">Could not reveal the browser ingest details. Retry the key reveal or refresh the studio.</p>}
+          {setupError && <p className="text-[11px] leading-relaxed text-error">Could not reveal the browser ingest details. Retry the key reveal or refresh the studio.</p>}
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
@@ -513,7 +513,7 @@ export default function Broadcast() {
             {ingestBusy ? <Loader2 className="size-4 animate-spin" /> : <Radio className="size-4" />}
             {ingestBusy ? "Setting up ingest" : "Generate ingest"}
           </Button>
-          {setupError && <p className="text-[11px] leading-relaxed text-red-200">Stream setup did not finish. Retry here or refresh the studio.</p>}
+          {setupError && <p className="text-[11px] leading-relaxed text-error">Stream setup did not finish. Retry here or refresh the studio.</p>}
         </div>
       )}
     </div>

@@ -169,7 +169,7 @@ export function WalletSheet() {
                   <button
                     key={p}
                     onClick={() => setAddAmount(p)}
-                    className={`h-[54px] rounded-[14px] text-[15px] font-bold transition ${addAmount === p ? "border-2 border-blue bg-blue/[0.14] text-white" : "border border-white/12 bg-white/[0.04] text-ink-dim hover:text-white"}`}
+                    className={`h-[54px] receipt rounded-[14px] text-[15px] transition ${addAmount === p ? "border-2 border-beam bg-beam/[0.08] text-white" : "border border-white/12 bg-white/[0.04] text-ink-dim hover:text-white"}`}
                   >
                     ${p}
                   </button>

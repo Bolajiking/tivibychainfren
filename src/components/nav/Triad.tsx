@@ -29,7 +29,7 @@ export function Triad({
             key={it.id}
             onClick={() => (isChat && chatSoon ? undefined : onChange(it.id))}
             className={cn(
-              "flex h-[38px] flex-1 items-center justify-center gap-1.5 rounded-[10px] text-[12.5px] font-semibold transition",
+              "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-[12px] text-[12.5px] font-semibold transition",
               isActive ? "bg-white text-canvas" : "text-muted hover:text-white",
               isChat && chatSoon && "cursor-default",
             )}
