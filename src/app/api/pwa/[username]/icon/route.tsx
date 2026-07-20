@@ -11,7 +11,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ username: strin
   const maskable = url.searchParams.get("mask") === "1";
 
   const creator = await getCreatorByUsername(username);
-  const seed = creator?.avatarColor ?? "#0091ff";
+  const seed = creator?.avatarColor ?? "#40acff";
   const initials = (creator?.displayName ?? username).trim().slice(0, 2).toUpperCase();
   // Maskable icons keep content inside an ~80% safe zone.
   const inset = maskable ? Math.round(size * 0.1) : 0;

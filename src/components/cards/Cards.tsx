@@ -61,7 +61,7 @@ export function ProductCard({ product, onClick }: { product: Product; onClick?: 
         )}
       </div>
       <div className="mt-2.5 text-[12.5px] font-semibold">{product.name}</div>
-      <div className="mt-1 font-display text-[15px] font-bold">${product.price}</div>
+      <div className="receipt mt-1 text-[15px] text-ink-soft">${product.price}</div>
     </div>
   );
 }
@@ -108,6 +108,6 @@ export function CreatorCard({ creator }: { creator: Creator }) {
 
 function LiveBadgeMini() {
   return (
-    <span className="rounded-[5px] bg-live px-[7px] py-0.5 text-[8.5px] font-extrabold text-white">LIVE</span>
+    <span className="rounded-[5px] bg-live px-[7px] py-0.5 text-[8.5px] font-semibold tracking-[0.12em] text-white">LIVE</span>
   );
 }

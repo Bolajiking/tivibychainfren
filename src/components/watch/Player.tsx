@@ -133,7 +133,7 @@ function PlaybackStatus({ className, status, mode }: { className?: string; statu
         ? "We will switch on the picture as soon as the live feed arrives."
         : "Processing can take a minute. Keep this tab open and we will refresh it.";
   return (
-    <div className={className} style={{ display: "grid", placeItems: "center", height: "100%", background: "radial-gradient(80% 80% at 50% 35%,rgba(0,145,255,.12),#0a0a0c 72%)" }}>
+    <div className={className} style={{ display: "grid", placeItems: "center", height: "100%", background: "radial-gradient(80% 80% at 50% 35%,rgba(64,172,255,.12),#0a0a0c 72%)" }}>
       <div className="mx-5 flex max-w-[320px] flex-col items-center text-center">
         <div className="relative flex size-16 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-white shadow-[0_20px_60px_rgba(0,0,0,.35)]">
           {!gone && <span className="absolute inset-[-7px] rounded-[24px] border border-blue/20 animate-pulse" />}

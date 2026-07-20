@@ -148,7 +148,7 @@ export function TipComposer({
                 className={cn(
                   "rounded-[13px] py-3 text-center text-sm font-semibold transition",
                   amount === p
-                    ? "border-[1.5px] border-blue bg-blue/[0.18] text-white shadow-[0_6px_18px_rgba(0,145,255,.28)]"
+                    ? "border-[1.5px] border-blue bg-blue/[0.18] text-white shadow-[0_6px_18px_rgba(64,172,255,.28)]"
                     : "border border-white/12 bg-white/[0.06] text-ink-dim",
                 )}
               >
@@ -175,7 +175,7 @@ export function TipComposer({
             )}
           </div>
           {error && !insufficient && (
-            <div className="mt-2 rounded-[11px] border border-red-400/20 bg-red-400/[0.08] px-3 py-2 text-[10.5px] text-red-100">
+            <div className="mt-2 rounded-[11px] border border-error/25 bg-error/[0.08] px-3 py-2 text-[10.5px] text-ink-dim">
               {error}
             </div>
           )}

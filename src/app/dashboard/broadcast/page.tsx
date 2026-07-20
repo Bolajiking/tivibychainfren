@@ -21,8 +21,21 @@ import {
   type BroadcastTransportPlanPayload,
   type LiveIngest,
 } from "@/lib/livepeer-client";
+import dynamic from "next/dynamic";
 import { BroadcastChat } from "@/components/dashboard/BroadcastChat";
-import { BrowserBroadcaster } from "@/components/dashboard/BrowserBroadcaster";
+import { GoLiveMoment } from "@/components/dashboard/GoLiveMoment";
+
+// The browser broadcaster carries the whole WHIP/media stack — load it only
+// when the studio actually renders it, behind a stage-shaped skeleton.
+const BrowserBroadcaster = dynamic(
+  () => import("@/components/dashboard/BrowserBroadcaster").then((m) => m.BrowserBroadcaster),
+  {
+    ssr: false,
+    loading: () => <div className="flex-1 animate-pulse rounded-2xl bg-white/[0.05]" />,
+  },
+);
+import { LiveFavicon } from "@/components/brand/LiveFavicon";
+import { Mark } from "@/components/brand/Logo";
 import { useStreamPresence } from "@/lib/live-hooks";
 import { subscribeToStreamStatus } from "@/lib/realtime";
 import { useStoreHydrated } from "@/components/dashboard/DashboardScaffold";
@@ -455,7 +468,7 @@ export default function Broadcast() {
           <input value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} disabled={viewMode === "free"} placeholder="Price" inputMode="decimal" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none disabled:opacity-45" />
         </div>
         <label className="flex h-10 items-center gap-2.5 rounded-[12px] border border-white/10 bg-white/[0.035] px-3 text-[12px] text-ink-dim">
-          <input type="checkbox" checked={record} onChange={(e) => setRecord(e.target.checked)} className="size-4 accent-[#0091ff]" />
+          <input type="checkbox" checked={record} onChange={(e) => setRecord(e.target.checked)} className="size-4 accent-[#40acff]" />
           Record replay
         </label>
         <Button size="lg" onClick={() => saveStream(live)} disabled={savingStream}>
@@ -491,7 +504,7 @@ export default function Broadcast() {
             Regenerate ingest
           </Button>
           <p className="text-[11px] leading-relaxed text-faint">Use this if Livepeer stays idle or OBS cannot connect. TVinBio will create a fresh Livepeer stream and update this channel.</p>
-          {setupError && <p className="text-[11px] leading-relaxed text-red-200">Could not reveal the browser ingest details. Retry the key reveal or refresh the studio.</p>}
+          {setupError && <p className="text-[11px] leading-relaxed text-error">Could not reveal the browser ingest details. Retry the key reveal or refresh the studio.</p>}
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
@@ -500,7 +513,7 @@ export default function Broadcast() {
             {ingestBusy ? <Loader2 className="size-4 animate-spin" /> : <Radio className="size-4" />}
             {ingestBusy ? "Setting up ingest" : "Generate ingest"}
           </Button>
-          {setupError && <p className="text-[11px] leading-relaxed text-red-200">Stream setup did not finish. Retry here or refresh the studio.</p>}
+          {setupError && <p className="text-[11px] leading-relaxed text-error">Stream setup did not finish. Retry here or refresh the studio.</p>}
         </div>
       )}
     </div>
@@ -535,7 +548,7 @@ export default function Broadcast() {
   const chatHeader = (
     <div className="flex h-[50px] shrink-0 items-center justify-between border-b border-white/[0.06] px-4">
       <span className="text-xs font-semibold tracking-[0.04em] text-ink-dim">LIVE CHAT · MOD</span>
-      <span className="inline-flex items-center gap-1.5 text-[11px] text-faint"><Eye className="size-[13px]" /> {live ? liveViewers.toLocaleString() : "0"}</span>
+      <span className="inline-flex items-center gap-1.5 text-[11px] text-faint"><Eye className="size-[13px]" /> <span className="receipt">{live ? liveViewers.toLocaleString() : "0"}</span></span>
     </div>
   );
 
@@ -561,6 +574,8 @@ export default function Broadcast() {
 
   return (
     <BroadcastShell live={live} clock={clock} viewerCount={liveViewers}>
+      <LiveFavicon live={live} />
+      <GoLiveMoment live={live} name={creator.displayName} handle={creator.username} />
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* Camera stage — dominant, contained, centered; fills the viewport on mobile. */}
         <div className="relative flex min-h-0 flex-1 flex-col p-0 lg:p-4">
@@ -692,16 +707,19 @@ function BroadcastShell({ live, clock, viewerCount, children }: { live: boolean;
         <div className="flex items-center gap-2.5">
           {live ? (
             <>
-              <span className="size-[9px] rounded-full bg-live shadow-[0_0_12px_rgba(239,68,68,.8)] animate-[tvLive_1.4s_infinite]" />
-              <span className="font-display text-[14px] font-bold tracking-[0.04em]">YOU ARE LIVE</span>
-              <span className="text-xs text-muted">· {clock}</span>
+              <span className="text-ink-soft"><Mark size={20} live /></span>
+              <span className="text-[12px] font-semibold tracking-[0.14em] text-live">ON AIR</span>
+              <span className="receipt text-xs text-muted">· {clock}</span>
             </>
           ) : (
-            <span className="font-display text-[14px] font-semibold text-muted">Broadcast desk</span>
+            <span className="inline-flex items-center gap-2 text-muted">
+              <Mark size={20} />
+              <span className="font-display text-[14px] font-semibold">Broadcast desk</span>
+            </span>
           )}
         </div>
         <div className="flex items-center gap-3.5 text-[11.5px]">
-          {live && <span className="inline-flex items-center gap-1.5 text-ink-dim"><Eye className="size-[13px]" /> {(viewerCount ?? 0).toLocaleString()}</span>}
+          {live && <span className="inline-flex items-center gap-1.5 text-ink-dim"><Eye className="size-[13px]" /> <span className="receipt">{(viewerCount ?? 0).toLocaleString()}</span></span>}
           <Link href="/dashboard" className="font-semibold text-muted hover:text-white">Dashboard</Link>
         </div>
       </div>
@@ -713,7 +731,7 @@ function BroadcastShell({ live, clock, viewerCount, children }: { live: boolean;
 function ReadyRoomFallback({ creator, title, setupError, mock }: { creator: Creator; title: string; setupError: boolean; mock: boolean }) {
   return (
     <div className="relative flex-1 overflow-hidden rounded-2xl border border-white/[0.08]" style={{ background: "linear-gradient(150deg,#1d1f24,#0a0a0c 78%)", minHeight: 320 }}>
-      <div className="absolute inset-0" style={{ background: `radial-gradient(55% 65% at 50% 40%,${creator.avatarColor ?? "#0091ff"}33,transparent 72%)` }} />
+      <div className="absolute inset-0" style={{ background: `radial-gradient(55% 65% at 50% 40%,${creator.avatarColor ?? "#40acff"}33,transparent 72%)` }} />
       <div className="absolute left-4 top-4 z-10 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 text-[11px] font-semibold text-ink-dim backdrop-blur">@{creator.username}</div>
       <div className="absolute inset-0 flex items-center justify-center px-6 text-center">
         {mock ? (

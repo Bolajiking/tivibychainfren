@@ -6,7 +6,7 @@ import { WalletButton } from "@/components/wallet/WalletButton";
 import { filterExploreResults, normalizeExploreQuery } from "@/lib/explore";
 import { Search } from "lucide-react";
 
-export const metadata = { title: "Explore — TVinBio" };
+export const metadata = { title: "What's on — TVinBio" };
 
 export default async function ExplorePage({
   searchParams,
@@ -39,14 +39,14 @@ export default async function ExplorePage({
 
         <div className="flex-1 px-4 py-5 md:px-6">
           <div className="mb-5 flex items-center justify-between">
-            <h1 className="font-display text-[26px] font-semibold tracking-[-0.02em] md:text-[22px]">Explore</h1>
+            <h1 className="font-display text-[26px] font-semibold tracking-[-0.02em] md:text-[22px]">What&apos;s on</h1>
             <div className="hidden gap-1.5 md:flex">
               {["All", "Gaming", "Music", "Learn"].map((f, i) => (
                 <span
                   key={f}
                   className={
                     i === 0
-                      ? "rounded-full bg-blue px-3.5 py-1.5 text-[11px] font-semibold text-white"
+                      ? "rounded-full bg-beam px-3.5 py-1.5 text-[11px] font-semibold text-canvas"
                       : "rounded-full border border-white/10 bg-white/[0.06] px-3.5 py-1.5 text-[11px] font-medium text-muted"
                   }
                 >
@@ -79,7 +79,7 @@ export default async function ExplorePage({
               ))}
             </div>
           ) : (
-            <EmptySearch label={query ? "No live streams match that search" : "No live streams yet"} />
+            <EmptySearch label={query ? "No live streams match that search" : "Nobody's on air right now"} />
           )}
 
           {/* trending */}

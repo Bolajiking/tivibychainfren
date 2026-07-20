@@ -96,7 +96,7 @@ export function UnlockGate({
                   {resource?.kind === "video" ? "This replay, yours forever" : "This stream + the replay, yours forever"}
                 </div>
               </div>
-              <div className="font-display text-[20px] font-bold">${oneTimeAmount}</div>
+              <div className="receipt text-[19px] text-ink-soft">${oneTimeAmount}</div>
             </button>
 
             <button
@@ -104,7 +104,7 @@ export function UnlockGate({
               className={cn(
                 "relative mt-2.5 flex w-full items-center justify-between rounded-2xl border p-3.5 text-left transition",
                 door === "monthly"
-                  ? "border-[1.5px] border-blue bg-blue/[0.1] shadow-[0_8px_28px_rgba(0,145,255,.18)]"
+                  ? "border-[1.5px] border-blue bg-blue/[0.1] shadow-[0_8px_28px_rgba(64,172,255,.18)]"
                   : "border-white/12",
               )}
             >
@@ -115,9 +115,9 @@ export function UnlockGate({
                 <div className="text-[13.5px] font-bold text-white">Subscribe</div>
                 <div className="mt-0.5 text-[11px] text-blue-soft">Every stream, the replays, the chat</div>
               </div>
-              <div className="font-display text-[20px] font-bold">
+              <div className="receipt text-[19px] text-ink-soft">
                 ${monthlyAmount}
-                <span className="text-[11px] font-medium text-blue-soft">/mo</span>
+                <span className="text-[11px] text-beam-soft">/mo</span>
               </div>
             </button>
 
@@ -133,8 +133,8 @@ export function UnlockGate({
             </div>
             <div className="mt-4 flex items-center justify-between border-y border-white/[0.07] py-3.5">
               <span className="text-[12.5px] text-muted">Total</span>
-              <span className="font-display text-[22px] font-bold">
-                ${amount.toFixed(2)}{door === "monthly" && <span className="text-[12px] font-medium text-faint">/mo</span>}
+              <span className="receipt text-[21px] text-ink-soft">
+                ${amount.toFixed(2)}{door === "monthly" && <span className="text-[12px] text-faint">/mo</span>}
               </span>
             </div>
 
@@ -145,7 +145,7 @@ export function UnlockGate({
                     <Wallet className="size-[18px]" />
                   </div>
                   <div className="flex-1">
-                    <div className="text-[12.5px] font-semibold text-ink-soft">Your balance is ${user?.balanceUsd.toFixed(2)}</div>
+                    <div className="text-[12.5px] font-semibold text-ink-soft">Your balance is <span className="receipt">${user?.balanceUsd.toFixed(2)}</span></div>
                     <div className="mt-0.5 text-[11px] text-faint">Add a little to keep watching</div>
                   </div>
                 </div>

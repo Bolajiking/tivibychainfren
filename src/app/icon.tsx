@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 
-// App icon (favicon + PWA 192/512 fallback). Rendered, no binary asset needed.
+// App icon (favicon + PWA 192/512 fallback) — the Viewport mark at 60% on
+// canvas #060606 (Identity Package 1 export matrix). Rendered, no binary asset.
 export const size = { width: 512, height: 512 };
 export const contentType = "image/png";
 
@@ -14,27 +15,13 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(150deg,#0b1830,#060606 78%)",
-          color: "#fff",
+          background: "#060606",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 300,
-            height: 300,
-            borderRadius: 72,
-            background: "linear-gradient(140deg,#33a8ff,#0091ff 60%,#0060c0)",
-            boxShadow: "0 20px 60px rgba(0,145,255,.5)",
-            fontSize: 150,
-            fontWeight: 800,
-            letterSpacing: -6,
-          }}
-        >
-          TV
-        </div>
+        <svg width={307} height={307} viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="4.5" width="18" height="15" rx="4.5" stroke="#f0f0f2" strokeWidth="2" />
+          <circle cx="12" cy="12" r="2.4" fill="#f0f0f2" />
+        </svg>
       </div>
     ),
     { ...size },

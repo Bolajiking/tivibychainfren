@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       config={{
         appearance: {
           theme: "dark",
-          accentColor: "#0091FF",
+          accentColor: "#40ACFF",
           logo: undefined,
           walletChainType: "ethereum-only",
         },

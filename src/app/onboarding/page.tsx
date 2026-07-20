@@ -12,6 +12,7 @@ import { config } from "@/lib/config";
 import { provisionCreatorProfile, redeemInvite, uploadChannelArt, checkCreatorAccess, getMyCreatorProfile } from "@/lib/profile-client";
 import { slugifyUsername } from "@/lib/profile";
 import { buildAuthHref } from "@/lib/auth/redirect";
+import { shareLink } from "@/lib/share";
 import { useHydrated } from "@/lib/store/useHydrated";
 import { MOCK_MODE } from "@/lib/config";
 import { cn } from "@/lib/cn";
@@ -182,7 +183,7 @@ function OnboardingFlow() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-4 py-10">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[340px]"
-        style={{ background: "radial-gradient(95% 100% at 30% 0%,rgba(0,145,255,.18),transparent 60%)" }} />
+        style={{ background: "radial-gradient(95% 100% at 30% 0%,rgba(64,172,255,.16),transparent 60%)" }} />
 
       <div className="relative w-full max-w-[420px]">
         {step === "invite" && (
@@ -190,12 +191,13 @@ function OnboardingFlow() {
             <Logo size={44} href="" />
             <div className="mt-5 inline-flex rounded-full border border-blue-light/45 bg-blue/[0.08] px-3 py-1.5 text-[9px] font-bold tracking-[0.14em] text-blue-light">INVITE ONLY</div>
             <h1 className="font-display mt-4 text-[30px] font-semibold leading-[1.05] tracking-[-0.02em]">Claim your channel.</h1>
-            <p className="mt-3 text-[13px] leading-relaxed text-muted">Enter your invite code to start building the platform the algorithm wouldn't let you.</p>
+            <p className="mt-3 text-[13px] leading-relaxed text-muted">Enter your invite code to start building the platform the algorithm wouldn&apos;t let you.</p>
+            <p className="outcome mt-2 text-[13px] text-muted">a link you own, not one you rent</p>
             <input
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="ADA·2K"
-              className="mt-5 h-[52px] w-full rounded-[14px] border-[1.5px] border-blue bg-white/[0.06] text-center text-base font-semibold tracking-[0.28em] text-white shadow-[0_0_0_3px_rgba(0,145,255,.12)] placeholder:text-faint focus:outline-none"
+              className="mt-5 h-[52px] w-full rounded-[14px] border-[1.5px] border-blue bg-white/[0.06] text-center text-base font-semibold tracking-[0.28em] text-white shadow-[0_0_0_3px_rgba(64,172,255,.12)] placeholder:text-faint focus:outline-none"
             />
             <Button size="lg" className="mt-3 w-full" onClick={continueToProfile} disabled={saving}>
               {saving ? "Checking…" : "Continue"}
@@ -249,8 +251,8 @@ function OnboardingFlow() {
             </div>
             <div className="mt-1.5 mb-2 text-[10.5px] text-faint">Your link</div>
             <div className="flex h-[46px] items-center gap-0.5 rounded-[13px] border border-white/12 bg-white/[0.06] px-3.5">
-              <span className="text-[13px] text-faint">tvin.bio/</span>
-              <span className="text-[13px] font-semibold text-white">{username}</span>
+              <span className="receipt text-[13px] text-faint">tvin.bio/</span>
+              <span className="receipt text-[13px] text-white">{username}</span>
               <span className="ml-auto inline-flex items-center gap-1 text-[11px] font-semibold text-online"><Check className="size-3" /> available</span>
             </div>
             <Button size="lg" className="mt-5 w-full" onClick={createChannel} disabled={saving}>
@@ -266,10 +268,19 @@ function OnboardingFlow() {
             <h1 className="font-display mt-5 text-[23px] font-semibold leading-[1.12] tracking-[-0.02em]">Your channel<br />is live.</h1>
             <p className="mt-2.5 text-[12.5px] leading-relaxed text-muted">One link. Drop it in your bio — this is your home now.</p>
             <div className="mt-5 flex h-[50px] w-full items-center gap-2 rounded-[14px] border border-white/[0.14] bg-white/[0.06] px-4">
-              <span className="text-[13.5px] font-semibold text-blue-light">tvin.bio/{profileUsername}</span>
+              <span className="receipt text-[13.5px] text-beam-soft">tvin.bio/{profileUsername}</span>
               <button onClick={() => { navigator.clipboard?.writeText(`tvin.bio/${profileUsername}`); toast.success("Link copied"); }} className="ml-auto inline-flex items-center gap-1.5 text-[11px] font-semibold text-ink-dim"><Copy className="size-3" /> Copy</button>
             </div>
-            <Button size="lg" className="mt-3 w-full" onClick={() => setStep("firstrun")}>Share my link</Button>
+            <Button
+              size="lg"
+              className="mt-3 w-full"
+              onClick={async () => {
+                await shareLink({ url: `https://tvin.bio/${profileUsername}`, text: `My channel — tvin.bio/${profileUsername}` });
+                setStep("firstrun");
+              }}
+            >
+              Share my link
+            </Button>
           </div>
         )}
 
@@ -277,7 +288,7 @@ function OnboardingFlow() {
           <div className="animate-[tvRise_.3s_ease]">
             <h1 className="font-display text-[21px] font-semibold tracking-[-0.01em]">Let's set you up</h1>
             <div className="mt-1 text-[11.5px] text-muted">3 steps to your first dollar</div>
-            <div className="mt-2.5 h-[5px] overflow-hidden rounded-full bg-white/10"><div className="h-full w-1/3 golive-gradient" /></div>
+            <div className="mt-2.5 h-[5px] overflow-hidden rounded-full bg-white/10"><div className="h-full w-1/3 rounded-full bg-beam" /></div>
             <div className="mt-5 flex flex-col gap-2.5">
               <Task done icon={<Check className="size-4" />} title="Create your channel" sub="Done" tone="green" />
               <Task active icon={<Play className="size-[15px]" />} title="Go live or upload a video" sub="Give fans something to watch" onClick={() => router.push("/dashboard/broadcast")} />
@@ -296,7 +307,7 @@ function OnboardingFallback() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-4 py-10">
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-[340px]"
-        style={{ background: "radial-gradient(95% 100% at 30% 0%,rgba(0,145,255,.18),transparent 60%)" }}
+        style={{ background: "radial-gradient(95% 100% at 30% 0%,rgba(64,172,255,.16),transparent 60%)" }}
       />
       <div className="relative w-full max-w-[420px]">
         <Logo size={44} href="" />
@@ -349,7 +360,7 @@ function Task({ icon, title, sub, done, active, tone, onClick }: { icon: React.R
       disabled={done}
       className={cn(
         "flex items-center gap-3 rounded-[15px] border bg-[#0f0f12] p-3.5 text-left transition",
-        done ? "border-online/30" : active ? "border-[1.5px] border-blue shadow-[0_8px_24px_rgba(0,145,255,.16)]" : "border-white/[0.06] opacity-60 hover:opacity-100",
+        done ? "border-online/30" : active ? "border-[1.5px] border-blue " : "border-white/[0.06] opacity-60 hover:opacity-100",
       )}
     >
       <span className={cn("flex size-8 shrink-0 items-center justify-center rounded-full",

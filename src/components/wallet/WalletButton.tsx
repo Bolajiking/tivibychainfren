@@ -39,7 +39,7 @@ export function WalletButton({ variant }: { variant: "rail" | "row" | "pill" }) 
     return (
       <button onClick={onClick} aria-label="Wallet" className="flex items-center gap-2 rounded-full border border-blue/30 bg-blue/[0.12] py-1 pl-1 pr-3">
         <span className="flex size-[26px] items-center justify-center rounded-full bg-blue/25 text-blue-light"><Wallet className="size-[14px]" /></span>
-        <span className="text-[12.5px] font-semibold text-white">{hydrated && user ? `$${user.balanceUsd.toFixed(2)}` : "Wallet"}</span>
+        <span className={`text-[12.5px] font-semibold text-white ${hydrated && user ? "receipt" : ""}`}>{hydrated && user ? `$${user.balanceUsd.toFixed(2)}` : "Wallet"}</span>
       </button>
     );
   }

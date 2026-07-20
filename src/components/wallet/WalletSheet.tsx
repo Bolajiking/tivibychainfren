@@ -169,7 +169,7 @@ export function WalletSheet() {
                   <button
                     key={p}
                     onClick={() => setAddAmount(p)}
-                    className={`h-[54px] rounded-[14px] text-[15px] font-bold transition ${addAmount === p ? "border-2 border-blue bg-blue/[0.14] text-white" : "border border-white/12 bg-white/[0.04] text-ink-dim hover:text-white"}`}
+                    className={`h-[54px] receipt rounded-[14px] text-[15px] transition ${addAmount === p ? "border-2 border-beam bg-beam/[0.08] text-white" : "border border-white/12 bg-white/[0.04] text-ink-dim hover:text-white"}`}
                   >
                     ${p}
                   </button>
@@ -207,7 +207,7 @@ export function WalletSheet() {
                     value={cashAmount}
                     placeholder={formatAmt(balance)}
                     onChange={(e) => setCashAmount(e.target.value.replace(/[^\d.]/g, ""))}
-                    className="h-[50px] flex-1 bg-transparent font-display text-[22px] font-bold text-white placeholder:text-[#55555c] focus:outline-none"
+                    className="h-[50px] flex-1 bg-transparent receipt text-[20px] text-white placeholder:text-[#55555c] focus:outline-none"
                   />
                   <button onClick={() => setCashAmount(balance.toFixed(2))} className="text-[11px] font-semibold text-blue-light">MAX</button>
                 </div>
@@ -237,9 +237,9 @@ export function WalletSheet() {
             </div>
           ) : (
             <div>
-              <div className="font-display text-[56px] font-bold leading-none tracking-[-0.04em]">
+              <div className="receipt text-[52px] leading-none text-ink-soft">
                 ${whole}
-                <span className="text-[30px] text-[#55555c]">.{cents}</span>
+                <span className="text-[28px] text-[#55555c]">.{cents}</span>
                 <button onClick={onRefresh} aria-label="Refresh balance" className="ml-3 inline-flex size-7 -translate-y-2 items-center justify-center rounded-full bg-white/[0.06] text-muted align-middle hover:text-white">
                   <RefreshCw className={`size-[14px] ${refreshing ? "animate-spin" : ""}`} />
                 </button>
@@ -258,11 +258,11 @@ export function WalletSheet() {
               <div className="mt-4 flex gap-7 border-b border-white/[0.07] pb-4">
                 <div>
                   <div className="text-[10px] uppercase tracking-[0.06em] text-faint">In · 30d</div>
-                  <div className="mt-1 font-display text-[17px] font-bold text-online">+${formatAmt(inflow)}</div>
+                  <div className="receipt mt-1 text-[17px] text-earn">+${formatAmt(inflow)}</div>
                 </div>
                 <div>
                   <div className="text-[10px] uppercase tracking-[0.06em] text-faint">Out · 30d</div>
-                  <div className="mt-1 font-display text-[17px] font-bold text-[#cfcfd4]">−${formatAmt(outflow)}</div>
+                  <div className="receipt mt-1 text-[17px] text-[#cfcfd4]">−${formatAmt(outflow)}</div>
                 </div>
               </div>
 
@@ -303,7 +303,7 @@ function LedgerRow({ tx }: { tx: WalletTx }) {
         <div className="truncate text-[13px] font-medium text-ink-soft">{tx.label}</div>
         <div className="mt-0.5 truncate text-[10.5px] text-faint">{relativeTime(tx.createdAt)} · {tx.sub}</div>
       </div>
-      <div className={`font-display text-[14px] font-semibold ${inbound ? "text-online" : "text-[#cfcfd4]"}`}>
+      <div className={`receipt text-[14px] ${inbound ? "text-earn" : "text-[#cfcfd4]"}`}>
         {inbound ? "+" : "−"}${formatAmt(Math.abs(tx.amountUsd))}
       </div>
     </div>

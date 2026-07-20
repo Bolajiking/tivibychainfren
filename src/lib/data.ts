@@ -20,6 +20,24 @@ import type {
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
 type FeaturedProductJoinRow = FeaturedProductRow & { product?: ProductRow | null };
 
+/**
+ * Short-TTL memo + in-flight dedupe for hot list reads (landing, explore).
+ * These surfaces tolerate seconds of staleness — live status is re-checked
+ * client-side — while each saved round-trip is a full Supabase RTT.
+ */
+const HOT_TTL_MS = 10_000;
+const hotCache = new Map<string, { at: number; value: Promise<unknown> }>();
+function memoHot<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+  const hit = hotCache.get(key);
+  if (hit && Date.now() - hit.at < HOT_TTL_MS) return hit.value as Promise<T>;
+  const value = fetcher().catch((error) => {
+    hotCache.delete(key); // never cache a failure
+    throw error;
+  });
+  hotCache.set(key, { at: Date.now(), value });
+  return value;
+}
+
 // ── Creators ───────────────────────────────────────────────────────
 export async function getCreatorByUsername(username: string): Promise<Creator | null> {
   const db = getSupabase();
@@ -40,8 +58,10 @@ export async function getCreatorById(creatorId: string): Promise<Creator | null>
 export async function listCreators(): Promise<Creator[]> {
   const db = getSupabase();
   if (db) {
-    const { data } = await db.from("creators").select("*").order("subscriber_count", { ascending: false });
-    return (data ?? []).map(rowToCreator);
+    return memoHot("creators:list", async () => {
+      const { data } = await db.from("creators").select("*").order("subscriber_count", { ascending: false });
+      return (data ?? []).map(rowToCreator);
+    });
   }
   return clone(seed.creators);
 }
@@ -50,8 +70,10 @@ export async function listCreators(): Promise<Creator[]> {
 export async function getLiveStreams(): Promise<Stream[]> {
   const db = getSupabase();
   if (db) {
-    const { data } = await db.from("streams").select("*").eq("is_active", true).order("viewer_count", { ascending: false });
-    return (data ?? []).map(rowToStream);
+    return memoHot("streams:live", async () => {
+      const { data } = await db.from("streams").select("*").eq("is_active", true).order("viewer_count", { ascending: false });
+      return (data ?? []).map(rowToStream);
+    });
   }
   return clone(seed.streams.filter((s) => s.isActive));
 }

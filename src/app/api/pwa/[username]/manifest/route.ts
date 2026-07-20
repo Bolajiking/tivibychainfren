@@ -22,7 +22,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ username: stri
     display: "standalone",
     orientation: "portrait",
     background_color: "#060606",
-    theme_color: creator.avatarColor ?? "#0091ff",
+    theme_color: creator.avatarColor ?? "#40acff",
     icons: [
       { src: `${iconBase}?size=192`, sizes: "192x192", type: "image/png", purpose: "any" },
       { src: `${iconBase}?size=512`, sizes: "512x512", type: "image/png", purpose: "any" },

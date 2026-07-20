@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { LiveFavicon } from "@/components/brand/LiveFavicon";
 import { toast } from "sonner";
 import { ChevronLeft, Play, Heart, ShoppingBag } from "lucide-react";
 import { LivePill, ViewerPill } from "@/components/ui/Badges";
@@ -205,8 +206,9 @@ export function LiveWatch({
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas md:flex-row">
+      <LiveFavicon live={liveStream.isActive} />
       <div className="relative flex-1 overflow-hidden" style={{ background: "linear-gradient(150deg,#1d1f24,#0a0a0c 78%)" }}>
-        <div className="absolute inset-0" style={{ background: "radial-gradient(55% 45% at 50% 36%,rgba(0,145,255,.14),transparent 70%)" }} />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(55% 45% at 50% 36%,rgba(64,172,255,.14),transparent 70%)" }} />
 
         <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-2 bg-gradient-to-b from-black/55 to-transparent p-4">
           <div className="flex min-w-0 items-center gap-2.5">
@@ -252,7 +254,7 @@ export function LiveWatch({
         {alert && <DonationAlert amount={alert.amount} message={alert.message} creatorName={creator.displayName} onDone={() => setAlert(null)} />}
 
         {featuredProduct && !locked && (
-          <div className="absolute inset-x-4 top-[26%] z-20 animate-[tvDrop_.5s_cubic-bezier(.22,1,.36,1)] rounded-2xl border-[1.5px] border-blue bg-[#08080a]/90 p-3.5 backdrop-blur-md shadow-[0_16px_50px_rgba(0,145,255,.32)] md:left-auto md:right-4 md:w-[280px]">
+          <div className="absolute inset-x-4 top-[26%] z-20 animate-[tvDrop_.5s_cubic-bezier(.22,1,.36,1)] rounded-2xl border-[1.5px] border-blue bg-[#08080a]/90 p-3.5 backdrop-blur-md  md:left-auto md:right-4 md:w-[280px]">
             <div className="mb-2.5 inline-flex items-center gap-1.5 rounded-full bg-blue/[0.18] px-2.5 py-1">
               <span className="size-[5px] rounded-full bg-blue-light" />
               <span className="text-[8.5px] font-bold tracking-[0.08em] text-blue-soft">FEATURED NOW</span>
@@ -266,7 +268,7 @@ export function LiveWatch({
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-[14px] font-semibold">{featuredProduct.product.name}</div>
-                <div className="mt-1 font-display text-[19px] font-bold">${featuredProduct.product.price}</div>
+                <div className="receipt mt-1 text-[18px] text-ink-soft">${featuredProduct.product.price}</div>
               </div>
             </div>
             <button onClick={() => setBuy(featuredProduct.product)} className="mt-3 h-[46px] w-full rounded-[13px] bg-blue text-[13.5px] font-bold text-white">
@@ -282,12 +284,12 @@ export function LiveWatch({
                 <button
                   key={product.id}
                   onClick={() => setBuy(product)}
-                  className="flex min-w-[168px] items-center gap-2 rounded-[14px] border border-blue/35 bg-[#08080a]/82 p-2 text-left shadow-[0_12px_34px_rgba(0,145,255,.22)] backdrop-blur-md"
+                  className="flex min-w-[168px] items-center gap-2 rounded-[14px] border border-blue/35 bg-[#08080a]/82 p-2 text-left  backdrop-blur-md"
                 >
                   <Tile seed={product.imageColor} src={product.imageUrl} size={38} radius={10} />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[11.5px] font-semibold text-white">{product.name}</span>
-                    <span className="mt-0.5 block font-display text-[13px] font-bold text-blue-soft">${product.price}</span>
+                    <span className="mt-0.5 block receipt text-[13px] text-beam-soft">${product.price}</span>
                   </span>
                   <span className="rounded-full bg-blue px-2 py-1 text-[9px] font-bold text-white">Buy</span>
                 </button>
@@ -326,7 +328,7 @@ export function LiveWatch({
                   <Tile seed={product.imageColor} src={product.imageUrl} size={42} radius={10} />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[12px] font-semibold text-ink-soft">{product.name}</span>
-                    <span className="mt-0.5 block font-display text-[13px] font-bold text-blue-soft">${product.price}</span>
+                    <span className="mt-0.5 block receipt text-[13px] text-beam-soft">${product.price}</span>
                   </span>
                   <span className="rounded-full bg-blue px-2.5 py-1 text-[10px] font-bold text-white transition-colors group-hover:bg-blue-light">
                     {product.status === "active" ? "Buy" : "Sold"}
@@ -378,7 +380,7 @@ export function LiveWatch({
 function ChatRow({ m, overlay }: { m: ChatMessage; overlay?: boolean }) {
   if (m.kind === "donation") {
     return (
-      <div className="flex items-center gap-2 self-start rounded-xl border border-blue-light/40 bg-gradient-to-r from-blue/20 to-[#40ffcc]/[0.08] px-2.5 py-2 animate-[tvPop_.4s_ease_both]">
+      <div className="flex items-center gap-2 self-start rounded-xl border border-blue-light/40 bg-beam/[0.12] px-2.5 py-2 animate-[tvPop_.4s_ease_both]">
         <Heart className="size-[14px] text-blue-light" />
         <span className="text-[11.5px] font-bold text-blue-soft">{m.sender} tipped ${m.amount}</span>
         {m.message && <span className="text-[11.5px] text-ink-dim">{m.message}</span>}
@@ -388,7 +390,7 @@ function ChatRow({ m, overlay }: { m: ChatMessage; overlay?: boolean }) {
   return (
     <div className="flex items-baseline gap-1.5">
       <span className="shrink-0 text-[11.5px] font-semibold" style={{ color: m.nameColor }}>{m.sender}</span>
-      {m.role === "host" && <Badge color="#0091ff">HOST</Badge>}
+      {m.role === "host" && <Badge color="#40acff">HOST</Badge>}
       {m.role === "mod" && <Badge color="#c8eb6d">MOD</Badge>}
       <span className={cn("text-[12px]", overlay ? "text-[#e2e2e6] [text-shadow:0_1px_3px_rgba(0,0,0,.6)]" : "text-[#d6d6db]")}>{m.message}</span>
     </div>

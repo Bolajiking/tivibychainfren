@@ -16,6 +16,12 @@ export async function generateMetadata({
   const iconBase = `/api/pwa/${creator.username}/icon`;
   return {
     title: `${creator.displayName} · TVinBio`,
+    description: creator.bio ?? `${creator.displayName} — live, video and store, on a link they own.`,
+    openGraph: {
+      title: `${creator.displayName} · tvin.bio/${creator.username}`,
+      description: creator.bio ?? `Watch ${creator.displayName} live, shop and subscribe — one link.`,
+    },
+    twitter: { card: "summary_large_image" },
     manifest: `/api/pwa/${creator.username}/manifest`,
     appleWebApp: {
       capable: true,

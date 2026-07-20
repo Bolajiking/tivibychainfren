@@ -152,7 +152,7 @@ export function ProfileSettings() {
         <div className="mx-auto max-w-[520px] px-4 py-7">
           <div className="mb-5 flex items-center gap-3">
             <label className="relative cursor-pointer" aria-label="Upload channel art">
-              <Avatar seed={avatarColor} src={avatarUrl} size={56} ring="#0091FF" />
+              <Avatar seed={avatarColor} src={avatarUrl} size={56} ring="#40ACFF" />
               <span className="absolute -bottom-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full border-2 border-canvas bg-blue text-white">
                 {uploading ? <Loader2 className="size-2.5 animate-spin" /> : <ImagePlus className="size-2.5" />}
               </span>
@@ -179,7 +179,7 @@ export function ProfileSettings() {
               <div className="mb-2 text-[10.5px] text-faint">Channel color</div>
               <div className="flex gap-2">
                 {SWATCHES.map((c) => (
-                  <button key={c} onClick={() => setAvatarColor(c)} aria-label={`Color ${c}`} className="flex size-9 items-center justify-center rounded-full border-2" style={{ background: c, borderColor: avatarColor === c ? "#0091FF" : "transparent" }}>
+                  <button key={c} onClick={() => setAvatarColor(c)} aria-label={`Color ${c}`} className="flex size-9 items-center justify-center rounded-full border-2" style={{ background: c, borderColor: avatarColor === c ? "#40ACFF" : "transparent" }}>
                     {avatarColor === c && <Check className="size-4 text-white" />}
                   </button>
                 ))}

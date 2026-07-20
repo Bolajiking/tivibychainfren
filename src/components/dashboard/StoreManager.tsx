@@ -126,7 +126,7 @@ export function StoreManager({ initial, creator, stream }: { initial: Product[];
             <div className="min-w-0 flex-1">
               <div className="truncate text-[13px] font-semibold">{p.name}</div>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-faint">
-                <span className="font-display font-bold text-white">${p.price}</span>
+                <span className="receipt text-white">${p.price}</span>
                 <span>· {p.inventory} in stock</span>
                 {p.subsOnly && <span className="rounded bg-blue/[0.18] px-1.5 py-px text-[8px] font-bold text-blue-soft">SUBS</span>}
                 <StatusBadge status={p.status} />
@@ -180,7 +180,7 @@ export function StoreManager({ initial, creator, stream }: { initial: Product[];
           </select>
           <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} placeholder="Description" className="min-h-24 resize-none rounded-[13px] border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none sm:col-span-2" />
           <label className="flex h-12 items-center gap-2.5 rounded-[13px] border border-white/12 bg-white/[0.04] px-4 text-[12px] text-ink-dim sm:col-span-2">
-            <input type="checkbox" checked={form.subsOnly} onChange={(e) => set({ subsOnly: e.target.checked })} className="size-4 accent-[#0091ff]" />
+            <input type="checkbox" checked={form.subsOnly} onChange={(e) => set({ subsOnly: e.target.checked })} className="size-4 accent-[#40acff]" />
             Subscribers only
           </label>
         </div>

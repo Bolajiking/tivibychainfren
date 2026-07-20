@@ -82,7 +82,7 @@ export async function sendChatMessage({
       message: text,
       kind: "message",
       role,
-      name_color: role === "host" ? "#0091ff" : "#9fd3ff",
+      name_color: role === "host" ? "#40acff" : "#9fd3ff",
     })
     .select("*")
     .single();

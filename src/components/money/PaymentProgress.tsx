@@ -6,7 +6,7 @@ export function PaymentProgress({ phase, amountUsd, label }: { phase: "preparing
   if (phase === "preparing") {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-10 text-center">
-        <div className="size-12 rounded-full border-[3px] border-white/12 border-t-blue animate-[tvSpin_1s_linear_infinite]" />
+        <div className="size-12 rounded-full border-[3px] border-white/12 border-t-beam animate-[tvSpin_1s_linear_infinite]" />
         <div className="text-[13px] font-semibold text-ink-soft">Preparing your {label}…</div>
         <div className="text-[11px] text-faint">Just a moment</div>
       </div>
@@ -14,19 +14,18 @@ export function PaymentProgress({ phase, amountUsd, label }: { phase: "preparing
   }
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-10 text-center">
-      <div className="flex size-[54px] items-center justify-center rounded-full border-[1.5px] border-blue bg-blue/[0.16] text-blue-light animate-[tvBob_1.6s_ease-in-out_infinite]">
+      <div className="flex size-[54px] items-center justify-center rounded-full border-[1.5px] border-beam bg-beam/[0.16] text-beam-soft animate-[tvBob_1.6s_ease-in-out_infinite]">
         <HandCoins className="size-6" />
       </div>
-      <div className="text-[13px] font-semibold text-ink-soft">Confirming ${amountUsd}…</div>
-      <div className="flex gap-1.5">
-        <Dot /> <Dot delay=".15s" /> <Dot delay=".3s" />
+      <div className="receipt text-[13px] text-ink-soft">
+        Confirming your ${amountUsd} · balance not yet charged
       </div>
+      <div className="h-[3px] w-40 overflow-hidden rounded-full bg-white/10">
+        <span className="block h-full w-3/5 rounded-full bg-beam animate-[tvGlow_1.4s_ease-in-out_infinite]" />
+      </div>
+      <div className="text-[11px] text-faint">Usually under 5 seconds. Don&apos;t close this sheet.</div>
     </div>
   );
-}
-
-function Dot({ delay = "0s" }: { delay?: string }) {
-  return <span className="size-[7px] rounded-full bg-blue animate-[tvBob_1s_infinite]" style={{ animationDelay: delay }} />;
 }
 
 export function Confetti() {
@@ -60,13 +59,13 @@ export function Confetti() {
 }
 
 export function SuccessBurst({ title, subtitle, tone = "blue" }: { title: string; subtitle?: string; tone?: "blue" | "green" }) {
-  const ring = tone === "green" ? "bg-online shadow-[0_14px_40px_rgba(34,197,94,.45)]" : "cta-gradient shadow-[0_14px_40px_rgba(0,145,255,.45)]";
+  const ring = tone === "green" ? "bg-earn shadow-[0_14px_40px_rgba(34,197,94,.35)]" : "bg-beam shadow-[0_14px_40px_rgba(64,172,255,.35)]";
   return (
     <div className="flex flex-col items-center justify-center gap-3.5 py-8 text-center animate-[tvPop_.5s_cubic-bezier(.22,1,.36,1)_both]">
       <div className={`flex size-16 items-center justify-center rounded-full text-white ${ring}`}>
         <Check className="size-8" />
       </div>
-      <div className="font-display text-[20px] font-bold">{title}</div>
+      <div className="font-display text-[20px] font-semibold">{title}</div>
       {subtitle && <div className="text-[11.5px] text-muted">{subtitle}</div>}
     </div>
   );

@@ -27,14 +27,20 @@
   --color-faint: #7a7a82;
   --color-ghost: #555555;
 
-  /* Accent — electric blue */
-  --color-blue: #0091ff;
-  --color-blue-light: #40acff;
+  /* Accent — the beam ramp (single brand-action color, Chainfren lineage) */
+  --color-beam: #40acff;
+  --color-beam-deep: #1b84e8;
+  --color-beam-soft: #9fd3ff;
+  /* Legacy aliases retuned onto the beam ramp — existing classes keep working */
+  --color-blue: #40acff;
+  --color-blue-light: #9fd3ff;
   --color-blue-soft: #9fd3ff;
 
-  /* Status */
-  --color-live: #ef4444;
-  --color-online: #22c55e;
+  /* Status — hard-reserved semantics */
+  --color-live: #ef4444; /* LIVE only — never errors, never emphasis */
+  --color-earn: #22c55e; /* money received only */
+  --color-online: #22c55e; /* legacy alias; presence dots */
+  --color-error: #dc2626; /* errors — never live-red, never pulsing */
 
   /* Chat name pastels */
   --color-cyan: #5acdff;
@@ -49,6 +55,8 @@
   /* Fonts (wired by next/font) */
   --font-display: var(--font-funnel), "Funnel Display", system-ui, sans-serif;
   --font-body: var(--font-host), "Host Grotesk", "Inter", system-ui, sans-serif;
+  /* Receipt layer — every numeral that represents value */
+  --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, "SF Mono", monospace;
 
   /* Motion */
   --ease-expo: cubic-bezier(0.22, 1, 0.36, 1);
@@ -175,7 +183,60 @@ body {
 
 /* Utility shorthands used across the app */
 .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
-.cta-gradient { background-image: linear-gradient(120deg, #0091ff, #40ffcc); }
-.golive-gradient { background-image: linear-gradient(100deg, #0091ff, #22c55e); }
-.glow-blue { box-shadow: 0 8px 24px rgba(0, 145, 255, 0.4); }
+.cta-gradient { background-image: linear-gradient(120deg, #40acff, #40ffcc); }
+.golive-gradient { background-image: linear-gradient(100deg, #40acff, #22c55e); }
+.glow-blue { box-shadow: 0 8px 24px rgba(64, 172, 255, 0.35); }
 .confetti { position: absolute; border-radius: 1px; }
+
+/* ============================================================
+   "The Stream Is the Stage" v2 — designer package additions
+   ============================================================ */
+
+/* Receipt layer — mandatory on every numeral representing value */
+.receipt {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Georgia-italic outcome line — max one per screen */
+.outcome {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+}
+
+/* Logo state machine (Package 1) — data-live drives CSS vars, no redraw.
+   Vars inherit into <use>/<svg> subtrees. */
+[data-live="on"] {
+  --live-fill: #ef4444;
+  --live-glow: drop-shadow(0 0 5px rgba(239, 68, 68, 0.65));
+  --live-anim: tvLive 1.5s var(--ease-expo) infinite;
+}
+[data-live="off"] {
+  --live-fill: currentColor;
+  --live-glow: none;
+  --live-anim: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-live="on"] { --live-anim: none; }
+}
+
+/* Signal motif kit — the only permitted decoration (Package 2) */
+.scanline {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.03) 0 1px,
+    transparent 1px 4px
+  );
+}
+.onair-glow { box-shadow: 0 0 24px rgba(239, 68, 68, 0.18); }
+.beam-glow { box-shadow: 0 0 24px rgba(64, 172, 255, 0.18); }
+
+@keyframes tvMeter {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+/* Go-live beam sweep (F5 sequence, 250–650ms window) */
+@keyframes tvSweep {
+  0% { transform: translateY(100%); opacity: 0.5; }
+  100% { transform: translateY(-100%); opacity: 0; }
+}

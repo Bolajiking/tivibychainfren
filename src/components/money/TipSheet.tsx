@@ -69,9 +69,11 @@ export function TipSheet({
               <Tile seed={avatarSeed} size={36} radius={11} />
               <div>
                 <div className="text-[13px] font-semibold">Send {creatorName} a tip</div>
-                <div className="mt-0.5 text-[10px] text-faint">100% goes to the creator</div>
+                <div className="mt-0.5 text-[11px] text-muted">
+                  goes directly to {creatorName} · <span className="receipt">0%</span> platform cut
+                </div>
               </div>
-              <span className="ml-auto flex size-9 items-center justify-center rounded-full bg-blue/[0.16] text-blue-light">
+              <span className="ml-auto flex size-9 items-center justify-center rounded-full bg-beam/[0.16] text-beam-soft">
                 <HandCoins className="size-4" />
               </span>
             </div>
@@ -82,10 +84,10 @@ export function TipSheet({
                   key={p}
                   onClick={() => setAmount(p)}
                   className={cn(
-                    "rounded-[13px] py-3 text-center text-sm font-semibold transition",
+                    "receipt h-12 rounded-[14px] text-center text-sm transition duration-150 ease-[cubic-bezier(.22,1,.36,1)]",
                     amount === p
-                      ? "border-[1.5px] border-blue bg-blue/[0.18] text-white shadow-[0_6px_18px_rgba(0,145,255,.28)]"
-                      : "border border-white/12 bg-white/[0.06] text-ink-dim",
+                      ? "border-2 border-beam bg-beam/[0.08] text-white"
+                      : "border border-white/12 bg-transparent text-ink-dim hover:border-white/25",
                   )}
                 >
                   ${p}
@@ -97,21 +99,30 @@ export function TipSheet({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Add a message…"
-              className="mt-3 h-[46px] w-full rounded-full border border-white/12 bg-white/[0.06] px-4 text-xs text-white placeholder:text-faint focus:border-blue focus:outline-none"
+              className="mt-3 h-[46px] w-full rounded-full border border-white/12 bg-white/[0.04] px-4 text-xs text-white placeholder:text-faint focus:border-beam focus:outline-none"
             />
 
+            <div className="mt-3 flex items-center gap-3 rounded-[14px] border border-white/10 px-3.5 py-2.5 opacity-55">
+              <span className="text-[12.5px] font-medium text-muted">Mobile money</span>
+              <span className="ml-auto text-[9.5px] font-semibold tracking-[0.12em] text-faint">SOON</span>
+            </div>
+
             {insufficient ? (
-              <Button size="lg" className="mt-3 w-full" onClick={() => setFundOpen(true)}>Add money & send ${amount}</Button>
+              <Button size="lg" className="mt-3 w-full" onClick={() => setFundOpen(true)}>
+                Add money & send&nbsp;<span className="receipt">${amount}</span>
+              </Button>
             ) : (
-              <Button size="lg" className="mt-3 w-full" onClick={send}>Send ${amount}</Button>
+              <Button size="lg" className="mt-3 w-full" onClick={send}>
+                Send&nbsp;<span className="receipt">${amount}</span>
+              </Button>
             )}
             {error && !insufficient && (
-              <div className="mt-2 rounded-[11px] border border-red-400/20 bg-red-400/[0.08] px-3 py-2 text-center text-[10.5px] text-red-100">
-                {error}
+              <div className="mt-2 rounded-[11px] border border-error/25 bg-error/[0.08] px-3 py-2.5 text-center text-[11px] leading-relaxed text-ink-dim">
+                That didn&apos;t go through — your balance wasn&apos;t charged. Try again, or come back in a moment.
               </div>
             )}
-            <div className="mt-2.5 text-center text-[9.5px] text-ghost">
-              Balance ${user?.balanceUsd.toFixed(2) ?? "0.00"} · Apple Pay · Card
+            <div className="receipt mt-2.5 text-center text-[9.5px] text-ghost">
+              Balance ${user?.balanceUsd.toFixed(2) ?? "0.00"} · USDC
             </div>
           </>
         )}

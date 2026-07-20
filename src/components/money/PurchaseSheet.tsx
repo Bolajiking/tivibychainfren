@@ -61,7 +61,8 @@ export function PurchaseSheet({
               <Tile seed={product.imageColor} src={product.imageUrl} size={60} radius={13} />
               <div className="flex-1">
                 <div className="text-[14px] font-semibold">{product.name}</div>
-                <div className="mt-1 font-display text-[20px] font-bold">${product.price}</div>
+                <div className="receipt mt-1 text-[19px] text-ink-soft">${product.price}</div>
+                <div className="mt-0.5 text-[10.5px] text-muted">goes directly to the creator · <span className="receipt">0%</span> platform cut</div>
               </div>
             </div>
 
@@ -81,9 +82,9 @@ export function PurchaseSheet({
               </>
             ) : (
               <>
-                <Button size="lg" className="mt-4 w-full" onClick={buy}>Buy now · ${product.price}</Button>
+                <Button size="lg" className="mt-4 w-full" onClick={buy}>Buy now ·&nbsp;<span className="receipt">${product.price}</span></Button>
                 {error && (
-                  <div className="mt-2 rounded-[11px] border border-red-400/20 bg-red-400/[0.08] px-3 py-2 text-center text-[10.5px] text-red-100">
+                  <div className="mt-2 rounded-[11px] border border-error/25 bg-error/[0.08] px-3 py-2.5 text-center text-[11px] text-ink-dim">
                     {error}
                   </div>
                 )}
