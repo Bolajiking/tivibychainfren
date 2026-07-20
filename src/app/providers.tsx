@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth/PrivyProvider";
 import { CreatorHydrator } from "@/lib/auth/CreatorHydrator";
@@ -14,6 +14,16 @@ const WalletSheet = dynamic(
   () => import("@/components/wallet/WalletSheet").then((m) => m.WalletSheet),
   { ssr: false },
 );
+
+// Mount-gated so server and client first paint are byte-identical (null on
+// both) — `ssr:false` alone leaves a Suspense placeholder on the server side
+// that the client never renders, which trips hydration. The chunk still
+// fetches lazily, right after hydration.
+function DeferredWalletSheet() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
+  return ready ? <WalletSheet /> : null;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(
@@ -29,7 +39,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <CreatorHydrator />
         <ServiceWorkerRegistrar />
         {children}
-        <WalletSheet />
+        <DeferredWalletSheet />
       </AuthProvider>
       <Toaster
         theme="dark"
