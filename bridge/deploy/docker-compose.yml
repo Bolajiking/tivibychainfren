@@ -3,21 +3,36 @@
 # Everything else is loopback inside the shared network namespace.
 services:
   mediamtx:
-    image: bluenviron/mediamtx:1.19.2
+    # NOT the stock bluenviron/mediamtx image: that one is built FROM scratch
+    # and carries no shell, so the runOnReady/runOnNotReady curl hooks that
+    # drive the forwarder fail silently. See Dockerfile.mediamtx.
+    build:
+      context: .
+      dockerfile: Dockerfile.mediamtx
+    image: tvinbio/bridge-mediamtx:1.19.2
     restart: unless-stopped
     network_mode: host # raw TCP 443 ICE + loopback hooks to the agent
     volumes:
       - ../mediamtx.production.yml:/mediamtx.yml:ro
+    # Start order only. NOT `condition: service_healthy`: the agent's /healthz
+    # reports 503 until MediaMTX answers its API, so health-gating here would
+    # deadlock — each service waiting on the other, forever.
     depends_on:
-      agent:
-        condition: service_healthy
+      - agent
 
   agent:
-    image: node:20-alpine
+    # Built, not the stock node image: the forwarder shells out to ffmpeg, which
+    # node:20-alpine does not carry. Dockerfile.agent pins it.
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.agent
+    image: tvinbio/bridge-agent:1
     restart: unless-stopped
     network_mode: host
     working_dir: /opt/bridge
     command: ["node", "agent/index.mjs"]
+    # Agent code is mounted so it can be updated without a rebuild; ffmpeg comes
+    # from the image. The mount shadows the image's copy of agent/ — intended.
     volumes:
       - ../:/opt/bridge:ro
     environment:
@@ -28,13 +43,23 @@ services:
       MEDIAMTX_API: "http://127.0.0.1:9997"
       MEDIAMTX_RTSP_BASE: "rtsp://127.0.0.1:8554"
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8091/healthz"]
+      # Liveness only — did the process answer at all. Exits 0 on ANY HTTP
+      # response including 503, and 1 only if the connection fails. `wget` is
+      # wrong here: it exits non-zero on 503, and /healthz legitimately returns
+      # 503 whenever MediaMTX is not answering its API, which would mark a
+      # perfectly alive agent unhealthy. Readiness stays the app's business —
+      # it health-checks the agent before routing any broadcast to it.
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://127.0.0.1:8091/healthz',()=>process.exit(0)).on('error',()=>process.exit(1))",
+        ]
       interval: 10s
       timeout: 3s
       retries: 3
       start_period: 5s
-    # ffmpeg lives in the agent container image in production; for the pinned
-    # build install it via the Dockerfile below instead of node:20-alpine.
 
   caddy:
     image: caddy:2.10

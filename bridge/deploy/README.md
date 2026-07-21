@@ -9,7 +9,7 @@ Record the exact values used at deploy time:
 
 | Component | Version | Checksum / digest |
 |---|---|---|
-| MediaMTX | **1.19.2** (`bluenviron/mediamtx:1.19.2`) | record `docker image inspect` digest |
+| MediaMTX | **1.19.2** via `Dockerfile.mediamtx` (`bluenviron/mediamtx:1.19.2-ffmpeg` + curl) | record `docker image inspect` digest |
 | ffmpeg | 6.x via `Dockerfile.agent` (Alpine) | record `ffmpeg -version` first line |
 | Node | 20 LTS (`node:20-alpine`) | record digest |
 | Caddy | 2.10 | record digest |
@@ -47,12 +47,27 @@ TVINBIO_BRIDGE_CONTROL_SECRET=<openssl rand -hex 32>
 BRIDGE_PUBLIC_WHIP_BASE=https://bridge.<domain>:8443
 CLOUDFLARE_API_TOKEN=<dns-01 token>
 ENV
-docker compose build agent   # uses Dockerfile.agent (adds pinned ffmpeg)
+docker compose build          # agent (ffmpeg) and mediamtx (shell + curl)
 docker compose up -d
 ```
 
-Set the compose agent service to `build: { context: .., dockerfile: deploy/Dockerfile.agent }`
-for production instead of the stock `node:20-alpine` image.
+**Both images are built, neither is stock, and that is deliberate:**
+
+- `Dockerfile.agent` adds ffmpeg — the forwarder shells out to it, and
+  `node:20-alpine` has none.
+- `Dockerfile.mediamtx` is based on the `-ffmpeg` tag and adds curl. The stock
+  `bluenviron/mediamtx:1.19.2` image is built FROM scratch with no shell, so the
+  `runOnReady` / `runOnNotReady` hooks in `mediamtx.production.yml` fail with
+  "command not found" — **silently**. MediaMTX still accepts the WebRTC publish,
+  the agent never learns the path is ready, ffmpeg never spawns, and the
+  broadcast is forwarded nowhere. It looks like it is working.
+
+Verify after `up`, before pointing a browser at it:
+
+```sh
+docker compose exec mediamtx curl --version   # must succeed
+docker compose exec agent ffmpeg -version     # must succeed
+```
 
 ## Health / readiness
 
