@@ -16,3 +16,11 @@ tsconfig.tsbuildinfo
 *.png
 *.crt
 *.key
+.env*
+
+# Local-only: docs, design work, brand/identity assets, generated reports.
+# Production code is the only thing committed (see hardening plan D1).
+/docs/
+/Design work/
+/identity-assets/
+/reports/
