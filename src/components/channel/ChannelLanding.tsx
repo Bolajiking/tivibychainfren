@@ -18,6 +18,7 @@ import { PurchaseSheet } from "@/components/money/PurchaseSheet";
 import { UnlockGate } from "@/components/money/UnlockGate";
 import { DonationAlert } from "@/components/money/DonationAlert";
 import { InstallButton } from "@/components/pwa/InstallButton";
+import { SaveChannelRow } from "@/components/pwa/SaveChannelRow";
 import { useSession } from "@/lib/store/session";
 import { useAuthIntent } from "@/lib/auth/useAuthIntent";
 import { useHydrated } from "@/lib/store/useHydrated";
@@ -271,24 +272,30 @@ export function ChannelLanding({
             </div>
           </>
         ) : (
-          <div className="mt-4 flex gap-2">
-            <Button
-              variant={subscribed ? "secondary" : "accent"}
-              size="pill"
-              className="flex-1"
-              onClick={onFollow}
-            >
-              {subscribed ? "Following" : "Follow"}
-            </Button>
-            <Button
-              variant="secondary"
-              size="pill"
-              className="flex-1"
-              onClick={() => storeRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-            >
-              <StoreGlyph size={16} /> Store
-            </Button>
-          </div>
+          <>
+            <div className="mt-4 flex gap-2">
+              <Button
+                variant={subscribed ? "secondary" : "accent"}
+                size="pill"
+                className="flex-1"
+                onClick={onFollow}
+              >
+                {subscribed ? "Following" : "Follow"}
+              </Button>
+              <Button
+                variant="secondary"
+                size="pill"
+                className="flex-1"
+                onClick={() => storeRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              >
+                <StoreGlyph size={16} /> Store
+              </Button>
+            </div>
+            {/* The fan's half of the install affordance the owner already had.
+                Removes itself when install is impossible, so the action row
+                keeps its shape in an in-app webview. */}
+            <SaveChannelRow creatorName={creator.displayName} className="mt-2" />
+          </>
         )}
 
         {/* ── What's next: the one card that says when to come back.
@@ -347,9 +354,9 @@ export function ChannelLanding({
           )}
         </div>
 
-        {/* ── Replays ────────────────────────────────────────────── */}
+        {/* ── Videos: uploaded VODs and stream replays, one shelf ──── */}
         <div className="mt-7">
-          <SectionLabel className="mb-3">Replays</SectionLabel>
+          <SectionLabel className="mb-3">Videos</SectionLabel>
           {latestVideo ? (
             <div className="flex flex-col gap-2.5">
               <ReplayRow video={latestVideo} username={creator.username} />
@@ -360,13 +367,20 @@ export function ChannelLanding({
           ) : (
             <EmptyState
               icon={<ReplayGlyph size={30} />}
-              title={isOwner ? "No replays yet" : "Nothing to replay yet"}
+              title={isOwner ? "No videos yet" : "Nothing to watch yet"}
               outcome={isOwner ? undefined : "a channel, not a link list"}
               action={
+                // This shelf fills two ways — an upload or a recorded stream.
+                // It only ever offered "Go live", which hid uploading entirely.
                 isOwner ? (
-                  <Button asChild size="sm">
-                    <Link href="/dashboard/broadcast">Go live</Link>
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button asChild size="sm">
+                      <Link href="/dashboard/videos">Upload a video</Link>
+                    </Button>
+                    <Button asChild size="sm" variant="secondary">
+                      <Link href="/dashboard/broadcast">Go live</Link>
+                    </Button>
+                  </div>
                 ) : undefined
               }
             />
