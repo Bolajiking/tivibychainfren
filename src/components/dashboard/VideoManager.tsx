@@ -581,6 +581,9 @@ const UPLOAD_ERRORS: Record<string, string> = {
   asset_mapping_failed: "Couldn't link the upload to this video",
   video_not_found: "Couldn't find the video draft — try again",
   video_write_failed: "Couldn't save the video — please try again.",
+  // Deliberately does NOT say "try again": a missing column/table is an
+  // unapplied migration, and retrying can never succeed.
+  schema_out_of_date: "Video uploads are temporarily unavailable — the server needs a database update. This isn't your connection.",
   creator_profile_missing: "Set up your channel profile before uploading videos.",
   video_request_failed: "The server rejected the upload. Try again.",
   route_not_allowed: "Upload route unavailable",
