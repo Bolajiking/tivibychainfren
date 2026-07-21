@@ -3,7 +3,10 @@ import { Funnel_Display, Geist_Mono, Host_Grotesk } from "next/font/google";
 import Script from "next/script";
 import { Providers } from "./providers";
 import { extensionHydrationAttributeCleanupScript } from "@/lib/hydration";
+import { warnOnMisconfiguration } from "@/lib/config-guard";
 import "./globals.css";
+
+warnOnMisconfiguration();
 
 const funnel = Funnel_Display({
   subsets: ["latin"],
