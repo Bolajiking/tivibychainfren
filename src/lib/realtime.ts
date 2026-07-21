@@ -10,6 +10,7 @@ import {
   type StreamRow,
 } from "@/lib/db/map";
 import { normalizeChatText } from "@/lib/realtime-state";
+import { getAccessToken } from "@/lib/auth/privy-bridge";
 import type { RealtimePostgresChangesPayload } from "@supabase/realtime-js";
 import type { ChatMessage, FeaturedProductWithProduct, Stream } from "@/lib/types";
 
@@ -59,36 +60,34 @@ export function subscribeToChatMessages(
 export async function sendChatMessage({
   streamId,
   sender,
-  walletAddress,
   message,
-  role = "viewer",
 }: {
   streamId: string;
   sender: string;
-  walletAddress: string;
+  /** Kept for call-site compatibility; the server derives the wallet from the verified identity. */
+  walletAddress?: string;
   message: string;
+  /** Kept for call-site compatibility; the server computes role from stream ownership. */
   role?: "viewer" | "host" | "mod";
 }): Promise<ChatMessage | null> {
-  const db = getSupabase();
   const text = normalizeChatText(message);
-  if (!db || !streamId || !text) return null;
+  if (!streamId || !text) return null;
 
-  const { data, error } = await db
-    .from("chats")
-    .insert({
-      stream_id: streamId,
-      sender,
-      wallet_address: walletAddress,
-      message: text,
-      kind: "message",
-      role,
-      name_color: role === "host" ? "#40acff" : "#9fd3ff",
-    })
-    .select("*")
-    .single();
+  // Chat posting requires sign-in: the write goes through the authenticated
+  // /api/chats route (service-role after Privy verification), never a direct
+  // anon insert. The server assigns wallet + role; we only send the text.
+  const token = await getAccessToken();
+  const headers = new Headers({ "content-type": "application/json" });
+  if (token) headers.set("authorization", `Bearer ${token}`);
 
-  if (error) throw error;
-  return data ? rowToChat(data) : null;
+  const res = await fetch("/api/chats", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ streamId, sender, message: text }),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok || data?.ok === false) throw new Error(data?.error ?? "chat_send_failed");
+  return (data?.message as ChatMessage) ?? null;
 }
 
 /** Load the most recent chat messages for a stream (creator moderation view). */

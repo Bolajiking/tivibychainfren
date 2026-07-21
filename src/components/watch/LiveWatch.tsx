@@ -18,6 +18,7 @@ import { PurchaseSheet } from "@/components/money/PurchaseSheet";
 import { Player } from "@/components/watch/Player";
 import { Tile, Avatar } from "@/components/ui/Media";
 import { useSession } from "@/lib/store/session";
+import { useAuthIntent } from "@/lib/auth/useAuthIntent";
 import { followCreator } from "@/lib/profile-client";
 import { hasAccess, matchesAny } from "@/lib/access";
 import { MOCK_MODE } from "@/lib/config";
@@ -52,6 +53,7 @@ export function LiveWatch({
   featured: FeaturedProductWithProduct[];
 }) {
   const router = useRouter();
+  const { requireAuth } = useAuthIntent();
   const { user, isSubscribed, isUnlocked, subscribe } = useSession();
   const [liveStream, setLiveStream] = useState<Stream>(stream);
   const [messages, setMessages] = useState<ChatMessage[]>(initialChat);
@@ -193,7 +195,11 @@ export function LiveWatch({
 
   async function onChatSent(message: string): Promise<boolean> {
     const activeUser = useSession.getState().user ?? user;
-    if (!activeUser) return false;
+    // Posting requires sign-in (D4): send the fan to the auth wall, worded for chat.
+    if (!activeUser) {
+      requireAuth({ reason: "comment", subject: creator.displayName });
+      return false;
+    }
 
     const localMessage = createLocalChatMessage({
       streamId: liveStream.playbackId,

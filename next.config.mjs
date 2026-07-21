@@ -24,7 +24,9 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "**" },
+      { protocol: "https", hostname: "**.supabase.co" },
+      { protocol: "https", hostname: "**.lp-playback.studio" },
+      { protocol: "https", hostname: "**.livepeer.cloud" },
     ],
   },
 };

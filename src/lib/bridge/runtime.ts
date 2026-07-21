@@ -4,6 +4,7 @@ import {
   type BroadcastSessionManager,
 } from "@/lib/bridge/broadcast-session";
 import { createWhipProxy, type WhipProxy } from "@/lib/bridge/whip-proxy";
+import { bridgeAllowedInRuntime } from "@/lib/bridge/runtime-guard";
 import {
   WHIP_PROXY_UPSTREAM_DELETE_TIMEOUT_MS,
   WHIP_PROXY_UPSTREAM_PATCH_TIMEOUT_MS,
@@ -20,8 +21,8 @@ export interface BridgeRuntime {
 const globalStore = globalThis as unknown as { __tvinbioBridgeRuntime?: BridgeRuntime };
 
 export function bridgeEnabled(): boolean {
+  if (!bridgeAllowedInRuntime(process.env)) return false;
   return (
-    process.env.TVINBIO_BRIDGE_ENABLED === "true" &&
     typeof process.env.TVINBIO_BRIDGE_CONTROL_URL === "string" &&
     process.env.TVINBIO_BRIDGE_CONTROL_URL.length > 0 &&
     typeof process.env.TVINBIO_BRIDGE_CONTROL_SECRET === "string" &&
