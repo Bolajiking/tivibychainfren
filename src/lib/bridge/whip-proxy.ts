@@ -3,7 +3,6 @@ import {
   filterWhipResponseHeaders,
   mapWhipUpstreamOutcome,
   rewriteWhipLocation,
-  type WhipResourceMap,
 } from "@/lib/bridge/whip-proxy-policy";
 
 export interface WhipProxyAttemptContext {
@@ -23,9 +22,22 @@ type UpstreamFetch = (
   init: { method: string; headers: Record<string, string>; body?: string },
 ) => Promise<Response>;
 
+/**
+ * The resource-mapping subset of `BridgeSessionStore`. Structural, so any store
+ * implementation satisfies it without importing the proxy.
+ */
+export interface WhipProxyResourceStore {
+  registerResource(
+    attemptId: string,
+    upstreamUrl: string,
+  ): Promise<{ resourceId: string; replacedUpstreamUrl: string | null }>;
+  resolveResource(attemptId: string, resourceId: string): Promise<string | null>;
+  releaseResource(attemptId: string, resourceId: string): Promise<string | null>;
+}
+
 export interface WhipProxyDeps {
-  resolveAttempt(attemptId: string): WhipProxyAttemptContext | null;
-  resourceMap: WhipResourceMap;
+  resolveAttempt(attemptId: string): Promise<WhipProxyAttemptContext | null>;
+  resources: WhipProxyResourceStore;
   upstreamFetch: UpstreamFetch;
 }
 
@@ -56,15 +68,16 @@ export function createWhipProxy(deps: WhipProxyDeps): WhipProxy {
     }
   }
 
-  function gate(
+  async function gate(
     attemptId: string,
     method: string,
     contentType: string | null,
     body: string,
-  ):
+  ): Promise<
     | { kind: "error"; result: WhipProxyResult }
-    | { kind: "ok"; attempt: WhipProxyAttemptContext & { whipUpstreamUrl: string } } {
-    const attempt = deps.resolveAttempt(attemptId);
+    | { kind: "ok"; attempt: WhipProxyAttemptContext & { whipUpstreamUrl: string } }
+  > {
+    const attempt = await deps.resolveAttempt(attemptId);
     if (!attempt) return { kind: "error", result: errorResult(404, "attempt_not_found") };
 
     const verdict = evaluateWhipProxyRequest({
@@ -87,7 +100,7 @@ export function createWhipProxy(deps: WhipProxyDeps): WhipProxy {
 
   return {
     async post({ attemptId, contentType, body }) {
-      const gated = gate(attemptId, "POST", contentType, body);
+      const gated = await gate(attemptId, "POST", contentType, body);
       if (gated.kind === "error") return gated.result;
       const { attempt } = gated;
 
@@ -103,7 +116,7 @@ export function createWhipProxy(deps: WhipProxyDeps): WhipProxy {
       if (!upstreamLocation) return errorResult(502, "bridge_signaling_rejected");
       const resolvedLocation = new URL(upstreamLocation, attempt.whipUpstreamUrl).toString();
 
-      const { resourceId, replacedUpstreamUrl } = deps.resourceMap.register(attemptId, resolvedLocation);
+      const { resourceId, replacedUpstreamUrl } = await deps.resources.registerResource(attemptId, resolvedLocation);
       if (replacedUpstreamUrl) {
         // One live WHIP resource per attempt: the replaced publisher is torn down upstream.
         await callUpstream(replacedUpstreamUrl, { method: "DELETE", headers: upstreamHeaders(attempt) });
@@ -118,11 +131,11 @@ export function createWhipProxy(deps: WhipProxyDeps): WhipProxy {
     },
 
     async patch({ attemptId, resourceId, contentType, body }) {
-      const gated = gate(attemptId, "PATCH", contentType, body);
+      const gated = await gate(attemptId, "PATCH", contentType, body);
       if (gated.kind === "error") return gated.result;
       const { attempt } = gated;
 
-      const upstreamUrl = deps.resourceMap.resolve(attemptId, resourceId);
+      const upstreamUrl = await deps.resources.resolveResource(attemptId, resourceId);
       if (!upstreamUrl) return errorResult(404, "attempt_not_found");
 
       const upstream = await callUpstream(upstreamUrl, {
@@ -136,12 +149,12 @@ export function createWhipProxy(deps: WhipProxyDeps): WhipProxy {
     },
 
     async del({ attemptId, resourceId }) {
-      const attempt = deps.resolveAttempt(attemptId);
+      const attempt = await deps.resolveAttempt(attemptId);
       if (!attempt) return errorResult(404, "attempt_not_found");
 
       // Clear the mapping first: teardown must succeed for the browser even
       // when upstream is already gone (revoking the lease kicks the publisher).
-      const upstreamUrl = deps.resourceMap.release(attemptId, resourceId);
+      const upstreamUrl = await deps.resources.releaseResource(attemptId, resourceId);
       if (upstreamUrl) {
         await callUpstream(upstreamUrl, { method: "DELETE", headers: upstreamHeaders(attempt) });
       }

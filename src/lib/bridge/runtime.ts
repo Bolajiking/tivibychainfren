@@ -5,6 +5,7 @@ import {
 } from "@/lib/bridge/broadcast-session";
 import { createWhipProxy, type WhipProxy } from "@/lib/bridge/whip-proxy";
 import { bridgeAllowedInRuntime } from "@/lib/bridge/runtime-guard";
+import { createInMemorySessionStore } from "@/lib/bridge/session-store";
 import {
   WHIP_PROXY_UPSTREAM_DELETE_TIMEOUT_MS,
   WHIP_PROXY_UPSTREAM_PATCH_TIMEOUT_MS,
@@ -86,6 +87,7 @@ function buildRuntime(): BridgeRuntime {
   const manager = createBroadcastSessionManager({
     agent,
     bridgeEnabled: bridgeEnabled(),
+    store: createInMemorySessionStore(),
     loadStreamKey,
     leaseRepo: {
       async record(row) {
@@ -119,7 +121,7 @@ function buildRuntime(): BridgeRuntime {
     // Signaling routes verify ownership via manager.getAttempt before proxying;
     // peekAttempt only supplies the upstream context after that check passed.
     resolveAttempt: (attemptId) => manager.peekAttempt(attemptId),
-    resourceMap: manager.resourceMap,
+    resources: manager.store,
     upstreamFetch,
   });
 

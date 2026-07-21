@@ -23,7 +23,7 @@ async function handle(req: Request, ctx: RouteContext, method: "PATCH" | "DELETE
   }
   const { attemptId, resourceId } = await ctx.params;
   const { manager, proxy } = bridgeRuntime();
-  if (!manager.getAttempt(attemptId, owner.walletAddress)) {
+  if (!(await manager.getAttempt(attemptId, owner.walletAddress))) {
     return NextResponse.json({ ok: false, error: "attempt_not_found" }, { status: 404 });
   }
 
