@@ -1,13 +1,19 @@
 import { randomUUID } from "node:crypto";
 import type { BridgeAgentClient } from "@/lib/bridge/agent-client";
-import { shouldAllowLeaseCreation } from "@/lib/bridge/lease-policy";
-import { createWhipResourceMap, type WhipResourceMap } from "@/lib/bridge/whip-proxy-policy";
+import { BRIDGE_LEASE_RATE_WINDOW_MS, shouldAllowLeaseCreation } from "@/lib/bridge/lease-policy";
+import {
+  createInMemorySessionStore,
+  type BridgeSessionStore,
+  type BroadcastAttempt,
+} from "@/lib/bridge/session-store";
 import { livepeerRtmpFullUrl, livepeerWhipIngestUrl } from "@/lib/livepeer/ingest";
 import {
   classifyBroadcastDevice,
   planTransportTargets,
   type BroadcastTransportTarget,
 } from "@/lib/livepeer/transport-policy";
+
+export type { BroadcastAttempt } from "@/lib/bridge/session-store";
 
 export interface BroadcastTransportPlan {
   attemptId: string;
@@ -17,17 +23,6 @@ export interface BroadcastTransportPlan {
   unavailableReason?: "bridge_unavailable" | "lease_rate_limited";
   bridgeLeaseId?: string;
   expiresAt?: string;
-}
-
-export interface BroadcastAttempt {
-  attemptId: string;
-  creatorId: string;
-  livepeerId: string;
-  category: "mobile" | "desktop";
-  leaseId: string | null;
-  whipUpstreamUrl: string | null;
-  publishToken: string | null;
-  createdAtMs: number;
 }
 
 export type BroadcastSessionCreateResult =
@@ -58,6 +53,11 @@ export interface BroadcastSessionDeps {
   leaseRepo?: BridgeLeaseRepo | null;
   /** Fired when revocation orphans a proxied WHIP resource so the caller can DELETE it upstream. */
   onReleaseResource?: (upstreamUrl: string, publishToken: string | null) => void;
+  /**
+   * Where attempt/lease/resource state lives. Defaults to per-process memory,
+   * which is only correct on a single instance — see `bridgeAllowedInRuntime()`.
+   */
+  store?: BridgeSessionStore;
   mintId?: () => string;
   nowMs?: () => number;
 }
@@ -75,24 +75,21 @@ export interface BroadcastSessionManager {
     attemptId: string,
     creatorId: string,
   ): Promise<{ ok: true; publishing: boolean } | { ok: false; error: "attempt_not_found" | "not_resource_owner" }>;
-  getAttempt(attemptId: string, creatorId: string): BroadcastAttempt | null;
+  getAttempt(attemptId: string, creatorId: string): Promise<BroadcastAttempt | null>;
   /**
    * Owner-blind lookup for the WHIP proxy only. Every signaling route MUST
    * verify ownership via getAttempt before proxying; this exists so the proxy
    * core can resolve upstream context without re-threading the owner.
    */
-  peekAttempt(attemptId: string): BroadcastAttempt | null;
-  resourceMap: WhipResourceMap;
+  peekAttempt(attemptId: string): Promise<BroadcastAttempt | null>;
+  /** Exposed so the WHIP proxy can map resources through the same storage. */
+  store: BridgeSessionStore;
 }
 
 export function createBroadcastSessionManager(deps: BroadcastSessionDeps): BroadcastSessionManager {
   const mintId = deps.mintId ?? (() => randomUUID());
   const nowMs = deps.nowMs ?? (() => Date.now());
-  const attempts = new Map<string, BroadcastAttempt>();
-  const attemptByCreator = new Map<string, string>();
-  const creatorLeaseEvents = new Map<string, number[]>();
-  const agentLeaseEvents: number[] = [];
-  const resourceMap = createWhipResourceMap();
+  const store = deps.store ?? createInMemorySessionStore();
 
   async function recordLifecycle(row: Parameters<BridgeLeaseRepo["record"]>[0]): Promise<void> {
     try {
@@ -102,17 +99,14 @@ export function createBroadcastSessionManager(deps: BroadcastSessionDeps): Broad
     }
   }
 
-  function releaseAttemptResources(attempt: BroadcastAttempt): void {
-    const upstreamUrl = resourceMap.releaseAttempt(attempt.attemptId);
+  async function releaseAttemptResources(attempt: BroadcastAttempt): Promise<void> {
+    const upstreamUrl = await store.releaseAttemptResources(attempt.attemptId);
     if (upstreamUrl) deps.onReleaseResource?.(upstreamUrl, attempt.publishToken);
   }
 
   async function dropAttempt(attempt: BroadcastAttempt, reason: string): Promise<void> {
-    releaseAttemptResources(attempt);
-    attempts.delete(attempt.attemptId);
-    if (attemptByCreator.get(attempt.creatorId) === attempt.attemptId) {
-      attemptByCreator.delete(attempt.creatorId);
-    }
+    await releaseAttemptResources(attempt);
+    await store.deleteAttempt(attempt.attemptId);
     if (attempt.leaseId && deps.agent) await deps.agent.revokeLease(attempt.leaseId);
     await recordLifecycle({
       event: "ended",
@@ -125,24 +119,16 @@ export function createBroadcastSessionManager(deps: BroadcastSessionDeps): Broad
     });
   }
 
-  function leaseRateVerdict(creatorId: string, atMs: number) {
-    return shouldAllowLeaseCreation({
-      creatorEvents: creatorLeaseEvents.get(creatorId) ?? [],
-      agentEvents: agentLeaseEvents,
-      nowMs: atMs,
-    });
-  }
-
-  function recordLeaseEvent(creatorId: string, atMs: number): void {
-    const events = creatorLeaseEvents.get(creatorId) ?? [];
-    events.push(atMs);
-    creatorLeaseEvents.set(creatorId, events.slice(-100));
-    agentLeaseEvents.push(atMs);
-    if (agentLeaseEvents.length > 1000) agentLeaseEvents.splice(0, agentLeaseEvents.length - 1000);
+  async function leaseRateVerdict(creatorId: string, atMs: number) {
+    const { creatorEvents, agentEvents } = await store.leaseEvents(
+      creatorId,
+      atMs - BRIDGE_LEASE_RATE_WINDOW_MS,
+    );
+    return shouldAllowLeaseCreation({ creatorEvents, agentEvents, nowMs: atMs });
   }
 
   return {
-    resourceMap,
+    store,
 
     async create({ creatorId, livepeerId, userAgent }) {
       const category = classifyBroadcastDevice(userAgent);
@@ -150,8 +136,7 @@ export function createBroadcastSessionManager(deps: BroadcastSessionDeps): Broad
 
       // Only one active bridge publisher per stream: a confirmed publishing
       // lease is never silently evicted; an unpublished predecessor is revoked.
-      const existingAttemptId = attemptByCreator.get(creatorId);
-      const existing = existingAttemptId ? attempts.get(existingAttemptId) : undefined;
+      const existing = await store.getAttemptByCreator(creatorId);
       if (existing) {
         const status =
           existing.leaseId && deps.agent ? await deps.agent.leaseStatus(existing.leaseId) : null;
@@ -167,11 +152,11 @@ export function createBroadcastSessionManager(deps: BroadcastSessionDeps): Broad
       let rateLimited = false;
 
       if (deps.bridgeEnabled && deps.agent) {
-        const rate = leaseRateVerdict(creatorId, now);
+        const rate = await leaseRateVerdict(creatorId, now);
         if (!rate.allowed) {
           rateLimited = true;
         } else if (await deps.agent.health()) {
-          recordLeaseEvent(creatorId, now);
+          await store.recordLeaseEvent(creatorId, now);
           lease = await deps.agent.createLease({
             leaseId: mintId(),
             attemptId,
@@ -198,8 +183,7 @@ export function createBroadcastSessionManager(deps: BroadcastSessionDeps): Broad
         publishToken: lease?.publishToken ?? null,
         createdAtMs: now,
       };
-      attempts.set(attemptId, attempt);
-      attemptByCreator.set(creatorId, attemptId);
+      await store.putAttempt(attempt);
       await recordLifecycle({
         event: "created",
         attemptId,
@@ -227,7 +211,7 @@ export function createBroadcastSessionManager(deps: BroadcastSessionDeps): Broad
     },
 
     async revoke(attemptId, creatorId) {
-      const attempt = attempts.get(attemptId);
+      const attempt = await store.getAttempt(attemptId);
       if (!attempt) return { ok: true };
       if (attempt.creatorId !== creatorId) return { ok: false, error: "not_resource_owner" };
       await dropAttempt(attempt, "revoked");
@@ -235,7 +219,7 @@ export function createBroadcastSessionManager(deps: BroadcastSessionDeps): Broad
     },
 
     async heartbeat(attemptId, creatorId) {
-      const attempt = attempts.get(attemptId);
+      const attempt = await store.getAttempt(attemptId);
       if (!attempt) return { ok: false, error: "attempt_not_found" };
       if (attempt.creatorId !== creatorId) return { ok: false, error: "not_resource_owner" };
       if (attempt.leaseId && deps.agent) {
@@ -246,7 +230,7 @@ export function createBroadcastSessionManager(deps: BroadcastSessionDeps): Broad
     },
 
     async status(attemptId, creatorId) {
-      const attempt = attempts.get(attemptId);
+      const attempt = await store.getAttempt(attemptId);
       if (!attempt) return { ok: false, error: "attempt_not_found" };
       if (attempt.creatorId !== creatorId) return { ok: false, error: "not_resource_owner" };
       if (!attempt.leaseId || !deps.agent) return { ok: true, publishing: false };
@@ -254,13 +238,13 @@ export function createBroadcastSessionManager(deps: BroadcastSessionDeps): Broad
       return { ok: true, publishing: status?.publishing === true };
     },
 
-    getAttempt(attemptId, creatorId) {
-      const attempt = attempts.get(attemptId);
+    async getAttempt(attemptId, creatorId) {
+      const attempt = await store.getAttempt(attemptId);
       return attempt && attempt.creatorId === creatorId ? attempt : null;
     },
 
-    peekAttempt(attemptId) {
-      return attempts.get(attemptId) ?? null;
+    async peekAttempt(attemptId) {
+      return store.getAttempt(attemptId);
     },
   };
 }

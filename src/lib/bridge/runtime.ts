@@ -5,6 +5,8 @@ import {
 } from "@/lib/bridge/broadcast-session";
 import { createWhipProxy, type WhipProxy } from "@/lib/bridge/whip-proxy";
 import { bridgeAllowedInRuntime } from "@/lib/bridge/runtime-guard";
+import { createInMemorySessionStore, type BridgeSessionStore } from "@/lib/bridge/session-store";
+import { createSupabaseSessionStore } from "@/lib/bridge/session-store-supabase";
 import {
   WHIP_PROXY_UPSTREAM_DELETE_TIMEOUT_MS,
   WHIP_PROXY_UPSTREAM_PATCH_TIMEOUT_MS,
@@ -79,6 +81,21 @@ function upstreamFetchByMethod() {
   };
 }
 
+/**
+ * Shared storage whenever it is available, so signaling survives landing on a
+ * different instance. Falls back to per-process memory for single-instance and
+ * local runs — `bridgeAllowedInRuntime()` is what stops that combination from
+ * being used on serverless.
+ */
+function buildStore(): BridgeSessionStore {
+  const controlSecret = process.env.TVINBIO_BRIDGE_CONTROL_SECRET ?? "";
+  const client = supabaseAdmin();
+  if (controlSecret && client) {
+    return createSupabaseSessionStore({ client, controlSecret });
+  }
+  return createInMemorySessionStore();
+}
+
 function buildRuntime(): BridgeRuntime {
   const agent = buildAgent();
   const upstreamFetch = upstreamFetchByMethod();
@@ -86,6 +103,7 @@ function buildRuntime(): BridgeRuntime {
   const manager = createBroadcastSessionManager({
     agent,
     bridgeEnabled: bridgeEnabled(),
+    store: buildStore(),
     loadStreamKey,
     leaseRepo: {
       async record(row) {
@@ -119,7 +137,7 @@ function buildRuntime(): BridgeRuntime {
     // Signaling routes verify ownership via manager.getAttempt before proxying;
     // peekAttempt only supplies the upstream context after that check passed.
     resolveAttempt: (attemptId) => manager.peekAttempt(attemptId),
-    resourceMap: manager.resourceMap,
+    resources: manager.store,
     upstreamFetch,
   });
 

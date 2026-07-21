@@ -3,28 +3,28 @@ import { test } from "node:test";
 import { loadTsModule } from "./helpers/load-ts-module.mjs";
 
 const proxyModule = await loadTsModule(new URL("../src/lib/bridge/whip-proxy.ts", import.meta.url));
-const policyModule = await loadTsModule(new URL("../src/lib/bridge/whip-proxy-policy.ts", import.meta.url));
+const storeModule = await loadTsModule(new URL("../src/lib/bridge/session-store.ts", import.meta.url));
 
 const UPSTREAM_WHIP = "https://127.0.0.1:8889/opaque-lease/whip";
 
 function createProxy(handler, overrides = {}) {
   const upstreamCalls = [];
   let counter = 0;
-  const resourceMap = policyModule.createWhipResourceMap({ mintId: () => `res-${++counter}` });
+  const store = storeModule.createInMemorySessionStore({ mintId: () => `res-${++counter}` });
   const attempts = new Map([
     ["attempt-1", { whipUpstreamUrl: UPSTREAM_WHIP, publishToken: "publish-token-1" }],
     ["attempt-nolease", { whipUpstreamUrl: null, publishToken: null }],
   ]);
   const proxy = proxyModule.createWhipProxy({
-    resolveAttempt: (attemptId) => attempts.get(attemptId) ?? null,
-    resourceMap,
+    resolveAttempt: async (attemptId) => attempts.get(attemptId) ?? null,
+    resources: store,
     upstreamFetch: async (url, init) => {
       upstreamCalls.push({ url, init });
       return handler(url, init);
     },
     ...overrides,
   });
-  return { proxy, upstreamCalls, resourceMap };
+  return { proxy, upstreamCalls, store };
 }
 
 function sdpCreated(location = `${UPSTREAM_WHIP}/session-xyz`) {
@@ -144,13 +144,13 @@ test("PATCH forwards trickle ICE to the stored upstream resource", async () => {
 });
 
 test("DELETE is idempotent and clears the mapping even when upstream fails", async () => {
-  const { proxy, resourceMap } = createProxy((url, init) =>
+  const { proxy, store } = createProxy((url, init) =>
     init.method === "DELETE" ? new Response("err", { status: 500 }) : sdpCreated(),
   );
   await proxy.post({ attemptId: "attempt-1", contentType: "application/sdp", body: "v=0" });
   const result = await proxy.del({ attemptId: "attempt-1", resourceId: "res-1" });
   assert.equal(result.status, 204, "teardown reports success to the browser; revoking the lease kicks the publisher anyway");
-  assert.equal(resourceMap.resolve("attempt-1", "res-1"), null, "mapping cleared despite upstream 500");
+  assert.equal(await store.resolveResource("attempt-1", "res-1"), null, "mapping cleared despite upstream 500");
 
   const again = await proxy.del({ attemptId: "attempt-1", resourceId: "res-1" });
   assert.equal(again.status, 204, "second DELETE is still success");

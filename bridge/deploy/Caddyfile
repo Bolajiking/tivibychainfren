@@ -2,7 +2,14 @@
 # so the HTTPS listener lives on 8443 (only the TVinBio app server calls it).
 # Use the DNS-01 challenge: port 443 is not available for HTTP-01.
 {
+	# REPLACE: a real address — Let's Encrypt sends expiry warnings here.
 	email ops@example.com
+
+	# Caddy binds :80 for HTTP→HTTPS redirects by default. Nothing on this host
+	# serves plain HTTP, DNS-01 makes :80 unnecessary for issuance, and every
+	# port bound here shares the host network namespace with MediaMTX's ICE
+	# listener on raw :443. Bind nothing we did not ask for.
+	auto_https disable_redirects
 }
 
 https://BRIDGE_PUBLIC_HOST:8443 {

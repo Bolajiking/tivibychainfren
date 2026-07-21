@@ -1,0 +1,15 @@
+# MediaMTX with a shell and curl, for the runOnReady/runOnNotReady hooks.
+#
+# The default `bluenviron/mediamtx:1.19.2` image is built FROM scratch — the
+# binary and nothing else. mediamtx.production.yml drives the forwarder
+# lifecycle through `curl` hooks, and on the scratch image those fail with
+# "command not found", silently: MediaMTX still accepts the WebRTC publish, the
+# agent never learns the path is ready, ffmpeg never spawns, and the broadcast
+# is forwarded nowhere.
+#
+# The `-ffmpeg` variant is Alpine-based and carries a shell. curl is added
+# explicitly rather than assumed. Record the resulting digest in README.md.
+FROM bluenviron/mediamtx:1.19.2-ffmpeg
+
+USER root
+RUN apk add --no-cache curl && curl --version | head -1

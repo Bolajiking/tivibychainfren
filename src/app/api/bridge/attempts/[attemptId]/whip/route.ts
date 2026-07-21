@@ -16,7 +16,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ attemptId: str
   }
   const { attemptId } = await ctx.params;
   const { manager, proxy } = bridgeRuntime();
-  if (!manager.getAttempt(attemptId, owner.walletAddress)) {
+  if (!(await manager.getAttempt(attemptId, owner.walletAddress))) {
     return NextResponse.json({ ok: false, error: "attempt_not_found" }, { status: 404 });
   }
 

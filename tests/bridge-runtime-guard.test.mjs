@@ -25,3 +25,41 @@ test("bridge blocked on Vercel unless the single-instance override is set", () =
     true,
   );
 });
+
+test("bridge allowed on Vercel when a shared session store is configured", () => {
+  assert.equal(
+    bridgeAllowedInRuntime({
+      TVINBIO_BRIDGE_ENABLED: "true",
+      VERCEL: "1",
+      SUPABASE_SERVICE_ROLE_KEY: "service-key",
+      TVINBIO_BRIDGE_CONTROL_SECRET: "control-secret",
+    }),
+    true,
+    "migration 0019 makes multi-instance signaling safe",
+  );
+});
+
+test("a partial shared-store config does NOT unlock serverless", () => {
+  const base = { TVINBIO_BRIDGE_ENABLED: "true", VERCEL: "1" };
+  assert.equal(
+    bridgeAllowedInRuntime({ ...base, SUPABASE_SERVICE_ROLE_KEY: "service-key" }),
+    false,
+    "state without the sealing key would persist credentials in the clear",
+  );
+  assert.equal(
+    bridgeAllowedInRuntime({ ...base, TVINBIO_BRIDGE_CONTROL_SECRET: "control-secret" }),
+    false,
+    "sealing key without shared state still breaks cross-instance signaling",
+  );
+});
+
+test("the master switch still wins over a complete shared-store config", () => {
+  assert.equal(
+    bridgeAllowedInRuntime({
+      VERCEL: "1",
+      SUPABASE_SERVICE_ROLE_KEY: "service-key",
+      TVINBIO_BRIDGE_CONTROL_SECRET: "control-secret",
+    }),
+    false,
+  );
+});

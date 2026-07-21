@@ -135,8 +135,8 @@ test("creating a new attempt revokes the owner's previous unpublished attempt", 
   const second = await manager.create({ creatorId: "0xabc", livepeerId: "lp-1", userAgent: MOBILE_UA });
   assert.equal(calls.revoked.length, 1);
   assert.equal(calls.revoked[0], first.plan.bridgeLeaseId);
-  assert.equal(manager.getAttempt(first.plan.attemptId, "0xabc"), null, "old attempt is gone");
-  assert.ok(manager.getAttempt(second.plan.attemptId, "0xabc"));
+  assert.equal(await manager.getAttempt(first.plan.attemptId, "0xabc"), null, "old attempt is gone");
+  assert.ok(await manager.getAttempt(second.plan.attemptId, "0xabc"));
 });
 
 test("a publishing attempt is not silently evicted by a new create", async () => {
@@ -148,15 +148,15 @@ test("a publishing attempt is not silently evicted by a new create", async () =>
   assert.equal(second.ok, false);
   assert.equal(second.error, "broadcast_in_progress");
   assert.deepEqual(calls.revoked, [], "the active lease was not revoked");
-  assert.ok(manager.getAttempt(first.plan.attemptId, "0xabc"));
+  assert.ok(await manager.getAttempt(first.plan.attemptId, "0xabc"));
 });
 
 test("attempt access is owner-scoped", async () => {
   const { manager } = createManager();
   const { plan } = await manager.create({ creatorId: "0xabc", livepeerId: "lp-1", userAgent: MOBILE_UA });
-  assert.ok(manager.getAttempt(plan.attemptId, "0xabc"));
-  assert.equal(manager.getAttempt(plan.attemptId, "0xother"), null);
-  assert.equal(manager.getAttempt("attempt-unknown", "0xabc"), null);
+  assert.ok(await manager.getAttempt(plan.attemptId, "0xabc"));
+  assert.equal(await manager.getAttempt(plan.attemptId, "0xother"), null);
+  assert.equal(await manager.getAttempt("attempt-unknown", "0xabc"), null);
 });
 
 test("revoke is idempotent, owner-checked, and releases the lease", async () => {
