@@ -2,17 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { ImagePlus, Loader2, Share2 } from "lucide-react";
+import { ImagePlus, Loader2, Play, Share2 } from "lucide-react";
 import { CreatorTheme } from "./CreatorTheme";
 import { CaptureModule } from "./CaptureModule";
 import { BackButton } from "@/components/nav/BackButton";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { SectionLabel, ReplayPill, UpcomingPill, PricePill } from "@/components/ui/Badges";
+import { SectionLabel, ReplayPill, UpcomingPill, PricePill, LivePill, ViewerPill } from "@/components/ui/Badges";
 import { PlatformStamp } from "@/components/brand/Logo";
-import { StoreGlyph, ReplayGlyph, TipGlyph, StageGlyph } from "@/components/brand/Glyphs";
+import { StoreGlyph, ReplayGlyph, TipGlyph, StageGlyph, WalletGlyph } from "@/components/brand/Glyphs";
 import { TipSheet } from "@/components/money/TipSheet";
 import { PurchaseSheet } from "@/components/money/PurchaseSheet";
 import { UnlockGate } from "@/components/money/UnlockGate";
@@ -24,8 +24,9 @@ import { useHydrated } from "@/lib/store/useHydrated";
 import { matchesAny } from "@/lib/access";
 import { uploadChannelArt } from "@/lib/profile-client";
 import { shareLink } from "@/lib/share";
-import { formatCount } from "@/lib/cn";
+import { cn, formatCount } from "@/lib/cn";
 import { variantSurfaces } from "@/lib/creator-theme";
+import { useChannelLiveStream } from "@/lib/useChannelLiveStream";
 import type { Creator, Stream, Video, Product } from "@/lib/types";
 
 /**
@@ -51,11 +52,10 @@ export function ChannelLanding({
   videos: Video[];
   products: Product[];
 }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const autoInstall = searchParams.get("install") === "1";
   const { user, requireAuth } = useAuthIntent("viewer");
-  const { isSubscribed, subscribe } = useSession();
+  const { isSubscribed, subscribe, openWallet } = useSession();
   const hydrated = useHydrated();
 
   const [tipOpen, setTipOpen] = useState(false);
@@ -68,10 +68,16 @@ export function ChannelLanding({
   const headerInputRef = useRef<HTMLInputElement>(null);
   const storeRef = useRef<HTMLDivElement>(null);
 
+  // Live status is owned client-side: it flips to LIVE when the creator goes on
+  // air and reverts the moment they end — the channel page is never trapped in
+  // a stale live state (and polling repairs the DB, which reverts explore too).
+  const currentStream = useChannelLiveStream(creator, stream);
+  const isLive = !!currentStream?.isActive;
+
   const wallets = hydrated ? user?.walletAddresses ?? [] : [];
   const isOwner = matchesAny(wallets, creator.creatorId);
   const subscribed = hydrated && isSubscribed(creator.creatorId);
-  const gated = !!stream && stream.viewMode !== "free";
+  const gated = !!currentStream && currentStream.viewMode !== "free";
   const surfaces = variantSurfaces(creator.themeVariant);
 
   const latestVideo = videos[0];
@@ -87,7 +93,7 @@ export function ChannelLanding({
   useEffect(() => setHeaderUrl(creator.headerUrl ?? null), [creator.headerUrl]);
 
   function onFollow() {
-    if (!requireAuth({ role: "viewer" })) return;
+    if (!requireAuth({ role: "viewer", reason: "follow", subject: creator.displayName })) return;
     if (subscribed) return;
     // A paid channel routes follow through the gate; a free one is one tap.
     if (gated) return setGateOpen(true);
@@ -96,7 +102,7 @@ export function ChannelLanding({
   }
 
   function onTip() {
-    if (!requireAuth({ role: "viewer" })) return;
+    if (!requireAuth({ role: "viewer", reason: "tip", subject: creator.displayName })) return;
     setTipOpen(true);
   }
 
@@ -132,31 +138,86 @@ export function ChannelLanding({
 
   return (
     <CreatorTheme accent={creator.accentColor} variant={creator.themeVariant} className="min-h-screen">
-      {/* Cover — creator art, faded into their canvas. Ambient accent when bare. */}
-      <div className="relative h-[132px] w-full overflow-hidden md:h-[188px]">
+      {/* Cover — and, when the creator is on air, the live banner. The fan lands
+          on the profile first (never yanked into the stream); the banner offers
+          the stream, one tap away. It taller on live so the ON-AIR moment reads
+          immediately on mobile. Reverts to a plain cover the instant they end. */}
+      <div
+        className={cn(
+          "relative w-full overflow-hidden transition-[height] duration-500 ease-[cubic-bezier(.22,1,.36,1)]",
+          isLive ? "h-[220px] md:h-[300px]" : "h-[132px] md:h-[188px]",
+        )}
+      >
         {headerUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={headerUrl} alt="" className="absolute inset-0 size-full object-cover" />
         ) : (
-          <div className="accent-ambient absolute inset-0" />
+          <div className={cn("absolute inset-0", isLive ? "onair-wash" : "accent-ambient")} />
         )}
         <div
           className="absolute inset-x-0 bottom-0 h-1/2"
           style={{ backgroundImage: `linear-gradient(0deg, ${surfaces.canvas}, transparent)` }}
         />
+
         {/* Back to wherever they came from (Explore, another channel) — hidden
             on a cold bio-tap arrival so the shared page stays a clean front door. */}
-        <BackButton className="absolute left-3 top-3 z-10" />
-        {isOwner && (
-          <button
-            onClick={() => headerInputRef.current?.click()}
-            disabled={headerUploading}
-            className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1.5 text-[11px] font-semibold text-ink-dim backdrop-blur transition-colors hover:text-white disabled:opacity-60"
+        <BackButton className="absolute left-3 top-3 z-20" />
+
+        {/* Top-right chrome cluster — sits above the live banner so it stays
+            tappable there. The wallet is the fan's money surface: system tokens,
+            never the creator accent, opening the same docked WalletSheet as
+            everywhere else (right-dock on desktop, bottom sheet on mobile). */}
+        <div className="absolute right-3 top-3 z-20 flex items-center gap-2">
+          {hydrated && user && (
+            <button
+              onClick={openWallet}
+              aria-label="Wallet"
+              className="tap grid size-9 place-items-center rounded-full border border-white/15 bg-black/45 text-ink-dim backdrop-blur transition-colors hover:text-white"
+            >
+              <WalletGlyph size={17} />
+            </button>
+          )}
+          {isOwner && !isLive && (
+            <button
+              onClick={() => headerInputRef.current?.click()}
+              disabled={headerUploading}
+              className="tap inline-flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1.5 text-[11px] font-semibold text-ink-dim backdrop-blur transition-colors hover:text-white disabled:opacity-60"
+            >
+              {headerUploading ? <Loader2 className="size-3.5 animate-spin" /> : <ImagePlus className="size-3.5" />}
+              {headerUrl ? "Change cover" : "Add cover"}
+            </button>
+          )}
+        </div>
+
+        {isLive ? (
+          /* The whole banner is the tap target → the dedicated stream page. */
+          <Link
+            href={`/${creator.username}/live`}
+            aria-label={`Watch ${creator.displayName} live`}
+            className="group absolute inset-0 z-10 block"
           >
-            {headerUploading ? <Loader2 className="size-3.5 animate-spin" /> : <ImagePlus className="size-3.5" />}
-            {headerUrl ? "Change cover" : "Add cover"}
-          </button>
-        )}
+            {/* Signal motifs (framework §5): the banner reads as a broadcast
+                viewport — ON-AIR wash, faint scanline, corner ticks. */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 animate-[tvGlow_4.8s_ease-in-out_infinite]"
+              style={{ background: "radial-gradient(60% 70% at 50% 30%, rgba(239,68,68,.22), transparent 70%)" }}
+            />
+            <span aria-hidden className="scanline pointer-events-none absolute inset-0 opacity-60" />
+            <span aria-hidden className="pointer-events-none absolute inset-0 shadow-[inset_0_0_0_1.5px_rgba(239,68,68,.35),inset_0_0_60px_rgba(239,68,68,.12)]" />
+            <span aria-hidden className="corner-ticks pointer-events-none absolute inset-2.5" />
+            <span className="absolute left-3 top-3 z-10 flex items-center gap-2">
+              <LivePill small />
+              <ViewerPill count={currentStream!.viewerCount} small bare />
+            </span>
+            {/* Thumb-reach CTA, bottom-centered, ≥44px, scales on press. The play
+                triangle is nudged right of geometric center to read optical. */}
+            <span className="tap absolute bottom-3 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-live px-5 py-2.5 text-[13px] font-semibold text-white shadow-[0_8px_30px_rgba(239,68,68,.45)] transition-transform group-active:scale-[0.97]">
+              <Play className="size-4 translate-x-[1px] fill-current" />
+              Watch live
+            </span>
+          </Link>
+        ) : null}
       </div>
 
       {/* Sections cascade in — identity first, then the conversion ladder. */}
@@ -221,15 +282,35 @@ export function ChannelLanding({
           </div>
         )}
 
-        {/* ── What's next: the one card that says when to come back ─ */}
-        {stream && (
-          <div className="mt-4 rounded-[18px] border border-white/[0.08] bg-creator-card p-4">
-            <UpcomingPill accent={creator.themeVariant === "voltage"} small />
-            <div className="mt-2.5 text-[15px] font-medium text-ink-soft">{stream.title}</div>
-            <div className="receipt mt-1.5 text-[12px] text-muted">
-              {stream.startedAt ? `Last live · ${formatDay(stream.startedAt)}` : "Follow to get the nudge"}
+        {/* ── What's next: the one card that says when to come back.
+            Live → it becomes the second way into the stream (after the banner)
+            and reverts to the schedule/last-live line when the stream ends. */}
+        {currentStream && (
+          isLive ? (
+            <Link
+              href={`/${creator.username}/live`}
+              className="tap mt-4 flex items-center gap-3 rounded-[18px] border border-live/35 bg-live/[0.06] p-4 transition-colors"
+            >
+              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-live text-white">
+                <Play className="size-[18px] translate-x-[1px] fill-current" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-2">
+                  <LivePill small onSurface />
+                </span>
+                <span className="mt-1.5 block truncate text-[15px] font-medium text-ink-soft">{currentStream.title}</span>
+              </span>
+              <ViewerPill count={currentStream.viewerCount} small />
+            </Link>
+          ) : (
+            <div className="mt-4 rounded-[18px] border border-white/[0.08] bg-creator-card p-4">
+              <UpcomingPill accent={creator.themeVariant === "voltage"} small />
+              <div className="mt-2.5 text-[15px] font-medium text-ink-soft">{currentStream.title}</div>
+              <div className="receipt mt-1.5 text-[12px] text-muted">
+                {currentStream.startedAt ? `Last live · ${formatDay(currentStream.startedAt)}` : "Follow to get the nudge"}
+              </div>
             </div>
-          </div>
+          )
         )}
 
         {/* ── Conversion: the store ──────────────────────────────── */}
@@ -331,9 +412,9 @@ export function ChannelLanding({
         onOpenChange={setTipOpen}
         creatorName={creator.displayName}
         recipient={creator.creatorId}
-        presets={stream?.donationPresets ?? [1, 3, 5, 10]}
+        presets={currentStream?.donationPresets ?? [1, 3, 5, 10]}
         avatarSeed={creator.avatarColor}
-        resource={stream ? { kind: "stream", playbackId: stream.playbackId } : undefined}
+        resource={currentStream ? { kind: "stream", playbackId: currentStream.playbackId } : undefined}
         onSent={(amount, message) => setAlert({ amount, message })}
         onFollow={subscribed ? undefined : onFollow}
       />
@@ -350,13 +431,13 @@ export function ChannelLanding({
         creatorName={creator.displayName}
         recipient={creator.creatorId}
         contextLabel={creator.displayName}
-        oneTimeAmount={stream?.viewMode === "one-time" ? stream.amount : 3}
-        monthlyAmount={stream?.viewMode === "monthly" ? stream.amount : 9}
+        oneTimeAmount={currentStream?.viewMode === "one-time" ? currentStream.amount : 3}
+        monthlyAmount={currentStream?.viewMode === "monthly" ? currentStream.amount : 9}
         unlockKeys={{
-          "one-time": stream ? [`stream_access_${stream.playbackId}`] : [],
+          "one-time": currentStream ? [`stream_access_${currentStream.playbackId}`] : [],
           monthly: [`creator_access_${creator.creatorId}`],
         }}
-        resource={stream ? { kind: "stream", playbackId: stream.playbackId } : undefined}
+        resource={currentStream ? { kind: "stream", playbackId: currentStream.playbackId } : undefined}
         onUnlocked={(door) => {
           if (door === "monthly") subscribe(creator.creatorId, channelSummary);
           toast.success(door === "monthly" ? "You're in" : "Unlocked");

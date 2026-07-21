@@ -3,7 +3,8 @@
 import { Mail, Apple, Chrome } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
-import type { AuthRole } from "@/lib/auth/redirect";
+import type { AuthReason, AuthRole } from "@/lib/auth/redirect";
+import { authPromptCopy } from "@/lib/auth/prompt-copy";
 
 /**
  * Presentational sign-in card — the on-brand shell shared by both auth paths.
@@ -14,6 +15,8 @@ import type { AuthRole } from "@/lib/auth/redirect";
 export function AuthCard({
   onSignIn,
   role = "viewer",
+  reason,
+  subject,
   busy = false,
   demoNote = false,
   error,
@@ -21,21 +24,16 @@ export function AuthCard({
 }: {
   onSignIn?: () => void;
   role?: AuthRole;
+  /** Why the wall appeared — drives contextual copy (follow/tip/buy…). */
+  reason?: AuthReason | null;
+  /** Creator name, where it sharpens the copy. */
+  subject?: string | null;
   busy?: boolean;
   demoNote?: boolean;
   error?: string | null;
   children?: React.ReactNode;
 }) {
-  const copy =
-    role === "creator"
-      ? {
-          title: "Claim your TVinBio channel",
-          body: "Sign in to set up your channel, stream, store, and share-ready link in one flow.",
-        }
-      : {
-          title: "Welcome to TVinBio",
-          body: "Sign in to subscribe, tip, shop, and join the channels you love. It only takes a few seconds.",
-        };
+  const copy = authPromptCopy(role, reason, subject);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-canvas px-5">
@@ -43,10 +41,10 @@ export function AuthCard({
         style={{ background: "radial-gradient(70% 100% at 50% 0%,rgba(64,172,255,.18),transparent 60%)" }} />
       <div className="relative w-full max-w-[360px]">
         <Logo size={44} href="" />
-        <h1 className="font-display mt-6 text-[27px] font-semibold leading-[1.05] tracking-[-0.02em]">
+        <h1 className="font-display mt-6 text-balance text-[27px] font-semibold leading-[1.05] tracking-[-0.02em]">
           {copy.title}
         </h1>
-        <p className="mt-2.5 text-[13px] leading-relaxed text-muted">
+        <p className="mt-2.5 text-pretty text-[13px] leading-relaxed text-muted">
           {copy.body}
         </p>
 

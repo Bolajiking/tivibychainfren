@@ -44,7 +44,7 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
 
   /** F3 — one tap, and the creator owns the relationship. */
   function follow() {
-    if (!requireAuth({ role: "viewer" })) return;
+    if (!requireAuth({ role: "viewer", reason: "follow", subject: creator.displayName })) return;
     if (subscribed) return;
     subscribe(creator.creatorId, {
       creatorId: creator.creatorId,
@@ -61,7 +61,7 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
   async function submitComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!normalizedComment || posting) return;
-    if (!requireAuth({ role: "viewer" })) return;
+    if (!requireAuth({ role: "viewer", reason: "comment", subject: creator.displayName })) return;
     const activeUser = getAuthedUser();
     if (!activeUser) return;
 
@@ -136,7 +136,7 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
               <Button size="pill" variant={subscribed ? "secondary" : "accent"} onClick={follow}>
                 {subscribed ? "Following" : "Follow"}
               </Button>
-              <Button size="pill" variant="secondary" onClick={() => { if (requireAuth({ role: "viewer" })) setTipOpen(true); }}><TipGlyph size={16} /> Tip</Button>
+              <Button size="pill" variant="secondary" onClick={() => { if (requireAuth({ role: "viewer", reason: "tip", subject: creator.displayName })) setTipOpen(true); }}><TipGlyph size={16} /> Tip</Button>
             </>
           )}
         </div>
@@ -170,7 +170,7 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
           <input
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            onFocus={() => requireAuth({ role: "viewer" })}
+            onFocus={() => requireAuth({ role: "viewer", reason: "comment", subject: creator.displayName })}
             placeholder={user ? "Add a thoughtful comment…" : "Sign in to comment"}
             className="h-11 min-w-0 flex-1 rounded-full border border-white/10 bg-white/[0.05] px-4 text-[12.5px] text-white placeholder:text-faint focus:border-beam focus:outline-none"
           />

@@ -23,7 +23,7 @@ export default function WalletPage() {
     if (!hydrated || done.current) return;
     done.current = true;
     if (!useSession.getState().user) {
-      router.replace(buildAuthHref({ role: "viewer", next: "/wallet" }));
+      router.replace(buildAuthHref({ role: "viewer", next: "/wallet", reason: "wallet" }));
       return;
     }
     openWallet();

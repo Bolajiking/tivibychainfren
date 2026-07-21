@@ -21,7 +21,7 @@ export function WalletButton({ variant }: { variant: "rail" | "row" | "pill" }) 
   function onClick() {
     // Read fresh state so a click right after hydration never mis-routes.
     if (!useSession.getState().user) {
-      router.push(buildAuthHref({ role: "viewer", next: "/wallet" }));
+      router.push(buildAuthHref({ role: "viewer", next: "/wallet", reason: "wallet" }));
       return;
     }
     openWallet();
