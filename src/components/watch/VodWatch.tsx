@@ -20,6 +20,7 @@ import { hasAccess, matchesAny } from "@/lib/access";
 import { formatCount } from "@/lib/cn";
 import { normalizeChatText } from "@/lib/realtime-state";
 import { postVideoComment } from "@/lib/video-client";
+import { followCreator } from "@/lib/profile-client";
 import type { Creator, Video, VodComment, Product } from "@/lib/types";
 
 export function VodWatch({ creator, video, initialComments, products }: { creator: Creator; video: Video; initialComments: VodComment[]; products: Product[] }) {
@@ -54,6 +55,7 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
       avatarUrl: creator.avatarUrl,
     });
     toast.success(`You follow ${creator.displayName}`);
+    void followCreator(creator.username, useSession.getState().user?.walletAddress);
   }
   const activeProducts = products.filter((p) => p.status === "active");
   const normalizedComment = normalizeChatText(commentText);

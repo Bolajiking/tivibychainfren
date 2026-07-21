@@ -6,8 +6,9 @@ import { toast } from "sonner";
 import * as Menu from "@radix-ui/react-dropdown-menu";
 import * as Modal from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { CheckCircle2, ChevronLeft, Film, ImagePlus, Link as LinkIcon, Loader2, MoreVertical, Pencil, RefreshCw, Trash2, UploadCloud, X } from "lucide-react";
+import { CheckCircle2, Film, ImagePlus, Link as LinkIcon, Loader2, MoreVertical, Pencil, RefreshCw, Trash2, UploadCloud, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { DashboardShell } from "@/components/dashboard/DashboardScaffold";
 import { useSession } from "@/lib/store/session";
 import { useHydrated } from "@/lib/store/useHydrated";
 import { getMyCreatorProfile } from "@/lib/profile-client";
@@ -271,22 +272,13 @@ export function VideoManager() {
   const sorted = useMemo(() => videos, [videos]);
 
   return (
-    <div className="min-h-screen bg-canvas">
-      <header className="sticky top-0 z-20 flex h-[52px] items-center justify-between border-b border-white/[0.06] bg-canvas/80 px-4 backdrop-blur md:px-5">
-        <div className="flex items-center gap-2.5">
-          <span className="font-display text-[14px] font-semibold text-muted">Videos</span>
-        </div>
-        <Link href="/dashboard" className="inline-flex items-center gap-1 text-[12px] font-semibold text-muted hover:text-white">
-          <ChevronLeft className="size-4" /> Dashboard
-        </Link>
-      </header>
-
+    <DashboardShell title="Videos" active="videos" creator={creator}>
       {!hydrated || (loading && user) ? (
         <Skeleton />
       ) : !user ? (
         <EmptyState />
       ) : (
-        <div className="mx-auto grid max-w-[1000px] gap-5 px-4 py-6 lg:grid-cols-[380px_1fr]">
+        <div className="mx-auto grid max-w-[1000px] gap-5 lg:grid-cols-[380px_1fr]">
           {/* upload composer */}
           <section className="h-fit rounded-2xl border border-white/[0.08] bg-[#0a0a0c] p-4 lg:sticky lg:top-[68px]">
             <div className="mb-1 font-display text-[16px] font-semibold">Upload a replay</div>
@@ -408,7 +400,7 @@ export function VideoManager() {
 
       <EditDialog video={editing} onClose={() => setEditing(null)} onSave={saveEdit} />
       <ConfirmDialog video={deleting} onClose={() => setDeleting(null)} onConfirm={confirmDelete} />
-    </div>
+    </DashboardShell>
   );
 }
 
@@ -537,7 +529,7 @@ function StatusBadge({ status }: { status: Video["status"] }) {
 
 function Skeleton() {
   return (
-    <div className="mx-auto grid max-w-[1000px] gap-5 px-4 py-6 lg:grid-cols-[380px_1fr]">
+    <div className="mx-auto grid max-w-[1000px] gap-5 lg:grid-cols-[380px_1fr]">
       <div className="h-[320px] animate-pulse rounded-2xl bg-white/[0.06]" />
       <div className="flex flex-col gap-2.5">
         {Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-[72px] animate-pulse rounded-2xl bg-white/[0.06]" />)}
@@ -552,7 +544,7 @@ function EmptyState() {
       <div className="max-w-[380px]">
         <h1 className="font-display text-[22px] font-semibold tracking-[-0.02em]">Sign in to manage videos</h1>
         <p className="mt-2 text-[13px] text-muted">Upload replays once your channel profile is ready.</p>
-        <Button asChild size="lg" className="mt-5"><Link href="/onboarding">Set up profile</Link></Button>
+        <Button asChild size="lg" className="mt-5"><Link href="/start">Claim your channel</Link></Button>
       </div>
     </div>
   );

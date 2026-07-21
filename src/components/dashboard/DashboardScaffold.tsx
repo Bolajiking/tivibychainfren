@@ -103,21 +103,31 @@ const PRIMARY_DASHBOARD_TABS = new Set(["overview", "store", "money"]);
 
 /**
  * Mobile-only top bar for dashboard pages: a back affordance (only where the
- * page isn't reachable from the bottom tab bar) plus the page title. Sticky so
- * it stays put while the content scrolls.
+ * page isn't reachable from the bottom tab bar) plus the page title and an
+ * optional primary action (Save, Add…). Sticky so it stays put while the
+ * content scrolls — the consistent chrome every dashboard room wears on mobile.
  */
-export function DashboardMobileTopbar({ title, active }: { title: string; active: string }) {
+export function DashboardMobileTopbar({
+  title,
+  active,
+  action,
+}: {
+  title: string;
+  active: string;
+  action?: React.ReactNode;
+}) {
   const showBack = !PRIMARY_DASHBOARD_TABS.has(active);
   return (
     <div className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-1.5 border-b border-white/[0.06] bg-canvas/90 px-3 backdrop-blur md:hidden">
       {showBack ? (
-        <Link href="/dashboard" aria-label="Back to dashboard" className="-ml-1 flex size-10 shrink-0 items-center justify-center rounded-full text-ink-dim transition-transform active:scale-[0.92] hover:text-white">
+        <Link href="/dashboard" aria-label="Back to dashboard" className="-ml-1 grid size-10 shrink-0 place-items-center rounded-full text-ink-dim transition-transform active:scale-[0.92] hover:text-white">
           <ChevronLeft className="size-[22px]" />
         </Link>
       ) : (
         <span className="w-1 shrink-0" />
       )}
       <div className="min-w-0 flex-1 truncate font-display text-[16px] font-semibold">{title}</div>
+      {action && <div className="shrink-0">{action}</div>}
     </div>
   );
 }
@@ -127,12 +137,16 @@ export function DashboardShell({
   active,
   creator,
   actions,
+  mobileAction,
   children,
 }: {
   title: string;
   active: string;
   creator?: Creator | null;
+  /** Desktop header actions (right of the title). */
   actions?: React.ReactNode;
+  /** A single primary action folded into the mobile top bar (Save, Add…). */
+  mobileAction?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -148,7 +162,7 @@ export function DashboardShell({
             <Avatar seed={creator?.avatarColor ?? "#2a2a2a"} src={creator?.avatarUrl} size={32} />
           </div>
         </div>
-        <DashboardMobileTopbar title={title} active={active} />
+        <DashboardMobileTopbar title={title} active={active} action={mobileAction} />
         <div className="min-w-0 flex-1 overflow-x-clip px-4 py-5 md:px-6">{children}</div>
         <div className="md:hidden">
           <CreatorBottomNav />

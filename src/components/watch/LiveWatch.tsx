@@ -18,6 +18,7 @@ import { PurchaseSheet } from "@/components/money/PurchaseSheet";
 import { Player } from "@/components/watch/Player";
 import { Tile, Avatar } from "@/components/ui/Media";
 import { useSession } from "@/lib/store/session";
+import { followCreator } from "@/lib/profile-client";
 import { hasAccess, matchesAny } from "@/lib/access";
 import { MOCK_MODE } from "@/lib/config";
 import { cn } from "@/lib/cn";
@@ -166,6 +167,7 @@ export function LiveWatch({
       avatarUrl: creator.avatarUrl,
     });
     toast.success(`You follow ${creator.displayName}`);
+    void followCreator(creator.username, useSession.getState().user?.walletAddress);
   }
 
   function onTipSent(amount: number, message: string) {
