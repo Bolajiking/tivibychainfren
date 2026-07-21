@@ -81,7 +81,7 @@ export function PersonaSwitch({ variant = "full" }: { variant?: "full" | "compac
         "flex w-full items-center gap-2.5 rounded-[11px] border px-3 py-2.5 text-[11.5px] font-semibold transition",
         isCreator
           ? "border-white/10 text-muted hover:text-white"
-          : "border-blue/40 bg-blue/[0.1] text-blue-light hover:bg-blue/[0.16]",
+          : "border-beam/40 bg-beam/[0.1] text-beam-soft hover:bg-beam/[0.16]",
       )}
     >
       {icon}

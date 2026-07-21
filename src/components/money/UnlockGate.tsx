@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Lock, Wallet } from "lucide-react";
+import { Lock } from "lucide-react";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { PaymentProgress, SuccessBurst } from "./PaymentProgress";
+import { PaymentMethodPicker } from "./PaymentMethodPicker";
+import { PaymentFailure } from "./PaymentFailure";
 import { FundSheet } from "./FundSheet";
 import { usePaymentFlow } from "@/lib/usePaymentFlow";
 import { useAuthIntent } from "@/lib/auth/useAuthIntent";
@@ -80,91 +82,85 @@ export function UnlockGate({
           </div>
         ) : step === "gate" ? (
           <>
-            <div className="font-display text-[19px] font-semibold">Choose how to watch</div>
-            <div className="mt-1 text-[11.5px] text-faint">{contextLabel}</div>
+            <div className="font-display text-[20px] font-semibold tracking-[-0.01em]">Choose how to watch</div>
+            <div className="mt-1 text-[12px] text-muted">
+              goes directly to {creatorName} · <span className="receipt">0%</span> platform cut
+            </div>
+            <div className="mt-0.5 text-[11.5px] text-faint">{contextLabel}</div>
 
             <button
               onClick={() => setDoor("one-time")}
+              aria-pressed={door === "one-time"}
               className={cn(
-                "mt-4 flex w-full items-center justify-between rounded-2xl border p-3.5 text-left transition",
-                door === "one-time" ? "border-[1.5px] border-blue bg-blue/[0.1]" : "border-white/12",
+                "mt-4 flex w-full items-center justify-between rounded-[18px] border p-3.5 text-left transition-colors",
+                door === "one-time" ? "border-2 border-beam bg-beam/[0.08]" : "border border-white/12 hover:border-white/25",
               )}
             >
               <div>
                 <div className="text-[13.5px] font-semibold text-ink-soft">Unlock this once</div>
-                <div className="mt-0.5 text-[11px] text-faint">
+                <div className="mt-0.5 text-[11.5px] text-muted">
                   {resource?.kind === "video" ? "This replay, yours forever" : "This stream + the replay, yours forever"}
                 </div>
               </div>
-              <div className="receipt text-[19px] text-ink-soft">${oneTimeAmount}</div>
+              <div className="receipt text-[19px] text-ink-soft">${oneTimeAmount.toFixed(2)}</div>
             </button>
 
             <button
               onClick={() => setDoor("monthly")}
+              aria-pressed={door === "monthly"}
               className={cn(
-                "relative mt-2.5 flex w-full items-center justify-between rounded-2xl border p-3.5 text-left transition",
-                door === "monthly"
-                  ? "border-[1.5px] border-blue bg-blue/[0.1] shadow-[0_8px_28px_rgba(64,172,255,.18)]"
-                  : "border-white/12",
+                "mt-2.5 flex w-full items-center justify-between rounded-[18px] border p-3.5 text-left transition-colors",
+                door === "monthly" ? "border-2 border-beam bg-beam/[0.08]" : "border border-white/12 hover:border-white/25",
               )}
             >
-              <span className="absolute -top-2.5 left-3.5 rounded-full bg-blue px-2.5 py-[3px] text-[8.5px] font-bold tracking-[0.08em] text-white">
-                BEST VALUE
-              </span>
               <div>
-                <div className="text-[13.5px] font-bold text-white">Subscribe</div>
-                <div className="mt-0.5 text-[11px] text-blue-soft">Every stream, the replays, the chat</div>
+                <div className="text-[13.5px] font-semibold text-ink-soft">Subscribe</div>
+                <div className="mt-0.5 text-[11.5px] text-muted">Every stream, the replays, the chat</div>
               </div>
               <div className="receipt text-[19px] text-ink-soft">
-                ${monthlyAmount}
-                <span className="text-[11px] text-beam-soft">/mo</span>
+                ${monthlyAmount.toFixed(2)}
+                <span className="text-[11px] text-faint">/mo</span>
               </div>
             </button>
 
             <Button size="lg" className="mt-3.5 w-full" onClick={() => setStep("checkout")}>Continue</Button>
-            <div className="mt-3 flex items-center justify-center gap-1.5 text-[10px] text-ghost">
-              <Lock className="size-3" /> Secure · cancel anytime
+            <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-faint">
+              <Lock className="size-3" /> Cancel anytime
             </div>
           </>
         ) : (
           <>
-            <div className="font-display text-[19px] font-semibold">
+            <div className="font-display text-[20px] font-semibold tracking-[-0.01em]">
               {door === "monthly" ? `Subscribe to ${creatorName}` : `Unlock this ${contentNoun}`}
             </div>
-            <div className="mt-4 flex items-center justify-between border-y border-white/[0.07] py-3.5">
+            <div className="mt-1 text-[12px] text-muted">
+              goes directly to {creatorName} · <span className="receipt">0%</span> platform cut
+            </div>
+            <div className="mt-3.5 flex items-center justify-between border-y border-white/[0.07] py-3.5">
               <span className="text-[12.5px] text-muted">Total</span>
               <span className="receipt text-[21px] text-ink-soft">
                 ${amount.toFixed(2)}{door === "monthly" && <span className="text-[12px] text-faint">/mo</span>}
               </span>
             </div>
 
+            <PaymentMethodPicker className="mt-3.5" balance={user?.balanceUsd ?? 0} />
+
             {insufficient ? (
               <>
-                <div className="mt-3.5 flex items-center gap-2.5 rounded-[14px] border border-white/10 bg-white/[0.04] p-3.5">
-                  <div className="flex size-9 items-center justify-center rounded-[11px] bg-blue/[0.14] text-blue-light">
-                    <Wallet className="size-[18px]" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-[12.5px] font-semibold text-ink-soft">Your balance is <span className="receipt">${user?.balanceUsd.toFixed(2)}</span></div>
-                    <div className="mt-0.5 text-[11px] text-faint">Add a little to keep watching</div>
-                  </div>
+                <Button size="lg" className="mt-3.5 w-full" onClick={() => setFundOpen(true)}>
+                  Add money & unlock
+                </Button>
+                <div className="mt-2.5 text-center text-[11px] text-faint">
+                  You&apos;ll review before anything is charged
                 </div>
-                <Button size="lg" className="mt-3.5 w-full" onClick={() => setFundOpen(true)}>Add money & unlock</Button>
-                <div className="mt-2.5 text-center text-[10px] text-ghost">You'll review before anything is charged</div>
               </>
             ) : (
               <>
-                <Button size="lg" className="mt-4 w-full" onClick={pay}>
-                  {door === "monthly" ? "Confirm subscription" : "Unlock"} · ${amount}
+                <Button size="lg" className="mt-3.5 w-full" onClick={pay}>
+                  {door === "monthly" ? "Confirm subscription" : "Unlock"} ·&nbsp;
+                  <span className="receipt">${amount.toFixed(2)}</span>
                 </Button>
-                {error && (
-                  <div className="mt-2 rounded-[11px] border border-red-400/20 bg-red-400/[0.08] px-3 py-2 text-center text-[10.5px] text-red-100">
-                    {error}
-                  </div>
-                )}
-                <div className="mt-2.5 text-center text-[10px] text-ghost">
-                  Balance ${user?.balanceUsd.toFixed(2)} · same secure checkout as tips
-                </div>
+                {error && <PaymentFailure className="mt-3" onRetry={pay} />}
               </>
             )}
           </>

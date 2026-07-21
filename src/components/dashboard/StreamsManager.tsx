@@ -130,7 +130,7 @@ export function StreamsManager() {
                   <button
                     key={m.id}
                     onClick={() => setViewMode(m.id)}
-                    className={`rounded-[12px] border px-2 py-2.5 text-left transition ${viewMode === m.id ? "border-blue bg-blue/[0.12]" : "border-white/10 bg-white/[0.03] hover:border-white/20"}`}
+                    className={`rounded-[12px] border px-2 py-2.5 text-left transition ${viewMode === m.id ? "border-beam bg-beam/[0.12]" : "border-white/10 bg-white/[0.03] hover:border-white/20"}`}
                   >
                     <div className="text-[12px] font-semibold text-white">{m.label}</div>
                     <div className="mt-0.5 text-[9.5px] text-faint">{m.sub}</div>
@@ -156,10 +156,10 @@ export function StreamsManager() {
               </div>
               <button
                 onClick={() => setRecord((r) => !r)}
-                className={`relative h-[26px] w-[46px] shrink-0 rounded-full transition ${record ? "bg-blue" : "bg-white/15"}`}
+                className={`relative h-[26px] w-[46px] shrink-0 rounded-full transition ${record ? "bg-beam" : "bg-white/15"}`}
                 aria-pressed={record}
               >
-                <span className={`absolute top-[3px] size-[20px] rounded-full bg-white transition-all ${record ? "left-[23px]" : "left-[3px]"}`} />
+                <span className={`absolute top-[3px] size-[20px] rounded-full bg-white transition-[left] duration-200 ease-[cubic-bezier(.22,1,.36,1)] ${record ? "left-[23px]" : "left-[3px]"}`} />
               </button>
             </label>
             <Button onClick={save} disabled={saving} className="mt-1 w-full">
@@ -169,7 +169,7 @@ export function StreamsManager() {
         </Panel>
 
         {/* recordings */}
-        <Panel title="Past recordings" action={<Link href="/dashboard/videos" className="text-[11px] font-semibold text-blue">Manage</Link>}>
+        <Panel title="Past recordings" action={<Link href="/dashboard/videos" className="text-[11px] font-semibold text-beam">Manage</Link>}>
           {recordings.length ? (
             <div className="flex flex-col gap-3">
               {recordings.slice(0, 6).map((v) => (
@@ -196,7 +196,7 @@ export function StreamsManager() {
   );
 }
 
-const INPUT = "h-[44px] w-full rounded-[12px] border border-white/12 bg-white/[0.05] px-3.5 text-[13.5px] text-white placeholder:text-faint focus:border-blue/60 focus:outline-none";
+const INPUT = "h-[44px] w-full rounded-[12px] border border-white/12 bg-white/[0.05] px-3.5 text-[13.5px] text-white placeholder:text-faint focus:border-beam/60 focus:outline-none";
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

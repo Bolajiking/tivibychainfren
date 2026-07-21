@@ -151,8 +151,8 @@ export function LiveFieldBroadcaster({ config }: { config: LiveFieldPublicConfig
       <header className="border-b border-white/[0.08] bg-[#09090a]/95 px-4 py-3 backdrop-blur md:px-7">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-cyan-300/20 bg-cyan-300/[0.08] shadow-[0_0_24px_rgba(34,211,238,.08)]">
-              <Radio className="size-4 text-cyan-200" />
+            <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-live/35 bg-live/[0.12]">
+              <Radio className="size-4 text-live" />
             </span>
             <div className="min-w-0">
               <div className="truncate text-[13px] font-semibold">Browser live field check</div>
@@ -227,7 +227,7 @@ function EvidenceRow({ label, value, active }: { label: string; value: string; a
     <div className="flex items-center justify-between border-t border-white/[0.06] py-2.5 first:border-t-0">
       <span className="text-[12px] text-white/50">{label}</span>
       <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-white/80">
-        <span className={`size-1.5 rounded-full ${active ? "bg-emerald-300 shadow-[0_0_10px_rgba(110,231,183,.65)]" : "bg-white/25"}`} />
+        <span className={`size-1.5 rounded-full ${active ? "bg-emerald-300" : "bg-white/25"}`} />
         {value}
       </span>
     </div>

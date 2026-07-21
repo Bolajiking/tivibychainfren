@@ -66,11 +66,12 @@ export function FundSheet({
           <button
             key={p}
             onClick={() => setAmount(p)}
+            aria-pressed={amount === p}
             className={cn(
-              "rounded-[14px] py-[15px] text-center text-[15px] font-semibold transition",
+              "receipt rounded-[14px] py-[15px] text-center text-[15px] transition-colors",
               amount === p
-                ? "border-[1.5px] border-blue bg-blue/[0.18] text-white shadow-[0_6px_18px_rgba(64,172,255,.28)]"
-                : "border border-white/12 bg-white/[0.06] text-ink-dim",
+                ? "border-2 border-beam bg-beam/[0.08] text-ink-soft"
+                : "border border-white/12 text-ink-dim hover:border-white/25",
             )}
           >
             ${p}
@@ -79,7 +80,7 @@ export function FundSheet({
       </div>
 
       <div className="mt-3.5 flex items-center gap-2.5 rounded-[14px] border border-white/12 p-3.5">
-        <div className="flex size-9 items-center justify-center rounded-md border border-white/12 bg-gradient-to-br from-[#2b2b2b] to-[#161616] text-blue-light">
+        <div className="grid size-9 place-items-center rounded-[10px] border border-white/12 text-beam-soft">
           <CreditCard className="size-4" />
         </div>
         <div className="flex-1">

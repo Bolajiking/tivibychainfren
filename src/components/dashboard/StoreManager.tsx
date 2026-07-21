@@ -128,7 +128,7 @@ export function StoreManager({ initial, creator, stream }: { initial: Product[];
               <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-faint">
                 <span className="receipt text-white">${p.price}</span>
                 <span>· {p.inventory} in stock</span>
-                {p.subsOnly && <span className="rounded bg-blue/[0.18] px-1.5 py-px text-[8px] font-bold text-blue-soft">SUBS</span>}
+                {p.subsOnly && <span className="rounded bg-beam/[0.18] px-1.5 py-px text-[8px] font-bold text-beam-soft">SUBS</span>}
                 <StatusBadge status={p.status} />
               </div>
             </div>
@@ -141,7 +141,7 @@ export function StoreManager({ initial, creator, stream }: { initial: Product[];
         </div>
       ) : (
         <div className="flex min-h-[52vh] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 px-6 py-14 text-center">
-          <PackageCheck className="size-8 text-blue-light" />
+          <PackageCheck className="size-8 text-beam-soft" />
           <div className="mt-3 text-sm font-semibold text-ink-dim">No products yet</div>
           <div className="mt-1 max-w-[310px] text-[12px] leading-relaxed text-faint">Add merch, digital files or paid spots, then pin one during a live stream.</div>
           <Button size="pill" className="mt-4" onClick={openAdd} disabled={!stream}>
@@ -153,7 +153,7 @@ export function StoreManager({ initial, creator, stream }: { initial: Product[];
       <Sheet open={open} onOpenChange={setOpen} title={editing ? "Edit product" : "Add product"}>
         <div className="font-display text-[19px] font-semibold">{editing ? "Edit product" : "Add product"}</div>
         <div className="mt-4 flex items-start gap-3">
-          <label className="relative flex size-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[14px] border-2 border-dashed border-white/16 bg-white/[0.05] text-faint hover:border-blue/60">
+          <label className="relative flex size-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-[14px] border-2 border-dashed border-white/16 bg-white/[0.05] text-faint hover:border-beam/60">
             {imagePreview ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={imagePreview} alt="" className="absolute inset-0 size-full object-cover" />
@@ -169,16 +169,16 @@ export function StoreManager({ initial, creator, stream }: { initial: Product[];
           </div>
         </div>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <input value={form.name} onChange={(e) => set({ name: e.target.value })} placeholder="Product name" className="h-12 rounded-[13px] border border-white/12 bg-white/[0.06] px-4 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none sm:col-span-2" />
-          <input value={form.price} onChange={(e) => set({ price: e.target.value.replace(/[^0-9.]/g, "") })} placeholder="Price (USD)" inputMode="decimal" className="h-12 rounded-[13px] border border-white/12 bg-white/[0.06] px-4 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none" />
-          <input value={form.inventory} onChange={(e) => set({ inventory: e.target.value.replace(/[^0-9]/g, "") })} placeholder="Inventory" inputMode="numeric" className="h-12 rounded-[13px] border border-white/12 bg-white/[0.06] px-4 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none" />
-          <select value={form.productType} onChange={(e) => set({ productType: e.target.value as Product["productType"] })} className="h-12 rounded-[13px] border border-white/12 bg-[#151518] px-4 text-sm text-white focus:border-blue focus:outline-none sm:col-span-2">
+          <input value={form.name} onChange={(e) => set({ name: e.target.value })} placeholder="Product name" className="h-12 rounded-[13px] border border-white/12 bg-white/[0.06] px-4 text-sm text-white placeholder:text-faint focus:border-beam focus:outline-none sm:col-span-2" />
+          <input value={form.price} onChange={(e) => set({ price: e.target.value.replace(/[^0-9.]/g, "") })} placeholder="Price (USD)" inputMode="decimal" className="h-12 rounded-[13px] border border-white/12 bg-white/[0.06] px-4 text-sm text-white placeholder:text-faint focus:border-beam focus:outline-none" />
+          <input value={form.inventory} onChange={(e) => set({ inventory: e.target.value.replace(/[^0-9]/g, "") })} placeholder="Inventory" inputMode="numeric" className="h-12 rounded-[13px] border border-white/12 bg-white/[0.06] px-4 text-sm text-white placeholder:text-faint focus:border-beam focus:outline-none" />
+          <select value={form.productType} onChange={(e) => set({ productType: e.target.value as Product["productType"] })} className="h-12 rounded-[13px] border border-white/12 bg-[#151518] px-4 text-sm text-white focus:border-beam focus:outline-none sm:col-span-2">
             <option value="merch">Merch</option>
             <option value="physical">Physical</option>
             <option value="digital">Digital</option>
             <option value="ad">Paid spot</option>
           </select>
-          <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} placeholder="Description" className="min-h-24 resize-none rounded-[13px] border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none sm:col-span-2" />
+          <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} placeholder="Description" className="min-h-24 resize-none rounded-[13px] border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-white placeholder:text-faint focus:border-beam focus:outline-none sm:col-span-2" />
           <label className="flex h-12 items-center gap-2.5 rounded-[13px] border border-white/12 bg-white/[0.04] px-4 text-[12px] text-ink-dim sm:col-span-2">
             <input type="checkbox" checked={form.subsOnly} onChange={(e) => set({ subsOnly: e.target.checked })} className="size-4 accent-[#40acff]" />
             Subscribers only
@@ -202,7 +202,7 @@ function ProductMenu({ product, busy, onStatus }: { product: Product; busy: bool
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content align="end" className="z-50 min-w-40 rounded-xl border border-white/10 bg-elevated p-1.5 text-[12px] text-ink-dim shadow-[0_18px_50px_rgba(0,0,0,.45)]">
+        <DropdownMenu.Content align="end" className="z-50 min-w-40 rounded-xl border border-white/10 bg-elevated p-1.5 text-[12px] text-ink-dim">
           <DropdownMenu.Item onSelect={() => onStatus(product, "active")} className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 outline-none hover:bg-white/[0.07] hover:text-white">
             <CheckCircle2 className="size-3.5" /> Active
           </DropdownMenu.Item>
@@ -219,7 +219,7 @@ function ProductMenu({ product, busy, onStatus }: { product: Product; busy: bool
 }
 
 function StatusBadge({ status }: { status: Product["status"] }) {
-  if (status === "active") return <span className="rounded bg-online/[0.16] px-1.5 py-px text-[8px] font-bold text-online">LIVE</span>;
+  if (status === "active") return <span className="rounded bg-earn/[0.16] px-1.5 py-px text-[8px] font-bold text-earn">LIVE</span>;
   if (status === "sold_out") return <span className="rounded bg-white/[0.08] px-1.5 py-px text-[8px] font-bold text-ink-dim">SOLD</span>;
   return <span className="rounded bg-red-500/10 px-1.5 py-px text-[8px] font-bold text-red-200">ARCHIVED</span>;
 }

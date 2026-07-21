@@ -2,29 +2,54 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Download, Film, HandCoins, Radio, Settings, ShoppingBag, TrendingUp, UserPlus, LayoutGrid } from "lucide-react";
+import { BarChart3, Copy, HandCoins, MessageSquare, Settings, ShoppingBag, UserPlus } from "lucide-react";
 import { DashboardSidebar, CreatorBottomNav } from "@/components/nav/Rails";
 import { OwnerToggleStatic } from "@/components/dashboard/OwnerToggleStatic";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Media";
-import { GateBadge } from "@/components/ui/Badges";
+import { StatTile } from "@/components/ui/StatTile";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { SectionLabel, ReplayPill } from "@/components/ui/Badges";
+import { Mark } from "@/components/brand/Logo";
+import { GoLiveGlyph, StoreGlyph, StageGlyph, ClipGlyph, WalletGlyph } from "@/components/brand/Glyphs";
 import { useSession } from "@/lib/store/session";
 import { getMyCreatorProfile } from "@/lib/profile-client";
 import { MOCK_MODE } from "@/lib/config";
 import { formatCount } from "@/lib/cn";
+import { computeRpdm, revenueMix } from "@/lib/rpdm";
 import { useStoreHydrated } from "@/components/dashboard/DashboardScaffold";
 import { buildAuthHref } from "@/lib/auth/redirect";
-import type { CreatorNotification, CreatorProfilePayload, ViewMode } from "@/lib/types";
+import type { CreatorNotification, CreatorProfilePayload } from "@/lib/types";
 
+/**
+ * F6 — the dashboard answers three questions above the fold:
+ *   Am I making money?  (RPDM + earned, receipt layer)
+ *   Is anything live or scheduled?
+ *   Who arrived?
+ *
+ * A creator who just finished onboarding sees something different: one
+ * dominant action and the measured claim-to-here time. Everything else waits
+ * until they've been on air once.
+ */
 export function DashboardHome() {
   const { user, creator: sessionCreator, setCreator } = useSession();
   const hydrated = useStoreHydrated();
+  const searchParams = useSearchParams();
   const [payload, setPayload] = useState<CreatorProfilePayload | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // "?claimed=<ms>" is set by onboarding so the 60-second path can be measured
+  // and shown back to the creator — the promise, kept in front of them.
+  const claimedAt = Number(searchParams.get("claimed")) || null;
+  const [elapsed, setElapsed] = useState<number | null>(null);
   useEffect(() => {
-    // Wait for the persisted session before deciding (avoids a hard-refresh hang).
+    if (!claimedAt) return;
+    setElapsed(Math.max(0, Math.round((Date.now() - claimedAt) / 1000)));
+  }, [claimedAt]);
+
+  useEffect(() => {
     if (!hydrated) return;
     let alive = true;
     async function load() {
@@ -33,14 +58,11 @@ export function DashboardHome() {
         setLoading(false);
         return;
       }
-
       if (MOCK_MODE) {
-        // No backend in mock mode — never hit the real API (it can't resolve).
         setPayload(sessionCreator ? mockPayload(sessionCreator) : null);
         setLoading(false);
         return;
       }
-
       setLoading(true);
       try {
         const next = await getMyCreatorProfile(user.walletAddress);
@@ -59,24 +81,34 @@ export function DashboardHome() {
     return () => {
       alive = false;
     };
-    // Depend on stable ids only — `setCreator` writes a fresh creator object each
-    // fetch, so depending on the object/user reference would loop forever.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, user?.walletAddress, sessionCreator?.creatorId]);
 
   const creator = payload?.creator ?? sessionCreator;
-  const stats = useMemo(() => buildStats(payload), [payload]);
+  const rpdm = useMemo(() => computeRpdm(payload), [payload]);
+  const mix = useMemo(() => revenueMix(payload), [payload]);
+  const hasHistory = rpdm.revenueUsd > 0 || (payload?.videos.length ?? 0) > 0;
+
+  function copyLink() {
+    if (!creator) return;
+    navigator.clipboard?.writeText(`https://tvin.bio/${creator.username}`);
+    toast.success("Link copied");
+  }
 
   if (loading) {
-    return <DashboardShell creator={creator}><DashboardSkeleton /></DashboardShell>;
+    return (
+      <DashboardShell creator={creator}>
+        <DashboardSkeleton />
+      </DashboardShell>
+    );
   }
 
   if (!user) {
     return (
       <DashboardShell creator={creator}>
-        <EmptyState
+        <SignedOut
           title="Sign in to your dashboard"
-          body="Your creator dashboard lives behind sign-in. Continue to access your streams, store and earnings."
+          body="Your streams, store and earnings live behind sign-in."
           action="Sign in"
           href={buildAuthHref({ role: "creator", next: "/dashboard" })}
         />
@@ -87,95 +119,231 @@ export function DashboardHome() {
   if (!creator) {
     return (
       <DashboardShell creator={creator}>
-        <EmptyState
-          title="Create your channel profile"
-          body="Your dashboard becomes useful after your profile exists. Claim a link, then every stream, product and payment rolls up here."
-          action="Set up profile"
-          href="/onboarding"
+        <SignedOut
+          title="Claim your channel first"
+          body="Your dashboard becomes useful the moment your address exists."
+          action="Claim your channel"
+          href="/start"
         />
       </DashboardShell>
     );
   }
 
+  // ── The first-run landing: one dominant action ────────────────────────
+  if (!hasHistory) {
+    return (
+      <DashboardShell creator={creator}>
+        <h1 className="font-display text-[24px] font-semibold tracking-[-0.02em]">
+          Welcome, {creator.displayName.split(" ")[0]}
+        </h1>
+        <p className="mt-2 text-[13px] leading-relaxed text-muted">
+          Your channel is live at <span className="receipt text-ink-soft">tvin.bio/{creator.username}</span> — share
+          it, or go straight on air.
+        </p>
+
+        <div className="mt-4 flex flex-col items-center gap-4 rounded-[18px] border border-white/[0.08] bg-surface-2 px-5 py-10 text-center">
+          <Mark size={44} className="text-ink-soft" />
+          <Button asChild variant="golive" size="lg">
+            <Link href="/dashboard/broadcast">
+              <GoLiveGlyph size={18} /> Go live
+            </Link>
+          </Button>
+          {elapsed != null && elapsed < 3600 && (
+            <div className="receipt text-[11px] text-ghost">claimed → here in {formatElapsed(elapsed)}</div>
+          )}
+        </div>
+
+        <div className="mt-3 flex gap-2">
+          <Button variant="secondary" size="pill" className="flex-1" onClick={copyLink}>
+            <Copy className="size-[15px]" /> Copy my link
+          </Button>
+          <Button asChild variant="secondary" size="pill" className="flex-1">
+            <Link href="/dashboard/store">
+              <StoreGlyph size={15} /> Add a product
+            </Link>
+          </Button>
+        </div>
+
+        <p className="outcome mt-8 text-center text-[14px] text-muted">a channel you own</p>
+      </DashboardShell>
+    );
+  }
+
+  // ── The running channel ───────────────────────────────────────────────
   return (
     <DashboardShell creator={creator}>
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="truncate font-display text-[22px] font-semibold tracking-[-0.02em]">Welcome back, {creator.displayName}</h1>
-          <div className="mt-1 text-[12.5px] text-muted">/{creator.username} is ready for the next drop.</div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap sm:shrink-0">
-          <Button asChild variant="secondary" size="pill" className="shrink-0"><Link href={`/${creator.username}?install=1`}><Download className="size-4" /> Save channel</Link></Button>
-          <Button asChild variant="secondary" size="pill" className="shrink-0"><Link href="/dashboard/settings" aria-label="Channel settings"><Settings className="size-4" /></Link></Button>
-          <Button asChild variant="secondary" size="pill" className="shrink-0"><Link href="/dashboard/videos"><Film className="size-4" /> Videos</Link></Button>
-          <Button asChild variant="golive" size="pill" className="flex-1 sm:flex-none"><Link href="/dashboard/broadcast"><Radio className="size-4" /> Go live</Link></Button>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h1 className="font-display text-[22px] font-semibold tracking-[-0.02em]">This week</h1>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={copyLink}>
+            <Copy className="size-[15px] md:mr-0" />
+            <span className="hidden md:inline">Copy link</span>
+          </Button>
+          <Button asChild variant="golive" size="sm">
+            <Link href="/dashboard/broadcast">
+              <GoLiveGlyph size={16} /> Go live
+            </Link>
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl border border-white/[0.06] bg-raised p-4">
-            <div className="text-[10.5px] text-faint">{s.label}</div>
-            <div className="receipt mt-1.5 text-2xl text-ink-soft">{s.value}</div>
-            {s.delta && <div className="mt-1 inline-flex items-center gap-1 text-[10px] text-earn"><TrendingUp className="size-[11px]" /> {s.delta}</div>}
-          </div>
-        ))}
+      {/* Am I making money? RPDM leads — the metric that ties airtime to income. */}
+      <div className="stagger grid grid-cols-2 gap-3">
+        <StatTile
+          label="Rev / delivered min"
+          value={rpdm.perMinute != null ? `$${rpdm.perMinute.toFixed(2)}` : "—"}
+          sub={
+            rpdm.deliveredMinutes > 0
+              ? `est. ${formatCount(rpdm.deliveredMinutes)} min delivered`
+              : "no minutes delivered yet"
+          }
+        />
+        <StatTile
+          label="Earned"
+          value={`$${rpdm.revenueUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+          sub={rpdm.revenueUsd > 0 ? "100% yours · 0% cut" : undefined}
+          tone="earn"
+        />
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-[1.5fr_1fr]">
-        <div className="rounded-2xl border border-white/[0.06] bg-raised p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-semibold text-ink-dim">Recent content</span>
-            <Link href="/dashboard/broadcast" className="text-[11px] font-semibold text-blue">Manage</Link>
-          </div>
-          <div className="flex flex-col gap-3">
-            {payload?.stream && (
-              <ContentRow
-                color={payload.stream.thumbColor}
-                src={creator.headerUrl ?? creator.avatarUrl}
-                title={payload.stream.title}
-                meta={payload.stream.isActive ? `${formatCount(payload.stream.viewerCount)} watching` : "Ready to go live"}
-                viewMode={payload.stream.viewMode}
-                amount={payload.stream.amount}
-              />
-            )}
-            {payload?.videos.map((v) => (
-              <ContentRow
-                key={v.playbackId}
-                color={v.thumbColor}
-                src={v.thumbnailUrl}
-                title={v.title}
-                meta={`${formatCount(v.views)} views`}
-                viewMode={v.viewMode}
-                amount={v.amount}
-              />
+      {/* Revenue mix in beam steps — earn-green is reserved for money received. */}
+      {mix.total > 0 && (
+        <div className="mt-3 rounded-[14px] border border-white/[0.06] bg-surface-2 p-[14px]">
+          <div className="flex flex-col gap-2.5">
+            {mix.rows.map((row, index) => (
+              <div key={row.label}>
+                <div className="flex justify-between text-[12px]">
+                  <span className="text-muted">{row.label}</span>
+                  <span className="receipt text-ink-soft">
+                    ${row.value.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="mt-1.5 h-1 rounded-full bg-white/[0.08]">
+                  <span
+                    className="block h-full rounded-full bg-beam"
+                    style={{ width: `${Math.max(row.share * 100, row.value > 0 ? 4 : 0)}%`, opacity: 1 - index * 0.3 }}
+                  />
+                </div>
+              </div>
             ))}
-            {!payload?.stream && !payload?.videos.length && (
-              <EmptyList icon={<LayoutGrid className="size-4" />} label="No content yet. Go live or upload a replay." />
-            )}
           </div>
         </div>
+      )}
 
-        <div className="rounded-2xl border border-white/[0.06] bg-raised p-4">
-          <div className="mb-3 text-xs font-semibold text-ink-dim">Activity</div>
-          <div className="flex flex-col gap-3">
-            {payload?.notifications.length ? payload.notifications.map((a) => (
-              <ActivityRow key={a.id} activity={a} />
-            )) : (
-              <EmptyList icon={<HandCoins className="size-4" />} label="Payments, tips and orders will appear here." />
-            )}
+      {/* Is anything live or scheduled? */}
+      <div className="mt-5">
+        <SectionLabel className="mb-3">On air</SectionLabel>
+        {payload?.stream ? (
+          <div className="flex items-center gap-3 rounded-[14px] border border-white/[0.06] bg-surface-2 p-3">
+            <div
+              className="relative aspect-video w-[72px] shrink-0 overflow-hidden rounded-[8px]"
+              style={{ background: `linear-gradient(135deg, ${payload.stream.thumbColor}, #0d1420)` }}
+            >
+              {(creator.headerUrl ?? creator.avatarUrl) && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={creator.headerUrl ?? creator.avatarUrl} alt="" className="absolute inset-0 size-full object-cover" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[12.5px] text-ink-soft">{payload.stream.title}</div>
+              <div className="receipt mt-1 text-[10px] text-faint">
+                {payload.stream.isActive
+                  ? `LIVE · ${formatCount(payload.stream.viewerCount)} watching`
+                  : "READY · not on air"}
+              </div>
+            </div>
+            <Button asChild size="sm" variant={payload.stream.isActive ? "secondary" : "primary"}>
+              <Link href="/dashboard/broadcast">{payload.stream.isActive ? "Manage" : "Go live"}</Link>
+            </Button>
           </div>
+        ) : (
+          <EmptyState
+            icon={<StageGlyph size={28} />}
+            title="Nothing scheduled"
+            action={
+              <Button asChild size="sm">
+                <Link href="/dashboard/broadcast">Go live</Link>
+              </Button>
+            }
+          />
+        )}
+      </div>
+
+      {/* Replays waiting to be published — one card, one action. */}
+      {(payload?.videos.length ?? 0) > 0 && (
+        <div className="mt-5">
+          <SectionLabel className="mb-3">Replays</SectionLabel>
+          <div className="flex flex-col gap-2">
+            {payload!.videos.slice(0, 4).map((video) => (
+              <div key={video.playbackId} className="flex items-center gap-3 rounded-[14px] border border-white/[0.06] bg-surface-2 p-3">
+                <div
+                  className="relative aspect-video w-[72px] shrink-0 overflow-hidden rounded-[8px]"
+                  style={{ background: `linear-gradient(135deg, ${video.thumbColor}, #0d1420)` }}
+                >
+                  {video.thumbnailUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={video.thumbnailUrl} alt="" className="absolute inset-0 size-full object-cover" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[12.5px] text-ink-soft">{video.title}</div>
+                  <div className="receipt mt-1 text-[10px] text-faint">{formatCount(video.views)} views</div>
+                </div>
+                <ReplayPill small />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Every room, one tap from the Channel tab — the mobile bottom nav is a
+          triad, so the other rooms live here (desktop uses the left rail). */}
+      <div className="mt-5 md:hidden">
+        <SectionLabel className="mb-3">Manage</SectionLabel>
+        <div className="stagger grid grid-cols-3 gap-2.5">
+          <RoomLink href="/dashboard/streams" label="Streams" icon={<GoLiveGlyph size={18} />} />
+          <RoomLink href="/dashboard/videos" label="Videos" icon={<ClipGlyph size={18} />} />
+          <RoomLink href="/dashboard/store" label="Store" icon={<StoreGlyph size={18} />} />
+          <RoomLink href="/dashboard/monetization" label="Money" icon={<WalletGlyph size={18} />} />
+          <RoomLink href="/dashboard/analytics" label="Analytics" icon={<BarChart3 className="size-[18px]" />} />
+          <RoomLink href="/dashboard/chat" label="Chat" icon={<MessageSquare className="size-[18px]" />} />
+          <RoomLink href="/dashboard/settings" label="Settings" icon={<Settings className="size-[18px]" />} />
         </div>
       </div>
 
+      {/* Who arrived? */}
+      <div className="mt-5">
+        <SectionLabel className="mb-3">Who arrived</SectionLabel>
+        {payload?.notifications.length ? (
+          <div className="flex flex-col gap-2.5 rounded-[14px] border border-white/[0.06] bg-surface-2 p-[14px]">
+            {payload.notifications.slice(0, 6).map((activity) => (
+              <ActivityRow key={activity.id} activity={activity} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            icon={<UserPlus className="size-7" />}
+            title="No arrivals yet"
+            outcome="fans you keep, not followers you rent"
+          />
+        )}
+      </div>
     </DashboardShell>
   );
 }
 
-function DashboardShell({ creator, children }: { creator?: CreatorProfilePayload["creator"] | null; children: React.ReactNode }) {
+function DashboardShell({
+  creator,
+  children,
+}: {
+  creator?: CreatorProfilePayload["creator"] | null;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-screen bg-canvas">
-      <div className="hidden md:flex"><DashboardSidebar active="overview" creator={creator} /></div>
+      <div className="hidden md:flex">
+        <DashboardSidebar active="overview" creator={creator} />
+      </div>
       <main className="flex min-h-screen min-w-0 flex-1 flex-col">
         <div className="hidden h-14 shrink-0 items-center justify-between border-b border-white/[0.06] px-6 md:flex">
           <div className="font-display text-[16px] font-semibold">Overview</div>
@@ -184,52 +352,49 @@ function DashboardShell({ creator, children }: { creator?: CreatorProfilePayload
             <Avatar seed={creator?.avatarColor ?? "#2a2a2a"} src={creator?.avatarUrl} size={32} />
           </div>
         </div>
-        <div className="min-w-0 flex-1 overflow-x-clip px-4 py-5 md:px-6">{children}</div>
-        <div className="md:hidden"><CreatorBottomNav /></div>
+        <div className="mx-auto min-w-0 w-full max-w-[880px] flex-1 overflow-x-clip px-4 py-5 md:px-6">{children}</div>
+        <div className="md:hidden">
+          <CreatorBottomNav />
+        </div>
       </main>
     </div>
   );
 }
 
-function ContentRow({ color, src, title, meta, viewMode, amount }: { color: string; src?: string | null; title: string; meta: string; viewMode: ViewMode; amount: number }) {
+function RoomLink({ href, label, icon }: { href: string; label: string; icon: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="relative h-10 w-[62px] shrink-0 overflow-hidden rounded-lg" style={{ background: `radial-gradient(80% 80% at 50% 40%,${color},#0a0a0c)` }}>
-        {src && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={src} alt="" className="absolute inset-0 size-full object-cover" />
-        )}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-[12px] font-semibold">{title}</div>
-        <div className="mt-1 flex items-center gap-2">
-          <GateBadge viewMode={viewMode} amount={amount} />
-          <span className="text-[10px] text-faint">{meta}</span>
-        </div>
-      </div>
-    </div>
+    <Link
+      href={href}
+      className="tap flex flex-col items-center gap-2 rounded-[14px] border border-white/[0.06] bg-surface-2 py-3.5 text-faint transition-colors hover:border-white/[0.16] hover:text-ink-dim"
+    >
+      {icon}
+      <span className="text-[11px] font-medium">{label}</span>
+    </Link>
   );
 }
 
 function ActivityRow({ activity }: { activity: CreatorNotification }) {
   return (
     <div className="flex items-center gap-2.5">
-      <span className={`flex size-6 items-center justify-center rounded-full ${actColor(activity.type)}`}>{actIcon(activity.type)}</span>
-      <div className="text-[11px] text-ink-dim">{activity.message}</div>
+      <span className={`grid size-6 place-items-center rounded-full ${actColor(activity.type)}`}>
+        {actIcon(activity.type)}
+      </span>
+      <div className="min-w-0 flex-1 truncate text-[12px] text-ink-dim">{activity.message}</div>
+      {activity.amount != null && <span className="receipt shrink-0 text-[12px] text-earn">${activity.amount.toFixed(2)}</span>}
     </div>
   );
 }
 
-function EmptyState({ title, body, action, href }: { title: string; body: string; action: string; href: string }) {
+function SignedOut({ title, body, action, href }: { title: string; body: string; action: string; href: string }) {
   return (
     <div className="flex min-h-[62vh] items-center justify-center">
       <div className="max-w-[390px] text-center">
-        <div className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-blue-light">
-          <Radio className="size-5" />
-        </div>
-        <h1 className="mt-4 font-display text-[24px] font-semibold tracking-[-0.02em]">{title}</h1>
+        <Mark size={40} className="mx-auto text-ghost" />
+        <h1 className="font-display mt-4 text-[24px] font-semibold tracking-[-0.02em]">{title}</h1>
         <p className="mt-2 text-[13px] leading-relaxed text-muted">{body}</p>
-        <Button asChild size="lg" className="mt-5"><Link href={href}>{action}</Link></Button>
+        <Button asChild size="lg" className="mt-5">
+          <Link href={href}>{action}</Link>
+        </Button>
       </div>
     </div>
   );
@@ -238,36 +403,22 @@ function EmptyState({ title, body, action, href }: { title: string; body: string
 function DashboardSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="h-8 w-48 rounded-xl bg-white/10" />
-      <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, index) => <div key={index} className="h-28 rounded-2xl bg-white/[0.06]" />)}
+      <div className="h-8 w-48 rounded-xl bg-raised" />
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        {Array.from({ length: 2 }).map((_, index) => (
+          <div key={index} className="h-28 rounded-[14px] bg-raised" />
+        ))}
       </div>
-      <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-[1.5fr_1fr]">
-        <div className="h-64 rounded-2xl bg-white/[0.06]" />
-        <div className="h-64 rounded-2xl bg-white/[0.06]" />
-      </div>
+      <div className="mt-4 h-40 rounded-[14px] bg-raised" />
     </div>
   );
 }
 
-function EmptyList({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.035] px-3 py-3 text-[11.5px] text-faint">{icon}{label}</div>;
-}
-
-function buildStats(payload: CreatorProfilePayload | null): { label: string; value: string; delta?: string }[] {
-  const notifications = payload?.notifications ?? [];
-  const orders = payload?.orders ?? [];
-  const videos = payload?.videos ?? [];
-  const earnings = [...notifications.map((n) => n.amount ?? 0), ...orders.map((o) => o.amount)].reduce((a, b) => a + b, 0);
-  const tips = notifications.filter((n) => n.type === "donation").reduce((sum, n) => sum + (n.amount ?? 0), 0);
-  const views = videos.reduce((sum, v) => sum + v.views, 0);
-
-  return [
-    { label: "Subscribers", value: formatCount(payload?.creator.subscriberCount ?? 0) },
-    { label: "Earnings", value: `$${earnings.toLocaleString(undefined, { maximumFractionDigits: 0 })}` },
-    { label: "Video views", value: formatCount(views) },
-    { label: "Tips", value: `$${tips.toLocaleString(undefined, { maximumFractionDigits: 0 })}` },
-  ];
+/** mm:ss — the claim-to-live path, measured and shown back. */
+function formatElapsed(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 function mockPayload(creator: CreatorProfilePayload["creator"]): CreatorProfilePayload {
@@ -295,15 +446,15 @@ function mockPayload(creator: CreatorProfilePayload["creator"]): CreatorProfileP
   };
 }
 
-function actColor(t: string) {
-  if (t === "donation") return "bg-blue/[0.16] text-blue-light";
-  if (t === "subscription") return "bg-online/[0.16] text-online";
-  return "bg-lime/[0.16] text-lime";
+function actColor(type: string) {
+  if (type === "donation") return "bg-earn/[0.15] text-earn";
+  if (type === "subscription") return "bg-beam/[0.16] text-beam-soft";
+  return "bg-white/[0.08] text-muted";
 }
 
-function actIcon(t: string) {
-  if (t === "donation") return <HandCoins className="size-3" />;
-  if (t === "subscription") return <UserPlus className="size-3" />;
+function actIcon(type: string) {
+  if (type === "donation") return <HandCoins className="size-3" />;
+  if (type === "subscription") return <UserPlus className="size-3" />;
   return <ShoppingBag className="size-3" />;
 }
 

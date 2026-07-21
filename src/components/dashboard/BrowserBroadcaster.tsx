@@ -1175,7 +1175,7 @@ function BroadcastSurface({
           </span>
         )}
         {pending && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-blue/35 bg-blue/15 px-2.5 py-1 text-[9px] font-bold text-blue-soft backdrop-blur">
+          <span className="inline-flex items-center gap-1 rounded-full border border-beam/35 bg-beam/15 px-2.5 py-1 text-[9px] font-bold text-beam-soft backdrop-blur">
             <Loader2 className="size-3 animate-spin" /> STARTING
           </span>
         )}
@@ -1193,14 +1193,14 @@ function BroadcastSurface({
 
       <div className="absolute bottom-[78px] left-3.5 right-3.5 z-10 flex flex-col gap-2 md:right-auto md:w-[320px]">
         <div className="rounded-xl border border-white/10 bg-[#08080a]/80 p-3 backdrop-blur">
-          <div className="text-[9px] font-bold tracking-[0.08em] text-blue-soft">{live ? "LIVE PROGRAM" : "READY ROOM"}</div>
+          <div className="text-[9px] font-bold tracking-[0.08em] text-beam-soft">{live ? "LIVE PROGRAM" : "READY ROOM"}</div>
           <div className="mt-1 truncate text-[14px] font-semibold">{title}</div>
         </div>
         {activeProduct && (
-          <div className="flex items-center gap-2.5 rounded-xl border border-blue/40 bg-[#08080a]/85 p-2 backdrop-blur">
+          <div className="flex items-center gap-2.5 rounded-xl border border-beam/40 bg-[#08080a]/85 p-2 backdrop-blur">
             <Tile seed={activeProduct.imageColor} src={activeProduct.imageUrl} size={34} radius={10} />
             <div className="min-w-0">
-              <div className="text-[8px] font-bold tracking-[0.08em] text-blue-soft">PINNED</div>
+              <div className="text-[8px] font-bold tracking-[0.08em] text-beam-soft">PINNED</div>
               <div className="truncate text-[11px] font-semibold">
                 {activeProduct.name} · ${activeProduct.price}
               </div>
@@ -1211,12 +1211,12 @@ function BroadcastSurface({
 
       {(pending || publishError) && (
         <div
-          className="absolute inset-x-3.5 top-16 z-20 rounded-xl border border-white/10 bg-[#08080a]/90 px-3 py-2.5 text-[11.5px] text-ink-dim shadow-[0_14px_38px_rgba(0,0,0,.32)] backdrop-blur md:left-auto md:w-[330px]"
+          className="absolute inset-x-3.5 top-16 z-20 rounded-xl border border-white/10 bg-[#08080a]/90 px-3 py-2.5 text-[11.5px] text-ink-dim backdrop-blur md:left-auto md:w-[330px]"
           role="status"
           aria-live="polite"
         >
           <div className="flex items-start gap-2.5">
-            {publishError ? <X className="mt-0.5 size-3.5 shrink-0 text-red-200" /> : <Loader2 className="mt-0.5 size-3.5 shrink-0 animate-spin text-blue-light" />}
+            {publishError ? <X className="mt-0.5 size-3.5 shrink-0 text-red-200" /> : <Loader2 className="mt-0.5 size-3.5 shrink-0 animate-spin text-beam-soft" />}
             <div className="min-w-0 flex-1">
               <div className="font-semibold text-white">
                 {publishError ? "Browser live needs attention" : recoveryNotice ?? phase ?? "Starting live session"}
@@ -1225,7 +1225,7 @@ function BroadcastSurface({
                 {publishError ? publishError : "Keep this tab open while TVinBio confirms a real Livepeer session."}
               </div>
               {!publishError && retryCount > 0 && (
-                <div className="mt-1 text-[10.5px] text-blue-soft">Retry {retryCount}/{BROADCAST_MAX_AUTO_RETRIES}</div>
+                <div className="mt-1 text-[10.5px] text-beam-soft">Retry {retryCount}/{BROADCAST_MAX_AUTO_RETRIES}</div>
               )}
               {!publishError && pending && (
                 <div className="mt-1 text-[10.5px] text-faint">
@@ -1233,7 +1233,7 @@ function BroadcastSurface({
                 </div>
               )}
               {visibleDiagnosticText && (
-                <div className="mt-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 font-mono text-[10.5px] leading-relaxed text-blue-soft">
+                <div className="mt-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 font-mono text-[10.5px] leading-relaxed text-beam-soft">
                   {visibleDiagnosticText}
                 </div>
               )}
@@ -1265,7 +1265,7 @@ function BroadcastSurface({
           aria-label="Live shopping"
           className={cn(
             "flex size-[46px] items-center justify-center rounded-full border",
-            activeProduct ? "border-blue/40 bg-blue/15 text-blue-light" : "border-white/12 bg-white/[0.06] text-ink-dim hover:text-white",
+            activeProduct ? "border-beam/40 bg-beam/15 text-beam-soft" : "border-white/12 bg-white/[0.06] text-ink-dim hover:text-white",
             hasProducts ? "" : "opacity-60",
           )}
         >
@@ -1289,7 +1289,7 @@ function BroadcastSurface({
 function ctrlClass(active: boolean) {
   return cn(
     "flex size-[46px] items-center justify-center rounded-full border transition-colors",
-    active ? "border-blue/40 bg-blue/15 text-blue-light" : "border-white/12 bg-white/[0.06] text-ink-dim hover:text-white",
+    active ? "border-beam/40 bg-beam/15 text-beam-soft" : "border-white/12 bg-white/[0.06] text-ink-dim hover:text-white",
   );
 }
 

@@ -5,6 +5,7 @@ import {
   normalizeHexColor,
   trimBounded,
 } from "@/lib/input-normalizers";
+import { DEFAULT_ACCENT, isThemeVariant, type ThemeVariant } from "@/lib/creator-theme";
 import type { ValidationResult } from "@/lib/types";
 
 export interface CreatorProfileDraft {
@@ -17,6 +18,9 @@ export interface CreatorProfileDraft {
   avatarUrl?: string | null;
   /** undefined = leave existing header untouched; string|null = set/clear it. */
   headerUrl?: string | null;
+  /** Tier-1 brand accent — stored raw, contrast-guarded at render time. */
+  accentColor: string;
+  themeVariant: ThemeVariant;
   socialLinks: { kind: string; url: string }[];
   category?: string;
 }
@@ -50,6 +54,8 @@ export function parseCreatorProfileInput(input: unknown, ownerWallet: string): P
   const avatarColor = normalizeHexColor(record.avatarColor) ?? defaultAvatarColor(username);
   const avatarUrl = normalizeAvatarUrl(record.avatarUrl);
   const headerUrl = normalizeAvatarUrl(record.headerUrl);
+  const accentColor = normalizeHexColor(record.accentColor) ?? DEFAULT_ACCENT;
+  const themeVariant = isThemeVariant(record.themeVariant) ? record.themeVariant : "midnight";
 
   return {
     ok: true,
@@ -59,6 +65,8 @@ export function parseCreatorProfileInput(input: unknown, ownerWallet: string): P
       displayName,
       ...(bio ? { bio } : {}),
       avatarColor,
+      accentColor,
+      themeVariant,
       // Only carry image urls when the caller actually sent the field.
       ...(avatarUrl !== undefined ? { avatarUrl } : {}),
       ...(headerUrl !== undefined ? { headerUrl } : {}),
@@ -75,6 +83,8 @@ export function creatorProfileToRow(profile: CreatorProfileDraft) {
     display_name: profile.displayName,
     bio: profile.bio ?? null,
     avatar_color: profile.avatarColor,
+    accent_color: profile.accentColor,
+    theme_variant: profile.themeVariant,
     // Omit image urls unless explicitly provided, so an upsert never wipes an
     // already-uploaded image (the dedicated upload route owns those columns).
     ...(profile.avatarUrl !== undefined ? { avatar_url: profile.avatarUrl } : {}),

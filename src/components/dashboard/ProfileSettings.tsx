@@ -153,7 +153,7 @@ export function ProfileSettings() {
           <div className="mb-5 flex items-center gap-3">
             <label className="relative cursor-pointer" aria-label="Upload channel art">
               <Avatar seed={avatarColor} src={avatarUrl} size={56} ring="#40ACFF" />
-              <span className="absolute -bottom-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full border-2 border-canvas bg-blue text-white">
+              <span className="absolute -bottom-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full border-2 border-canvas bg-beam text-white">
                 {uploading ? <Loader2 className="size-2.5 animate-spin" /> : <ImagePlus className="size-2.5" />}
               </span>
               <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" className="hidden" onChange={(e) => onPickArt(e.target.files?.[0] ?? null)} />
@@ -189,7 +189,7 @@ export function ProfileSettings() {
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-[10.5px] text-faint">Social links</span>
                 {socialLinks.length < 5 && (
-                  <button onClick={() => setSocialLinks((l) => [...l, { kind: "link", url: "" }])} className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue hover:text-blue-light">
+                  <button onClick={() => setSocialLinks((l) => [...l, { kind: "link", url: "" }])} className="inline-flex items-center gap-1 text-[11px] font-semibold text-beam hover:text-beam-soft">
                     <Plus className="size-3.5" /> Add
                   </button>
                 )}
@@ -198,8 +198,8 @@ export function ProfileSettings() {
                 {socialLinks.length === 0 && <div className="rounded-[12px] border border-dashed border-white/10 px-3 py-3 text-center text-[11px] text-faint">Add Instagram, X, your shop — anything fans should reach.</div>}
                 {socialLinks.map((l, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <input value={l.kind} onChange={(e) => setLink(i, { kind: e.target.value })} placeholder="kind" className="h-10 w-[88px] rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-[12px] text-white placeholder:text-faint focus:border-blue focus:outline-none" />
-                    <input value={l.url} onChange={(e) => setLink(i, { url: e.target.value })} placeholder="https://…" inputMode="url" className="h-10 flex-1 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-[12px] text-white placeholder:text-faint focus:border-blue focus:outline-none" />
+                    <input value={l.kind} onChange={(e) => setLink(i, { kind: e.target.value })} placeholder="kind" className="h-10 w-[88px] rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-[12px] text-white placeholder:text-faint focus:border-beam focus:outline-none" />
+                    <input value={l.url} onChange={(e) => setLink(i, { url: e.target.value })} placeholder="https://…" inputMode="url" className="h-10 flex-1 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-[12px] text-white placeholder:text-faint focus:border-beam focus:outline-none" />
                     <button onClick={() => setSocialLinks((list) => list.filter((_, idx) => idx !== i))} aria-label="Remove link" className="shrink-0 text-ghost hover:text-red-300"><X className="size-4" /></button>
                   </div>
                 ))}

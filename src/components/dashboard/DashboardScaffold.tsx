@@ -93,8 +93,13 @@ export function useCreatorProfile() {
   return { user, payload, creator, loading, setPayload };
 }
 
-/** Primary bottom-nav destinations — these never show a mobile back button. */
-const PRIMARY_DASHBOARD_TABS = new Set(["overview", "streams", "money", "stats"]);
+/**
+ * The mobile bottom-nav destinations (Channel · Store · Wallet). A page that
+ * IS a bottom tab never shows a back button; every other room does, so nothing
+ * is reachable only by the browser's chrome. Must stay in sync with
+ * `CreatorBottomNav`.
+ */
+const PRIMARY_DASHBOARD_TABS = new Set(["overview", "store", "money"]);
 
 /**
  * Mobile-only top bar for dashboard pages: a back affordance (only where the
@@ -106,7 +111,7 @@ export function DashboardMobileTopbar({ title, active }: { title: string; active
   return (
     <div className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-1.5 border-b border-white/[0.06] bg-canvas/90 px-3 backdrop-blur md:hidden">
       {showBack ? (
-        <Link href="/dashboard" aria-label="Back to dashboard" className="-ml-1 flex size-10 shrink-0 items-center justify-center rounded-full text-ink-dim transition-transform active:scale-90 hover:text-white">
+        <Link href="/dashboard" aria-label="Back to dashboard" className="-ml-1 flex size-10 shrink-0 items-center justify-center rounded-full text-ink-dim transition-transform active:scale-[0.92] hover:text-white">
           <ChevronLeft className="size-[22px]" />
         </Link>
       ) : (
@@ -157,13 +162,13 @@ export function DashboardEmpty({ icon, title, body }: { icon: React.ReactNode; t
   return (
     <div className="flex min-h-[62vh] items-center justify-center">
       <div className="max-w-[390px] text-center">
-        <div className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-blue-light">
+        <div className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-beam-soft">
           {icon}
         </div>
         <h1 className="mt-4 font-display text-[24px] font-semibold tracking-[-0.02em]">{title}</h1>
         <p className="mt-2 text-[13px] leading-relaxed text-muted">{body}</p>
         <Button asChild size="lg" className="mt-5">
-          <Link href="/onboarding"><Radio className="size-4" /> Set up profile</Link>
+          <Link href="/start"><Radio className="size-4" /> Claim your channel</Link>
         </Button>
       </div>
     </div>

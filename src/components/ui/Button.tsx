@@ -4,7 +4,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { forwardRef } from "react";
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "secondary" | "ghost" | "golive" | "live" | "white" | "destructive";
+type Variant = "primary" | "secondary" | "ghost" | "accent" | "golive" | "live" | "white" | "destructive";
 type Size = "sm" | "md" | "lg" | "pill";
 
 // Package 3 spec: pill geometry, 44px min targets, beam is the single
@@ -16,14 +16,19 @@ const base =
   "active:scale-[0.97] disabled:opacity-40 disabled:pointer-events-none " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-beam focus-visible:ring-offset-2 focus-visible:ring-offset-canvas";
 
+// Elevation on dark is a lighter surface + a line, never a shadow — so no
+// variant carries a box-shadow (framework §6 / anti-pattern list).
 const variants: Record<Variant, string> = {
   primary: "bg-beam text-canvas hover:bg-beam-deep",
   secondary: "bg-transparent border border-white/16 text-ink-soft hover:bg-white/[0.05] hover:border-white/30",
   ghost: "bg-transparent text-muted hover:bg-white/[0.06] hover:text-ink-soft",
+  // Tier 1: the creator's own action. Never rendered beside a beam button in
+  // the same component — the accent owns the page, the beam owns the platform.
+  accent: "bg-accent text-on-accent hover:brightness-95",
   // The one red button in the product — pressing it IS going live (F5).
-  golive: "bg-live text-white shadow-[0_8px_24px_rgba(239,68,68,.25)] hover:bg-[#dc3535]",
-  live: "bg-live text-white shadow-[0_8px_24px_rgba(239,68,68,.35)]",
-  white: "bg-white text-canvas shadow-[0_8px_24px_rgba(255,255,255,.12)]",
+  golive: "bg-live text-white hover:bg-[#dc3535]",
+  live: "bg-live text-white hover:bg-[#dc3535]",
+  white: "bg-white text-canvas hover:bg-white/90",
   // Destructive is error-red, never live-red.
   destructive: "bg-transparent border border-error/40 text-error hover:bg-error/10 hover:border-error/60",
 };

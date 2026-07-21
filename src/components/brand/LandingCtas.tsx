@@ -5,7 +5,7 @@ import { ArrowRight, Tv } from "lucide-react";
 import { useSession } from "@/lib/store/session";
 import { useHydrated } from "@/lib/store/useHydrated";
 import { Button } from "@/components/ui/Button";
-import { ClaimCta } from "@/components/brand/ClaimCta";
+import { ClaimCta, ClaimHandle } from "@/components/brand/ClaimCta";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { Avatar } from "@/components/ui/Media";
 import { buildAuthHref } from "@/lib/auth/redirect";
@@ -29,7 +29,7 @@ export function LandingNav() {
 
   return (
     <nav className="flex items-center gap-3">
-      <Link href="/explore" className="hidden text-sm font-medium text-muted hover:text-white sm:block">Explore</Link>
+      <Link href="/explore" className="hidden text-sm font-medium text-muted hover:text-white sm:block">What&apos;s on</Link>
       {/* TVinBio app install lives only on the homepage — channels install their own PWA. */}
       <InstallButton subject="app" size="sm" variant="ghost" label="Install app" className="hidden sm:inline-flex" />
 
@@ -62,25 +62,49 @@ export function LandingNav() {
  * instead of being asked to claim a channel they already own; everyone else gets
  * the claim CTA. Hydration-gated to avoid a flash.
  */
+/**
+ * Hero call-to-action. For a stranger the claim input *is* the CTA — the whole
+ * pitch is "this address is yours", so we let them type it rather than
+ * promising it behind a button. Signed-in visitors get a route to what they
+ * already own instead of being asked to claim it twice.
+ */
 export function LandingHeroCta() {
   const hydrated = useHydrated();
   const user = useSession((s) => s.user);
   const creator = useSession((s) => s.creator);
 
-  return (
-    <div className="mt-8 flex items-center justify-center gap-3">
-      {hydrated && user && creator ? (
+  if (!hydrated) {
+    // Reserve the height so the hero doesn't jump when the store rehydrates.
+    return <div className="h-[86px]" aria-hidden />;
+  }
+
+  if (user && creator) {
+    return (
+      <div className="flex items-center justify-center gap-3">
         <Button asChild size="lg">
-          <Link href={`/${creator.username}`}><Tv className="size-[18px] mr-0.5" /> Go to channel <ArrowRight className="size-[18px]" /></Link>
+          <Link href={`/${creator.username}`}>
+            <Tv className="mr-0.5 size-[18px]" /> Go to channel <ArrowRight className="size-[18px]" />
+          </Link>
         </Button>
-      ) : hydrated && user ? (
+        <Button asChild size="lg" variant="ghost">
+          <Link href="/explore">What&apos;s on</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  if (user) {
+    return (
+      <div className="flex items-center justify-center gap-3">
         <Button asChild size="lg">
-          <Link href="/start">Open TVinBio <ArrowRight className="size-[18px]" /></Link>
+          <Link href="/start">Claim your channel <ArrowRight className="size-[18px]" /></Link>
         </Button>
-      ) : (
-        <ClaimCta size="lg" arrow />
-      )}
-      <Button asChild size="lg" variant="ghost"><Link href="/explore">Explore creators</Link></Button>
-    </div>
-  );
+        <Button asChild size="lg" variant="ghost">
+          <Link href="/explore">What&apos;s on</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  return <ClaimHandle autoFocus={false} />;
 }
