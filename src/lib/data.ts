@@ -39,6 +39,31 @@ function memoHot<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
 }
 
 // ── Creators ───────────────────────────────────────────────────────
+/**
+ * The real follower count for a channel: distinct active subscribers (free
+ * follows + unexpired paid subs), never below the denormalised column. This
+ * makes the public count correct even when `subscriber_count` drifted low —
+ * the case where a creator with fans was shown as having zero.
+ */
+export async function getCreatorFollowerCount(creatorId: string, fallback = 0): Promise<number> {
+  const db = getSupabase();
+  if (!db) return fallback;
+  const { data } = await db
+    .from("subscriptions")
+    .select("subscriber_address,expires_at")
+    .eq("creator_id", creatorId.toLowerCase())
+    .limit(5000);
+  if (!data) return fallback;
+  const now = Date.now();
+  const active = new Set(
+    data
+      .filter((s) => !s.expires_at || new Date(String(s.expires_at)).getTime() > now)
+      .map((s) => String(s.subscriber_address ?? "").toLowerCase())
+      .filter(Boolean),
+  );
+  return Math.max(fallback, active.size);
+}
+
 export async function getCreatorByUsername(username: string): Promise<Creator | null> {
   const db = getSupabase();
   if (db) {

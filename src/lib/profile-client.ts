@@ -52,6 +52,31 @@ export async function uploadChannelArt(
   return (data?.url as string | null) ?? (data?.avatarUrl as string | null) ?? null;
 }
 
+/**
+ * Persist a free follow to the database and return the creator's updated
+ * follower count. Best-effort: the caller keeps its optimistic local state and
+ * ignores a null (network hiccup, mock mode) — the count reconciles on reload.
+ */
+export async function followCreator(username: string, walletAddress?: string): Promise<number | null> {
+  const token = await getAccessToken();
+  const headers = new Headers({ "content-type": "application/json" });
+  if (token) headers.set("authorization", `Bearer ${token}`);
+  if (walletAddress) headers.set("x-tvinbio-wallet", walletAddress.toLowerCase());
+
+  try {
+    const res = await fetch(`/api/channels/${encodeURIComponent(username)}/follow`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ walletAddress }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || data?.ok === false) return null;
+    return typeof data?.subscriberCount === "number" ? data.subscriberCount : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Read-only check: has this wallet already redeemed an invite (creator access)? */
 export async function checkCreatorAccess(walletAddress: string): Promise<boolean> {
   const db = getSupabase();

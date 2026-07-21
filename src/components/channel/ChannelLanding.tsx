@@ -22,7 +22,7 @@ import { useSession } from "@/lib/store/session";
 import { useAuthIntent } from "@/lib/auth/useAuthIntent";
 import { useHydrated } from "@/lib/store/useHydrated";
 import { matchesAny } from "@/lib/access";
-import { uploadChannelArt } from "@/lib/profile-client";
+import { uploadChannelArt, followCreator } from "@/lib/profile-client";
 import { shareLink } from "@/lib/share";
 import { cn, formatCount } from "@/lib/cn";
 import { variantSurfaces } from "@/lib/creator-theme";
@@ -63,6 +63,9 @@ export function ChannelLanding({
   const [buy, setBuy] = useState<Product | null>(null);
   const [alert, setAlert] = useState<{ amount: number; message: string } | null>(null);
   const [captureDismissed, setCaptureDismissed] = useState(false);
+  // Follower count is live: seeded from SSR, bumped optimistically on follow,
+  // then reconciled from the server's real count.
+  const [followerCount, setFollowerCount] = useState(creator.subscriberCount);
   const [headerUrl, setHeaderUrl] = useState<string | null>(creator.headerUrl ?? null);
   const [headerUploading, setHeaderUploading] = useState(false);
   const headerInputRef = useRef<HTMLInputElement>(null);
@@ -98,7 +101,13 @@ export function ChannelLanding({
     // A paid channel routes follow through the gate; a free one is one tap.
     if (gated) return setGateOpen(true);
     subscribe(creator.creatorId, channelSummary);
+    setFollowerCount((n) => n + 1); // optimistic
     toast.success(`You follow ${creator.displayName}`);
+    // Persist so the count is real everywhere, then reconcile the display.
+    const wallet = useSession.getState().user?.walletAddress;
+    void followCreator(creator.username, wallet).then((count) => {
+      if (typeof count === "number") setFollowerCount(count);
+    });
   }
 
   function onTip() {
@@ -236,7 +245,7 @@ export function ChannelLanding({
         <div className="mt-3 flex items-center gap-2.5 text-[12px] text-muted">
           <span className="receipt text-ink-dim">tvin.bio/{creator.username}</span>
           <span className="size-[3px] rounded-full bg-ghost" />
-          <span className="receipt">{formatCount(creator.subscriberCount)} fans</span>
+          <span className="receipt">{formatCount(followerCount)} fans</span>
         </div>
 
         {/* ── Engagement: the action row ─────────────────────────────

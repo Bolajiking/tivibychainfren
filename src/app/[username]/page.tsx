@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import {
   getCreatorByUsername,
+  getCreatorFollowerCount,
   getCreatorLiveStream,
   getCreatorStream,
   getVideosByCreator,
@@ -25,13 +26,21 @@ export default async function ChannelPage({ params }: { params: Promise<{ userna
 
   // Seed the page with whatever is canonical now (an active stream if there is
   // one) so the banner is correct on first paint; the client keeps it live.
-  const [liveStream, defaultStream, videos] = await Promise.all([
+  const [liveStream, defaultStream, videos, followerCount] = await Promise.all([
     getCreatorLiveStream(creator.creatorId),
     getCreatorStream(creator.creatorId),
     getVideosByCreator(creator.creatorId),
+    getCreatorFollowerCount(creator.creatorId, creator.subscriberCount),
   ]);
   const stream = liveStream ?? defaultStream;
   const products = stream ? await getProductsByChannel(stream.playbackId) : [];
 
-  return <ChannelLanding creator={creator} stream={stream} videos={videos} products={products} />;
+  return (
+    <ChannelLanding
+      creator={{ ...creator, subscriberCount: followerCount }}
+      stream={stream}
+      videos={videos}
+      products={products}
+    />
+  );
 }

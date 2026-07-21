@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Compass, Search, BarChart3, MessageSquare, LayoutGrid, Heart, Crown,
-  ChevronRight, Wallet, PanelLeftClose, PanelLeftOpen,
+  ChevronRight, Wallet, PanelLeftClose, PanelLeftOpen, Settings,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
-import { OnAirGlyph, WalletGlyph, StoreGlyph, GoLiveGlyph, StageGlyph } from "@/components/brand/Glyphs";
+import { OnAirGlyph, WalletGlyph, StoreGlyph, GoLiveGlyph, StageGlyph, ClipGlyph } from "@/components/brand/Glyphs";
 import { Avatar } from "@/components/ui/Media";
 import { useSession } from "@/lib/store/session";
 import { buildAuthHref } from "@/lib/auth/redirect";
@@ -210,10 +210,12 @@ export function DashboardSidebar({ active = "overview", creator }: { active?: st
   const items = [
     { id: "overview", label: "Overview", icon: <StageGlyph size={16} />, href: "/dashboard" },
     { id: "streams", label: "Streams", icon: <GoLiveGlyph size={16} />, href: "/dashboard/streams" },
+    { id: "videos", label: "Videos", icon: <ClipGlyph size={16} />, href: "/dashboard/videos" },
     { id: "store", label: "Store", icon: <StoreGlyph size={16} />, href: "/dashboard/store" },
     { id: "money", label: "Monetization", icon: <WalletGlyph size={16} />, href: "/dashboard/monetization" },
     { id: "stats", label: "Analytics", icon: <BarChart3 className="size-4" />, href: "/dashboard/analytics" },
     { id: "chat", label: "Chat", icon: <MessageSquare className="size-4" />, href: "/dashboard/chat" },
+    { id: "settings", label: "Settings", icon: <Settings className="size-4" />, href: "/dashboard/settings" },
   ];
   return (
     <div className={cn(

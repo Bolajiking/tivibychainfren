@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Check, ChevronLeft, ImagePlus, Loader2, Plus, X } from "lucide-react";
+import { Check, ImagePlus, Loader2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Media";
+import { DashboardShell } from "@/components/dashboard/DashboardScaffold";
 import { useSession } from "@/lib/store/session";
 import { getMyCreatorProfile, provisionCreatorProfile, uploadChannelArt } from "@/lib/profile-client";
 import { MOCK_MODE } from "@/lib/config";
@@ -126,30 +127,39 @@ export function ProfileSettings() {
   }
 
   return (
-    <div className="min-h-screen bg-canvas">
-      <header className="flex h-[50px] items-center justify-between border-b border-white/[0.06] px-5">
-        <div className="flex items-center gap-2.5">
-          <span className="font-display text-[14px] font-semibold text-muted">Channel settings</span>
-        </div>
-        <Link href="/dashboard" className="inline-flex items-center gap-1 text-[12px] font-semibold text-muted hover:text-white">
-          <ChevronLeft className="size-4" /> Dashboard
-        </Link>
-      </header>
-
+    <DashboardShell
+      title="Settings"
+      active="settings"
+      creator={creator}
+      actions={
+        creator ? (
+          <Button size="sm" onClick={save} disabled={saving}>
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />} Save
+          </Button>
+        ) : undefined
+      }
+      mobileAction={
+        creator ? (
+          <Button size="sm" onClick={save} disabled={saving}>
+            {saving ? <Loader2 className="size-4 animate-spin" /> : "Save"}
+          </Button>
+        ) : undefined
+      }
+    >
       {!user || (!creator && !loading) ? (
         <div className="flex min-h-[60vh] items-center justify-center px-6 text-center">
           <div className="max-w-[380px]">
             <h1 className="font-display text-[22px] font-semibold tracking-[-0.02em]">No channel yet</h1>
             <p className="mt-2 text-[13px] text-muted">Claim your channel to manage its profile.</p>
-            <Button asChild size="lg" className="mt-5"><Link href="/onboarding">Claim channel</Link></Button>
+            <Button asChild size="lg" className="mt-5"><Link href="/start">Claim channel</Link></Button>
           </div>
         </div>
       ) : loading ? (
-        <div className="mx-auto max-w-[520px] px-4 py-8">
+        <div className="mx-auto max-w-[520px]">
           <div className="h-64 animate-pulse rounded-2xl bg-white/[0.06]" />
         </div>
       ) : (
-        <div className="mx-auto max-w-[520px] px-4 py-7">
+        <div className="mx-auto max-w-[520px]">
           <div className="mb-5 flex items-center gap-3">
             <label className="relative cursor-pointer" aria-label="Upload channel art">
               <Avatar seed={avatarColor} src={avatarUrl} size={56} ring="#40ACFF" />
@@ -213,7 +223,7 @@ export function ProfileSettings() {
           </div>
         </div>
       )}
-    </div>
+    </DashboardShell>
   );
 }
 
