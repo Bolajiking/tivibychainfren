@@ -107,7 +107,7 @@ function EmptyState() {
   return (
     <div className="flex min-h-[62vh] items-center justify-center">
       <div className="max-w-[390px] text-center">
-        <div className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-blue-light">
+        <div className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-beam-soft">
           <PackageCheck className="size-5" />
         </div>
         <h1 className="mt-4 font-display text-[24px] font-semibold tracking-[-0.02em]">Create your channel first</h1>

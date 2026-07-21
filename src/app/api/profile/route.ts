@@ -79,10 +79,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "username_taken" }, { status: 409 });
   }
 
-  const { error: creatorError } = await db
-    .from("creators")
-    .upsert(creatorProfileToRow(parsed.value), { onConflict: "creator_id" });
-
+  const creatorError = await upsertCreatorRow(db, creatorProfileToRow(parsed.value));
   if (creatorError) {
     console.error("[profile] creator upsert failed:", creatorError);
     return NextResponse.json({ ok: false, error: "profile_write_failed" }, { status: 500 });
@@ -105,6 +102,31 @@ export async function POST(req: Request) {
 
   const payload = await loadCreatorPayload(db, parsed.value.creatorId);
   return NextResponse.json({ ok: true, ...payload });
+}
+
+/**
+ * Upsert the creator row, tolerating a database that hasn't yet run migration
+ * `0016` (accent_color / theme_variant). Those columns are additive Tier-1
+ * theming: if PostgREST reports them missing, we retry without them so a
+ * schema/deploy race never blocks channel creation. The creator's accent then
+ * falls back to the default until the migration lands — reads already handle
+ * the absent columns. Any other error is returned as-is.
+ */
+async function upsertCreatorRow(
+  db: NonNullable<ReturnType<typeof supabaseAdmin>>,
+  row: ReturnType<typeof creatorProfileToRow>,
+): Promise<unknown> {
+  const { error } = await db.from("creators").upsert(row, { onConflict: "creator_id" });
+  if (!error) return null;
+
+  const missingThemeColumn =
+    error.code === "PGRST204" && /accent_color|theme_variant/.test(error.message ?? "");
+  if (!missingThemeColumn) return error;
+
+  console.warn("[profile] accent/theme columns absent — run migration 0016. Saving without them.");
+  const { accent_color: _accent, theme_variant: _theme, ...base } = row;
+  const retry = await db.from("creators").upsert(base, { onConflict: "creator_id" });
+  return retry.error ?? null;
 }
 
 async function loadCreatorPayload(

@@ -111,7 +111,7 @@ export function ChatDashboard() {
                   <button
                     key={s}
                     onClick={() => setSettings((cur) => ({ ...cur, slowModeSec: s }))}
-                    className={`flex-1 rounded-[10px] py-1.5 text-[11px] font-semibold transition ${settings.slowModeSec === s ? "bg-blue text-white" : "bg-white/[0.05] text-muted hover:text-white"}`}
+                    className={`flex-1 rounded-[10px] py-1.5 text-[11px] font-semibold transition ${settings.slowModeSec === s ? "bg-beam text-white" : "bg-white/[0.05] text-muted hover:text-white"}`}
                   >
                     {s === 0 ? "Off" : `${s}s`}
                   </button>
@@ -168,7 +168,7 @@ export function ChatDashboard() {
   );
 }
 
-const INPUT = "h-[42px] flex-1 rounded-[12px] border border-white/12 bg-white/[0.05] px-3.5 text-[13px] text-white placeholder:text-faint focus:border-blue/60 focus:outline-none";
+const INPUT = "h-[42px] flex-1 rounded-[12px] border border-white/12 bg-white/[0.05] px-3.5 text-[13px] text-white placeholder:text-faint focus:border-beam/60 focus:outline-none";
 
 function ToggleRow({ icon, label, hint, on, onToggle }: { icon: React.ReactNode; label: string; hint: string; on: boolean; onToggle: () => void }) {
   return (
@@ -180,8 +180,8 @@ function ToggleRow({ icon, label, hint, on, onToggle }: { icon: React.ReactNode;
           <div className="text-[10.5px] text-faint">{hint}</div>
         </div>
       </div>
-      <button onClick={onToggle} type="button" aria-pressed={on} className={`relative h-[26px] w-[46px] shrink-0 rounded-full transition ${on ? "bg-blue" : "bg-white/15"}`}>
-        <span className={`absolute top-[3px] size-[20px] rounded-full bg-white transition-all ${on ? "left-[23px]" : "left-[3px]"}`} />
+      <button onClick={onToggle} type="button" aria-pressed={on} className={`relative h-[26px] w-[46px] shrink-0 rounded-full transition ${on ? "bg-beam" : "bg-white/15"}`}>
+        <span className={`absolute top-[3px] size-[20px] rounded-full bg-white transition-[left] duration-200 ease-[cubic-bezier(.22,1,.36,1)] ${on ? "left-[23px]" : "left-[3px]"}`} />
       </button>
     </label>
   );

@@ -7,6 +7,7 @@ import type {
   CreatorNotification, Order, ViewMode, ProductType, ProductStatus,
   OrderStatus, ChatKind, NotificationType, VodComment,
 } from "@/lib/types";
+import { isThemeVariant } from "@/lib/creator-theme";
 
 type DbNumber = number | string | null | undefined;
 type DbText = string | null | undefined;
@@ -19,6 +20,8 @@ interface CreatorRow {
   avatar_color?: DbText;
   avatar_url?: DbText;
   header_url?: DbText;
+  accent_color?: DbText;
+  theme_variant?: DbText;
   subscriber_count?: DbNumber;
   social_links?: Creator["socialLinks"] | null;
   category?: DbText;
@@ -141,6 +144,8 @@ export function rowToCreator(r: CreatorRow): Creator {
     avatarColor: r.avatar_color ?? undefined,
     avatarUrl: r.avatar_url ?? undefined,
     headerUrl: r.header_url ?? undefined,
+    accentColor: r.accent_color ?? undefined,
+    themeVariant: isThemeVariant(r.theme_variant) ? r.theme_variant : undefined,
     subscriberCount: num(r.subscriber_count),
     socialLinks: Array.isArray(r.social_links) ? r.social_links : [],
     category: r.category ?? undefined,

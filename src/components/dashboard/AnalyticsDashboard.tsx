@@ -54,7 +54,7 @@ export function AnalyticsDashboard() {
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr]">
         {/* top content */}
-        <Panel title="Top content by views" action={<Link href="/dashboard/videos" className="text-[11px] font-semibold text-blue">Manage</Link>}>
+        <Panel title="Top content by views" action={<Link href="/dashboard/videos" className="text-[11px] font-semibold text-beam">Manage</Link>}>
           {topVideos.length ? (
             <div className="flex flex-col gap-3">
               {topVideos.map((v) => (
@@ -65,7 +65,7 @@ export function AnalyticsDashboard() {
                       <span className="shrink-0 font-display text-[12px] font-semibold text-ink-dim">{formatCount(v.views)}</span>
                     </div>
                     <div className="mt-1.5 h-[6px] overflow-hidden rounded-full bg-white/[0.06]">
-                      <div className="h-full rounded-full bg-gradient-to-r from-blue to-[#40ffcc]" style={{ width: `${Math.max(6, (v.views / maxViews) * 100)}%` }} />
+                      <div className="h-full rounded-full bg-gradient-to-r from-beam to-[#40ffcc]" style={{ width: `${Math.max(6, (v.views / maxViews) * 100)}%` }} />
                     </div>
                   </div>
                   <GateBadge viewMode={v.viewMode} amount={v.amount} />
@@ -84,9 +84,9 @@ export function AnalyticsDashboard() {
         {/* audience snapshot */}
         <Panel title="Snapshot">
           <div className="flex flex-col gap-3">
-            <SnapshotRow icon={<Users className="size-4" />} tone="bg-online/[0.16] text-online" label="Subscribers" value={formatCount(creator.subscriberCount ?? 0)} />
-            <SnapshotRow icon={<Eye className="size-4" />} tone="bg-blue/[0.16] text-blue-light" label="Total views" value={formatCount(stats.views)} />
-            <SnapshotRow icon={<HandCoins className="size-4" />} tone="bg-lime/[0.16] text-lime" label="Total earned" value={money(stats.earnings)} />
+            <SnapshotRow icon={<Users className="size-4" />} tone="bg-earn/[0.16] text-earn" label="Subscribers" value={formatCount(creator.subscriberCount ?? 0)} />
+            <SnapshotRow icon={<Eye className="size-4" />} tone="bg-beam/[0.16] text-beam-soft" label="Total views" value={formatCount(stats.views)} />
+            <SnapshotRow icon={<HandCoins className="size-4" />} tone="bg-earn/[0.16] text-earn" label="Total earned" value={money(stats.earnings)} />
             <SnapshotRow icon={<Film className="size-4" />} tone="bg-white/[0.08] text-muted" label="Published videos" value={String(stats.videoCount)} />
           </div>
           <p className="mt-4 text-[10.5px] leading-relaxed text-faint">Numbers update from real videos, orders, tips, subscriptions and notifications as fans watch and pay.</p>

@@ -141,7 +141,7 @@ export function WalletSheet() {
       <Dialog.Portal>
         {/* Semi-transparent dim — the page stays visible behind the wallet. */}
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/45 data-[state=open]:animate-[tvFadeIn_.22s_ease] data-[state=closed]:animate-[tvFadeOut_.2s_ease]" />
-        <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[480px] rounded-t-[24px] border border-white/12 bg-elevated p-4 pb-[max(20px,env(safe-area-inset-bottom))] text-white shadow-[0_24px_60px_rgba(0,0,0,.6)] will-change-transform focus:outline-none data-[state=open]:animate-[tvSheet_.34s_cubic-bezier(.22,1,.36,1)] data-[state=closed]:animate-[tvSheetOut_.24s_cubic-bezier(.4,0,1,1)] md:inset-y-0 md:left-auto md:right-0 md:bottom-0 md:mx-0 md:flex md:h-full md:w-[404px] md:max-w-none md:flex-col md:rounded-none md:border-y-0 md:border-r-0 md:border-l md:border-white/12 md:bg-[#0c0c0f]/70 md:p-6 md:backdrop-blur-[30px] md:backdrop-saturate-150 md:data-[state=open]:animate-[tvSlideInRight_.32s_cubic-bezier(.22,1,.36,1)] md:data-[state=closed]:animate-[tvSlideOutRight_.26s_cubic-bezier(.4,0,1,1)]">
+        <Dialog.Content className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-[480px] rounded-t-[24px] border border-white/12 bg-elevated p-4 pb-[max(20px,env(safe-area-inset-bottom))] text-white will-change-transform focus:outline-none data-[state=open]:animate-[tvSheet_.34s_cubic-bezier(.22,1,.36,1)] data-[state=closed]:animate-[tvSheetOut_.24s_cubic-bezier(.4,0,1,1)] md:inset-y-0 md:left-auto md:right-0 md:bottom-0 md:mx-0 md:flex md:h-full md:w-[404px] md:max-w-none md:flex-col md:rounded-none md:border-y-0 md:border-r-0 md:border-l md:border-white/12 md:bg-[#0c0c0f]/70 md:p-6 md:backdrop-blur-[30px] md:backdrop-saturate-150 md:data-[state=open]:animate-[tvSlideInRight_.32s_cubic-bezier(.22,1,.36,1)] md:data-[state=closed]:animate-[tvSlideOutRight_.26s_cubic-bezier(.4,0,1,1)]">
           <Dialog.Title asChild><VisuallyHidden>{title}</VisuallyHidden></Dialog.Title>
 
           <div className="mx-auto mb-3 h-1 w-9 rounded-full bg-white/25 md:hidden" />
@@ -169,7 +169,7 @@ export function WalletSheet() {
                   <button
                     key={p}
                     onClick={() => setAddAmount(p)}
-                    className={`h-[54px] receipt rounded-[14px] text-[15px] transition ${addAmount === p ? "border-2 border-beam bg-beam/[0.08] text-white" : "border border-white/12 bg-white/[0.04] text-ink-dim hover:text-white"}`}
+                    className={`h-[54px] receipt rounded-[14px] text-[15px] tap transition-colors ${addAmount === p ? "border-2 border-beam bg-beam/[0.08] text-white" : "border border-white/12 bg-white/[0.04] text-ink-dim hover:text-white"}`}
                   >
                     ${p}
                   </button>
@@ -186,7 +186,7 @@ export function WalletSheet() {
                 />
                 <span className="text-[11px] text-faint">USD</span>
               </label>
-              <button onClick={onAdd} disabled={busy || addAmount <= 0 || !canAddMoney} className="mt-3.5 flex h-[50px] w-full items-center justify-center gap-2 rounded-[14px] bg-white text-[14px] font-bold text-[#080808] transition hover:bg-white/90 disabled:opacity-50">
+              <button onClick={onAdd} disabled={busy || addAmount <= 0 || !canAddMoney} className="mt-3.5 flex h-[50px] w-full items-center justify-center gap-2 rounded-[14px] bg-white text-[14px] font-bold text-[#080808] transition-colors tap hover:bg-white/90 disabled:opacity-50">
                 {busy ? <Loader2 className="size-[18px] animate-spin" /> : `Add $${addAmount}`}
               </button>
               <div className="mt-2.5 text-center text-[11px] text-faint">
@@ -209,7 +209,7 @@ export function WalletSheet() {
                     onChange={(e) => setCashAmount(e.target.value.replace(/[^\d.]/g, ""))}
                     className="h-[50px] flex-1 bg-transparent receipt text-[20px] text-white placeholder:text-[#55555c] focus:outline-none"
                   />
-                  <button onClick={() => setCashAmount(balance.toFixed(2))} className="text-[11px] font-semibold text-blue-light">MAX</button>
+                  <button onClick={() => setCashAmount(balance.toFixed(2))} className="text-[11px] font-semibold text-beam-soft">MAX</button>
                 </div>
               </label>
               {caps.offramp === "fiat" ? (
@@ -224,11 +224,11 @@ export function WalletSheet() {
                     value={destination}
                     placeholder="0x…"
                     onChange={(e) => setDestination(e.target.value)}
-                    className="mt-1 h-[46px] w-full rounded-[14px] border border-white/12 bg-white/[0.04] px-4 font-mono text-[12.5px] text-white placeholder:text-faint focus:border-blue/60 focus:outline-none"
+                    className="mt-1 h-[46px] w-full rounded-[14px] border border-white/12 bg-white/[0.04] px-4 font-mono text-[12.5px] text-white placeholder:text-faint focus:border-beam/60 focus:outline-none"
                   />
                 </label>
               )}
-              <button onClick={onWithdraw} disabled={busy || !canWithdraw} className="mt-3.5 flex h-[50px] w-full items-center justify-center gap-2 rounded-[14px] bg-white text-[14px] font-bold text-[#080808] transition hover:bg-white/90 disabled:opacity-50">
+              <button onClick={onWithdraw} disabled={busy || !canWithdraw} className="mt-3.5 flex h-[50px] w-full items-center justify-center gap-2 rounded-[14px] bg-white text-[14px] font-bold text-[#080808] transition-colors tap hover:bg-white/90 disabled:opacity-50">
                 {busy ? <Loader2 className="size-[18px] animate-spin" /> : caps.offramp === "fiat" ? "Cash out" : "Withdraw"}
               </button>
               <div className="mt-2 text-center text-[11px] text-faint">
@@ -246,13 +246,13 @@ export function WalletSheet() {
               </div>
 
               {/* Provisioned wallet address — the user's USDC-on-Base account. */}
-              <button onClick={copyAddress} className="mt-3 flex w-full items-center gap-3 rounded-[13px] border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-left transition hover:border-white/[0.16]">
-                <span className="flex size-8 items-center justify-center rounded-full bg-blue/[0.16] text-blue-light"><Wallet className="size-[16px]" /></span>
+              <button onClick={copyAddress} className="mt-3 flex w-full items-center gap-3 rounded-[13px] border border-white/[0.08] bg-white/[0.03] px-3.5 py-2.5 text-left transition-colors tap hover:border-white/[0.16]">
+                <span className="flex size-8 items-center justify-center rounded-full bg-beam/[0.16] text-beam-soft"><Wallet className="size-[16px]" /></span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-[11px] font-semibold text-ink-dim">USDC · Base</span>
                   <span className="block truncate font-mono text-[11px] text-faint">{user.walletAddress}</span>
                 </span>
-                {copied ? <Check className="size-4 shrink-0 text-online" /> : <Copy className="size-4 shrink-0 text-faint" />}
+                {copied ? <Check className="size-4 shrink-0 text-earn" /> : <Copy className="size-4 shrink-0 text-faint" />}
               </button>
 
               <div className="mt-4 flex gap-7 border-b border-white/[0.07] pb-4">
@@ -267,12 +267,12 @@ export function WalletSheet() {
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-2.5">
-                <button onClick={() => setWalletView("add")} className="flex h-[46px] items-center justify-center rounded-[13px] bg-white text-[13px] font-bold text-[#080808] transition hover:bg-white/90">Add money</button>
-                <button onClick={() => setWalletView("cashout")} className="flex h-[46px] items-center justify-center rounded-[13px] border border-white/[0.16] text-[13px] font-semibold text-white transition hover:bg-white/[0.05]">Cash out</button>
+                <button onClick={() => setWalletView("add")} className="flex h-[46px] items-center justify-center rounded-[13px] bg-white text-[13px] font-bold text-[#080808] transition-colors tap hover:bg-white/90">Add money</button>
+                <button onClick={() => setWalletView("cashout")} className="flex h-[46px] items-center justify-center rounded-[13px] border border-white/[0.16] text-[13px] font-semibold text-white transition-colors tap hover:bg-white/[0.05]">Cash out</button>
               </div>
 
               <div className="mt-6 text-[10px] font-semibold uppercase tracking-[0.12em] text-faint">Recent</div>
-              <div className="mt-3 flex max-h-[200px] flex-col gap-3.5 overflow-y-auto md:max-h-[280px]">
+              <div className="stagger mt-3 flex max-h-[200px] flex-col gap-3.5 overflow-y-auto md:max-h-[280px]">
                 {transactions.length ? (
                   transactions.map((t) => <LedgerRow key={t.id} tx={t} />)
                 ) : (
@@ -323,9 +323,9 @@ function iconFor(kind: WalletTx["kind"]) {
 }
 
 function toneFor(kind: WalletTx["kind"]) {
-  if (kind === "fund") return "bg-online/[0.16] text-online";
-  if (kind === "subscribe") return "bg-online/[0.16] text-online";
-  if (kind === "tip") return "bg-blue/[0.16] text-blue-light";
+  if (kind === "fund") return "bg-earn/[0.16] text-earn";
+  if (kind === "subscribe") return "bg-earn/[0.16] text-earn";
+  if (kind === "tip") return "bg-beam/[0.16] text-beam-soft";
   return "bg-white/[0.07] text-muted";
 }
 

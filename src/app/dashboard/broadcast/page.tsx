@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Check, Copy, Eye, KeyRound, Loader2, MessageSquare, PackageCheck, Radio, RotateCcw, SlidersHorizontal, ShoppingBag, X } from "lucide-react";
+import { Check, ChevronLeft, Copy, Eye, KeyRound, Loader2, MessageSquare, PackageCheck, Radio, RotateCcw, SlidersHorizontal, ShoppingBag, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { Tile } from "@/components/ui/Media";
@@ -441,12 +441,12 @@ export default function Broadcast() {
       <BroadcastShell live={false} clock="0:00">
         <div className="flex flex-1 items-center justify-center px-6 text-center">
           <div className="max-w-[390px]">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-blue-light">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-beam-soft">
               <Radio className="size-5" />
             </div>
-            <h1 className="mt-4 font-display text-[24px] font-semibold tracking-[-0.02em]">Create your channel profile</h1>
-            <p className="mt-2 text-[13px] leading-relaxed text-muted">Broadcast tools unlock after your TVinBio channel profile is ready.</p>
-            <Button asChild size="lg" className="mt-5"><Link href="/onboarding">Set up profile</Link></Button>
+            <h1 className="mt-4 font-display text-[24px] font-semibold tracking-[-0.02em]">Claim your channel first</h1>
+            <p className="mt-2 text-[13px] leading-relaxed text-muted">Broadcast tools unlock once your TVinBio channel exists.</p>
+            <Button asChild size="lg" className="mt-5"><Link href="/start">Claim your channel</Link></Button>
           </div>
         </div>
       </BroadcastShell>
@@ -457,15 +457,15 @@ export default function Broadcast() {
     <div ref={shopPanelRef} className="p-4">
       <div className="mb-3 text-xs font-semibold tracking-[0.04em] text-ink-dim">STREAM SETUP</div>
       <div className="flex flex-col gap-2.5">
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Stream title" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none" />
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" className="min-h-20 resize-none rounded-[12px] border border-white/12 bg-white/[0.06] px-3 py-2.5 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none" />
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Stream title" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-sm text-white placeholder:text-faint focus:border-beam focus:outline-none" />
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" className="min-h-20 resize-none rounded-[12px] border border-white/12 bg-white/[0.06] px-3 py-2.5 text-sm text-white placeholder:text-faint focus:border-beam focus:outline-none" />
         <div className="grid grid-cols-2 gap-2">
-          <select value={viewMode} onChange={(e) => setViewMode(e.target.value as ViewMode)} className="h-11 rounded-[12px] border border-white/12 bg-[#151518] px-3 text-sm text-white focus:border-blue focus:outline-none">
+          <select value={viewMode} onChange={(e) => setViewMode(e.target.value as ViewMode)} className="h-11 rounded-[12px] border border-white/12 bg-[#151518] px-3 text-sm text-white focus:border-beam focus:outline-none">
             <option value="free">Free</option>
             <option value="one-time">One-time</option>
             <option value="monthly">Monthly</option>
           </select>
-          <input value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} disabled={viewMode === "free"} placeholder="Price" inputMode="decimal" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none disabled:opacity-45" />
+          <input value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))} disabled={viewMode === "free"} placeholder="Price" inputMode="decimal" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-sm text-white placeholder:text-faint focus:border-beam focus:outline-none disabled:opacity-45" />
         </div>
         <label className="flex h-10 items-center gap-2.5 rounded-[12px] border border-white/10 bg-white/[0.035] px-3 text-[12px] text-ink-dim">
           <input type="checkbox" checked={record} onChange={(e) => setRecord(e.target.checked)} className="size-4 accent-[#40acff]" />
@@ -483,7 +483,7 @@ export default function Broadcast() {
     <div ref={obsPanelRef} className="border-t border-white/[0.06] p-4">
       <div className="mb-1 flex items-center justify-between">
         <span className="text-xs font-semibold tracking-[0.04em] text-ink-dim">STREAM WITH OBS · ALTERNATIVE TO BROWSER</span>
-        {stream.livepeerId && <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-blue-soft"><span className="size-[6px] rounded-full bg-blue-light" /> Connected</span>}
+        {stream.livepeerId && <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-beam-soft"><span className="size-[6px] rounded-full bg-beam-soft" /> Connected</span>}
       </div>
       <p className="mb-3 text-[11px] leading-relaxed text-faint">Go live straight from the browser above, or use these credentials in OBS / any encoder — handy if browser live won&apos;t connect on your network.</p>
 
@@ -523,7 +523,7 @@ export default function Broadcast() {
     <div className="p-4">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-xs font-semibold tracking-[0.04em] text-ink-dim">LIVE SHOPPING</span>
-        <Link href="/dashboard/store" className="text-[11px] font-semibold text-blue">Store</Link>
+        <Link href="/dashboard/store" className="text-[11px] font-semibold text-beam">Store</Link>
       </div>
       {products.length ? (
         <div className="flex flex-col gap-2">
@@ -663,7 +663,7 @@ function RailTabButton({ active, onClick, icon, label, badge = 0 }: { active: bo
     >
       {icon}
       {label}
-      {badge > 0 && <span className="absolute right-1.5 top-1.5 size-[6px] rounded-full bg-blue-light" />}
+      {badge > 0 && <span className="absolute right-1.5 top-1.5 size-[6px] rounded-full bg-beam-soft" />}
     </button>
   );
 }
@@ -687,7 +687,7 @@ function StageAction({ label, onClick, active, children }: { label: string; onCl
       type="button"
       onClick={onClick}
       aria-label={label}
-      className={`pointer-events-auto flex size-11 items-center justify-center rounded-full border backdrop-blur transition-colors ${active ? "border-blue/40 bg-blue/20 text-blue-light" : "border-white/12 bg-black/45 text-white hover:bg-black/60"}`}
+      className={`pointer-events-auto flex size-11 items-center justify-center rounded-full border backdrop-blur transition-colors ${active ? "border-beam/40 bg-beam/20 text-beam-soft" : "border-white/12 bg-black/45 text-white hover:bg-black/60"}`}
     >
       {children}
     </button>
@@ -704,7 +704,18 @@ function BroadcastShell({ live, clock, viewerCount, children }: { live: boolean;
           borderColor: live ? "rgba(239,68,68,.35)" : "rgba(255,255,255,.06)",
         }}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5">
+          {/* Leaving the desk never ends the stream — but while ON AIR the exit
+              stays a quiet text link so it can't be fat-fingered mid-broadcast. */}
+          {!live && (
+            <Link
+              href="/dashboard"
+              aria-label="Back to dashboard"
+              className="-ml-2 flex size-10 shrink-0 items-center justify-center rounded-full text-ink-dim transition-transform active:scale-90 hover:text-white"
+            >
+              <ChevronLeft className="size-[22px]" />
+            </Link>
+          )}
           {live ? (
             <>
               <span className="text-ink-soft"><Mark size={20} live /></span>
@@ -720,7 +731,7 @@ function BroadcastShell({ live, clock, viewerCount, children }: { live: boolean;
         </div>
         <div className="flex items-center gap-3.5 text-[11.5px]">
           {live && <span className="inline-flex items-center gap-1.5 text-ink-dim"><Eye className="size-[13px]" /> <span className="receipt">{(viewerCount ?? 0).toLocaleString()}</span></span>}
-          <Link href="/dashboard" className="font-semibold text-muted hover:text-white">Dashboard</Link>
+          <Link href="/dashboard" className="font-semibold text-muted hover:text-white">{live ? "Dashboard" : "Done"}</Link>
         </div>
       </div>
       {children}
@@ -743,7 +754,7 @@ function ReadyRoomFallback({ creator, title, setupError, mock }: { creator: Crea
         )}
       </div>
       <div className="absolute bottom-3.5 left-3.5 right-3.5 rounded-xl border border-white/10 bg-[#08080a]/80 p-3 backdrop-blur md:w-[320px]">
-        <div className="text-[9px] font-bold tracking-[0.08em] text-blue-soft">READY ROOM</div>
+        <div className="text-[9px] font-bold tracking-[0.08em] text-beam-soft">READY ROOM</div>
         <div className="mt-1 truncate text-[14px] font-semibold">{title}</div>
       </div>
     </div>
@@ -768,14 +779,14 @@ function ProductPinRow({
     <button
       onClick={onClick}
       disabled={disabled || busy}
-      className={`flex items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-55 ${active ? "border-blue/45 bg-blue/[0.13]" : "border-white/[0.06] bg-white/[0.035] hover:bg-white/[0.06]"}`}
+      className={`flex items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-55 ${active ? "border-beam/45 bg-beam/[0.13]" : "border-white/[0.06] bg-white/[0.035] hover:bg-white/[0.06]"}`}
     >
       {product ? <Tile seed={product.imageColor} src={product.imageUrl} size={34} radius={10} /> : <span className="flex size-[34px] items-center justify-center rounded-[10px] border border-white/10 text-faint"><X className="size-4" /></span>}
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[12px] font-semibold text-white">{product?.name ?? "No featured product"}</span>
         <span className="mt-0.5 block text-[10.5px] text-faint">{product ? (unavailable ?? `$${product.price} · ${product.inventory} left`) : "Clear the live shopping card"}</span>
       </span>
-      {busy && <Loader2 className="size-3.5 animate-spin text-blue-light" />}
+      {busy && <Loader2 className="size-3.5 animate-spin text-beam-soft" />}
     </button>
   );
 }
@@ -813,9 +824,9 @@ function CopyRow({ label, value, secret }: { label: string; value: string; secre
     <div className="rounded-[12px] border border-white/10 bg-white/[0.04] p-2.5">
       <div className="mb-1 text-[9.5px] font-bold tracking-[0.08em] text-faint">{label.toUpperCase()}</div>
       <div className="flex items-center gap-2">
-        <code className={`min-w-0 flex-1 truncate text-[12px] ${secret ? "tracking-wider text-blue-soft" : "text-ink-dim"}`}>{value}</code>
+        <code className={`min-w-0 flex-1 truncate text-[12px] ${secret ? "tracking-wider text-beam-soft" : "text-ink-dim"}`}>{value}</code>
         <button onClick={copy} aria-label={`Copy ${label}`} className="shrink-0 text-ghost hover:text-white">
-          {copied ? <Check className="size-4 text-blue-light" /> : <Copy className="size-4" />}
+          {copied ? <Check className="size-4 text-beam-soft" /> : <Copy className="size-4" />}
         </button>
       </div>
     </div>

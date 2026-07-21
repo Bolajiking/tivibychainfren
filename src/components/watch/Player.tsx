@@ -135,15 +135,15 @@ function PlaybackStatus({ className, status, mode }: { className?: string; statu
   return (
     <div className={className} style={{ display: "grid", placeItems: "center", height: "100%", background: "radial-gradient(80% 80% at 50% 35%,rgba(64,172,255,.12),#0a0a0c 72%)" }}>
       <div className="mx-5 flex max-w-[320px] flex-col items-center text-center">
-        <div className="relative flex size-16 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-white shadow-[0_20px_60px_rgba(0,0,0,.35)]">
-          {!gone && <span className="absolute inset-[-7px] rounded-[24px] border border-blue/20 animate-pulse" />}
-          {gone ? <VideoOff className="size-7 text-ink-dim" /> : mode === "live" ? <Radio className="size-7 text-blue-light" /> : <Loader2 className="size-7 animate-spin text-blue-light" />}
+        <div className="relative flex size-16 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.06] text-white">
+          {!gone && <span className="absolute inset-[-7px] rounded-[24px] border border-beam/20 animate-pulse" />}
+          {gone ? <VideoOff className="size-7 text-ink-dim" /> : mode === "live" ? <Radio className="size-7 text-beam-soft" /> : <Loader2 className="size-7 animate-spin text-beam-soft" />}
         </div>
         <div className="mt-4 font-display text-[18px] font-semibold tracking-[-0.01em] text-white">{label}</div>
         <p className="mt-1.5 text-[12px] leading-relaxed text-muted">{sub}</p>
         {!gone && (
-          <div className="mt-4 flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-[10px] font-bold tracking-[0.08em] text-blue-soft">
-            <span className="size-[5px] rounded-full bg-blue-light animate-[tvLive_1.4s_infinite]" />
+          <div className="mt-4 flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-[10px] font-bold tracking-[0.08em] text-beam-soft">
+            <span className="size-[5px] rounded-full bg-beam-soft animate-[tvLive_1.4s_infinite]" />
             {mode === "live" ? "AUTO CONNECTING" : "CHECKING PLAYBACK"}
           </div>
         )}

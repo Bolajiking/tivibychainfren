@@ -16,6 +16,9 @@ export async function provisionCreatorProfile(
     category?: string;
     avatarColor?: string;
     avatarUrl?: string | null;
+    /** Tier-1 brand accent picked during onboarding (framework §8). */
+    accentColor?: string;
+    themeVariant?: "midnight" | "dim" | "voltage";
     socialLinks?: { kind: string; url: string }[];
   },
   walletAddress?: string,

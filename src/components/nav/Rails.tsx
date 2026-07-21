@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Compass, User, Search, BarChart3, ShoppingBag, Tv, HandCoins,
-  MessageSquare, LayoutGrid, Heart, Crown, ChevronRight, Wallet,
-  PanelLeftClose, PanelLeftOpen,
+  Compass, Search, BarChart3, MessageSquare, LayoutGrid, Heart, Crown,
+  ChevronRight, Wallet, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
+import { OnAirGlyph, WalletGlyph, StoreGlyph, GoLiveGlyph, StageGlyph } from "@/components/brand/Glyphs";
 import { Avatar } from "@/components/ui/Media";
 import { useSession } from "@/lib/store/session";
 import { buildAuthHref } from "@/lib/auth/redirect";
@@ -72,9 +72,10 @@ export function Sidebar({ query = "", active }: { query?: string; active?: "expl
           </form>
         )}
 
-        <NavRow href="/explore" icon={<Compass className="size-[18px]" />} label="Explore" active={active === "explore"} collapsed={collapsed} />
+        {/* Same vocabulary as the mobile triad — one name per destination. */}
+        <NavRow href="/explore" icon={<Compass className="size-[18px]" />} label="What's on" active={active === "explore"} collapsed={collapsed} />
         <NavRow href="/explore" icon={<Heart className="size-[18px]" />} label="Following" active={active === "following"} collapsed={collapsed} />
-        <NavRow icon={<Wallet className="size-[18px]" />} label="Wallet" collapsed={collapsed} onClick={onWallet} />
+        <NavRow icon={<WalletGlyph size={18} />} label="Wallet" collapsed={collapsed} onClick={onWallet} />
 
         {creator &&
           (collapsed ? (
@@ -84,7 +85,7 @@ export function Sidebar({ query = "", active }: { query?: string; active?: "expl
             </div>
           ) : (
             <>
-              <SidebarLabel className="text-blue-soft">Your channel</SidebarLabel>
+              <SidebarLabel className="text-beam-soft">Your channel</SidebarLabel>
               <OwnedChannelRow
                 href={`/${creator.username}`}
                 name={creator.displayName}
@@ -139,11 +140,11 @@ function NavRow({ href, icon, label, active, collapsed, onClick }: {
   const cls = cn(
     "flex h-10 items-center rounded-[11px] text-[13px] font-medium transition-colors",
     collapsed ? "justify-center" : "gap-3 px-[11px]",
-    active ? "bg-blue/[0.14] font-semibold text-white" : "text-muted hover:bg-white/[0.05] hover:text-white",
+    active ? "bg-beam/[0.14] font-semibold text-white" : "text-muted hover:bg-white/[0.05] hover:text-white",
   );
   const inner = (
     <>
-      <span className={cn("grid shrink-0 place-items-center", active ? "text-blue-light" : "text-faint")}>{icon}</span>
+      <span className={cn("grid shrink-0 place-items-center", active ? "text-beam-soft" : "text-faint")}>{icon}</span>
       {!collapsed && <span className="truncate">{label}</span>}
     </>
   );
@@ -162,9 +163,8 @@ function SidebarLabel({ children, className }: { children: React.ReactNode; clas
 function OwnedChannelIcon({ creator }: { creator: Creator }) {
   return (
     <Link href={`/${creator.username}`} aria-label={`${creator.displayName} (your channel)`} className="group relative">
-      <span aria-hidden className="absolute -inset-1.5 rounded-full bg-blue/30 opacity-70 blur-md transition-opacity group-hover:opacity-100" />
       <Avatar seed={creator.avatarColor ?? "#2a2a2a"} src={creator.avatarUrl} size={42} ring="#40ACFF" className="relative" />
-      <span className="absolute -right-1 -top-1 z-10 flex size-[15px] items-center justify-center rounded-full border-2 border-surface-2 bg-blue text-white shadow-[0_2px_8px_rgba(64,172,255,.45)]">
+      <span className="absolute -right-1 -top-1 z-10 flex size-[15px] items-center justify-center rounded-full border-2 border-surface-2 bg-beam text-white">
         <Crown className="size-[8px] fill-current" />
       </span>
     </Link>
@@ -175,22 +175,22 @@ function OwnedChannelRow({ href, name, handle, seed, src }: { href: string; name
   return (
     <Link
       href={href}
-      className="group relative flex items-center gap-2.5 overflow-hidden rounded-[12px] border border-blue/30 bg-gradient-to-r from-blue/[0.13] via-blue/[0.05] to-transparent px-2.5 py-2 transition-colors hover:border-blue/55"
+      className="group relative flex items-center gap-2.5 overflow-hidden rounded-[12px] border border-beam/30 bg-gradient-to-r from-beam/[0.13] via-beam/[0.05] to-transparent px-2.5 py-2 transition-colors hover:border-beam/55"
     >
       <span className="relative shrink-0">
         <Avatar seed={seed} src={src} size={32} ring="#40ACFF" />
-        <span className="absolute -right-1 -top-1 flex size-[14px] items-center justify-center rounded-full border-2 border-surface-2 bg-blue text-white shadow-[0_2px_8px_rgba(64,172,255,.45)]">
+        <span className="absolute -right-1 -top-1 flex size-[14px] items-center justify-center rounded-full border-2 border-surface-2 bg-beam text-white">
           <Crown className="size-[7px] fill-current" />
         </span>
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5">
           <span className="truncate text-xs font-semibold text-white">{name}</span>
-          <span className="shrink-0 rounded bg-blue/25 px-1.5 py-px text-[7.5px] font-bold tracking-[0.06em] text-blue-soft">OWNER</span>
+          <span className="shrink-0 rounded bg-beam/25 px-1.5 py-px text-[7.5px] font-bold tracking-[0.06em] text-beam-soft">OWNER</span>
         </span>
         <span className="mt-0.5 block truncate text-[10px] text-faint">@{handle}</span>
       </span>
-      <ChevronRight className="size-3.5 shrink-0 text-blue-soft/50 transition-transform group-hover:translate-x-0.5 group-hover:text-blue-soft" />
+      <ChevronRight className="size-3.5 shrink-0 text-beam-soft/50 transition-transform group-hover:translate-x-0.5 group-hover:text-beam-soft" />
     </Link>
   );
 }
@@ -208,10 +208,10 @@ export function DashboardSidebar({ active = "overview", creator }: { active?: st
   const collapsed = useSession((s) => s.navCollapsed);
   const toggleNav = useSession((s) => s.toggleNav);
   const items = [
-    { id: "overview", label: "Overview", icon: <LayoutGrid className="size-4" />, href: "/dashboard" },
-    { id: "streams", label: "Streams", icon: <Tv className="size-4" />, href: "/dashboard/streams" },
-    { id: "store", label: "Store", icon: <ShoppingBag className="size-4" />, href: "/dashboard/store" },
-    { id: "money", label: "Monetization", icon: <HandCoins className="size-4" />, href: "/dashboard/monetization" },
+    { id: "overview", label: "Overview", icon: <StageGlyph size={16} />, href: "/dashboard" },
+    { id: "streams", label: "Streams", icon: <GoLiveGlyph size={16} />, href: "/dashboard/streams" },
+    { id: "store", label: "Store", icon: <StoreGlyph size={16} />, href: "/dashboard/store" },
+    { id: "money", label: "Monetization", icon: <WalletGlyph size={16} />, href: "/dashboard/monetization" },
     { id: "stats", label: "Analytics", icon: <BarChart3 className="size-4" />, href: "/dashboard/analytics" },
     { id: "chat", label: "Chat", icon: <MessageSquare className="size-4" />, href: "/dashboard/chat" },
   ];
@@ -248,11 +248,11 @@ export function DashboardSidebar({ active = "overview", creator }: { active?: st
               "flex h-10 items-center rounded-[11px] text-xs transition-colors",
               collapsed ? "justify-center" : "gap-2.5 px-2.5",
               active === it.id
-                ? collapsed ? "font-semibold text-blue-light hover:bg-white/[0.05]" : "bg-blue/[0.14] font-semibold text-white"
+                ? collapsed ? "font-semibold text-beam-soft hover:bg-white/[0.05]" : "bg-beam/[0.14] font-semibold text-white"
                 : "text-muted hover:bg-white/[0.05] hover:text-white",
             )}
           >
-            <span className={active === it.id ? "text-blue-light" : "text-faint"}>{it.icon}</span>
+            <span className={active === it.id ? "text-beam-soft" : "text-faint"}>{it.icon}</span>
             {!collapsed && it.label}
           </Link>
         ))}
@@ -266,29 +266,40 @@ function CollapsedRailToggle({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       aria-label="Expand sidebar"
-      className="grid size-8 place-items-center rounded-[10px] border border-white/12 bg-white/[0.035] text-ink-dim transition-colors hover:border-white/20 hover:bg-white/[0.06] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-blue/60"
+      className="grid size-8 place-items-center rounded-[10px] border border-white/12 bg-white/[0.035] text-ink-dim transition-colors hover:border-white/20 hover:bg-white/[0.06] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-beam/60"
     >
       <PanelLeftOpen className="size-[17px]" />
     </button>
   );
 }
 
+/**
+ * The creator's mobile triad (F6): Channel · Store · Wallet. Streams and
+ * analytics are reached from the dashboard home, which already leads with
+ * "Go live" — a five-item bar would dilute the one dominant action.
+ */
 export function CreatorBottomNav() {
   const path = usePathname();
   const items = [
-    { label: "Home", icon: <LayoutGrid className="size-[18px]" />, href: "/dashboard" },
-    { label: "Streams", icon: <Tv className="size-[18px]" />, href: "/dashboard/streams" },
-    { label: "Money", icon: <HandCoins className="size-[18px]" />, href: "/dashboard/monetization" },
-    { label: "Stats", icon: <BarChart3 className="size-[18px]" />, href: "/dashboard/analytics" },
+    { label: "Channel", icon: <OnAirGlyph size={19} />, href: "/dashboard" },
+    { label: "Store", icon: <StoreGlyph size={19} />, href: "/dashboard/store" },
+    { label: "Wallet", icon: <WalletGlyph size={19} />, href: "/dashboard/monetization" },
   ];
   return (
     <div className="sticky bottom-0 z-30 flex shrink-0 items-center border-t border-white/[0.06] bg-surface-2/95 pt-1 backdrop-blur pb-[max(4px,env(safe-area-inset-bottom))]">
-      {items.map((it) => {
-        const active = path === it.href;
+      {items.map((item) => {
+        const active = path === item.href;
         return (
-          <Link key={it.label} href={it.href} className={cn("flex h-[54px] flex-1 flex-col items-center justify-center gap-[3px] transition-colors active:scale-95", active ? "text-blue" : "text-faint")}>
-            {it.icon}
-            <span className="text-[9px] font-semibold">{it.label}</span>
+          <Link
+            key={item.label}
+            href={item.href}
+            className={cn(
+              "flex h-[54px] flex-1 flex-col items-center justify-center gap-[3px] transition-[color,transform] duration-150 ease-[cubic-bezier(.22,1,.36,1)] active:scale-[0.96]",
+              active ? "text-beam" : "text-faint hover:text-ink-dim",
+            )}
+          >
+            {item.icon}
+            <span className="text-[10px] font-semibold">{item.label}</span>
           </Link>
         );
       })}
@@ -296,35 +307,72 @@ export function CreatorBottomNav() {
   );
 }
 
+/**
+ * The fan nav triad (Package 3): Channel · What's on · Wallet.
+ *
+ * Fan chrome is deliberately minimal — creator pages carry their own nav and
+ * never render this bar. Active state is the beam, one at a time.
+ */
 export function ViewerTabBar() {
   const path = usePathname();
   const router = useRouter();
   const openWallet = useSession((s) => s.openWallet);
+  const creator = useSession((s) => s.creator);
+  const subscriptions = useSession((s) => s.subscriptions);
 
   function onWallet() {
     if (!useSession.getState().user) router.push(buildAuthHref({ role: "viewer", next: "/wallet" }));
     else openWallet();
   }
 
-  const links = [
-    { label: "Explore", icon: <Compass className="size-[19px]" />, href: "/explore" },
-    { label: "Following", icon: <Heart className="size-[19px]" />, href: "/explore" },
-  ];
+  // "Channel" is only shown when the fan actually has one — a channel they own,
+  // else the first they follow. A pure viewer is never pushed toward the claim
+  // flow from their fan chrome (that's a creator action). They get What's on +
+  // Wallet, and Following once they follow someone.
+  const channelHref = creator ? `/${creator.username}` : subscriptions[0] ? `/${subscriptions[0].username}` : null;
+  const channelLabel = creator ? "My channel" : "Following";
+
   return (
     <div className="sticky bottom-0 z-30 flex shrink-0 items-center border-t border-white/[0.06] bg-surface-2/95 pt-1 backdrop-blur pb-[max(4px,env(safe-area-inset-bottom))]">
-      {links.map((it) => {
-        const active = path === it.href;
-        return (
-          <Link key={it.label} href={it.href} className={cn("flex h-[54px] flex-1 flex-col items-center justify-center gap-[3px] transition-colors active:scale-95", active ? "text-blue" : "text-faint")}>
-            {it.icon}
-            <span className="text-[9px] font-semibold">{it.label}</span>
-          </Link>
-        );
-      })}
-      <button onClick={onWallet} className="flex h-[54px] flex-1 flex-col items-center justify-center gap-[3px] text-faint transition-colors active:scale-95 hover:text-white">
-        <User className="size-[19px]" />
-        <span className="text-[9px] font-semibold">You</span>
-      </button>
+      {channelHref && (
+        <TabItem href={channelHref} label={channelLabel} active={path === channelHref} icon={<OnAirGlyph size={19} />} />
+      )}
+      <TabItem href="/explore" label="What's on" active={path === "/explore"} icon={<Search className="size-[19px]" />} />
+      <TabItem onClick={onWallet} label="Wallet" icon={<WalletGlyph size={19} />} />
     </div>
+  );
+}
+
+function TabItem({
+  href,
+  onClick,
+  label,
+  icon,
+  active,
+}: {
+  href?: string;
+  onClick?: () => void;
+  label: string;
+  icon: React.ReactNode;
+  active?: boolean;
+}) {
+  const className = cn(
+    "flex h-[54px] flex-1 flex-col items-center justify-center gap-[3px] transition-[color,transform] duration-150 ease-[cubic-bezier(.22,1,.36,1)] active:scale-[0.96]",
+    active ? "text-beam" : "text-faint hover:text-ink-dim",
+  );
+  const inner = (
+    <>
+      {icon}
+      <span className="text-[10px] font-semibold">{label}</span>
+    </>
+  );
+  return onClick ? (
+    <button onClick={onClick} aria-label={label} className={className}>
+      {inner}
+    </button>
+  ) : (
+    <Link href={href!} aria-label={label} className={className}>
+      {inner}
+    </Link>
   );
 }

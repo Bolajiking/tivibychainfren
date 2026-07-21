@@ -11,7 +11,7 @@ export function OwnerToggle({ mode, onChange }: { mode: "public" | "manage"; onC
           onClick={() => onChange(m)}
           className={cn(
             "rounded-full px-3 py-1.5 text-[10.5px] font-semibold transition",
-            mode === m ? "bg-blue text-white" : "text-muted",
+            mode === m ? "bg-beam text-white" : "text-muted",
           )}
         >
           {m === "public" ? "View as public" : "Manage"}

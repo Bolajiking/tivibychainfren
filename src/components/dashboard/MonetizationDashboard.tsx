@@ -95,7 +95,7 @@ export function MonetizationDashboard() {
           {/* payout */}
           <Panel title="Payout destination">
             <div className="flex items-center gap-3 rounded-[12px] border border-white/10 bg-white/[0.03] px-3.5 py-3">
-              <span className="flex size-9 items-center justify-center rounded-full bg-blue/[0.16] text-blue-light"><Wallet className="size-[18px]" /></span>
+              <span className="flex size-9 items-center justify-center rounded-full bg-beam/[0.16] text-beam-soft"><Wallet className="size-[18px]" /></span>
               <div className="min-w-0">
                 <div className="text-[12.5px] font-semibold">USDC · Base</div>
                 <div className="truncate font-mono text-[11px] text-faint">{shortenAddress(creator.creatorId)}</div>
@@ -116,7 +116,7 @@ export function MonetizationDashboard() {
                     <div className="truncate text-[12px] font-medium text-ink-soft">{row.label}</div>
                     <div className="mt-0.5 text-[10px] text-faint">{row.sub}</div>
                   </div>
-                  <div className="font-display text-[13px] font-semibold text-online">+{money(row.amount)}</div>
+                  <div className="font-display text-[13px] font-semibold text-earn">+{money(row.amount)}</div>
                 </div>
               ))}
             </div>
@@ -144,7 +144,7 @@ function buildLedger(notifications: CreatorNotification[], orders: Order[]): Led
       sub: new Date(n.createdAt).toLocaleDateString(),
       amount: n.amount ?? 0,
       icon: n.type === "donation" ? <HandCoins className="size-3.5" /> : n.type === "subscription" ? <UserPlus className="size-3.5" /> : <ShoppingBag className="size-3.5" />,
-      tone: n.type === "donation" ? "bg-blue/[0.16] text-blue-light" : n.type === "subscription" ? "bg-online/[0.16] text-online" : "bg-lime/[0.16] text-lime",
+      tone: n.type === "donation" ? "bg-beam/[0.16] text-beam-soft" : n.type === "subscription" ? "bg-earn/[0.16] text-earn" : "bg-white/[0.08] text-muted",
     }));
   const fromOrders: LedgerRow[] = orders
     .filter((o) => o.status === "completed")
@@ -154,7 +154,7 @@ function buildLedger(notifications: CreatorNotification[], orders: Order[]): Led
       sub: new Date(o.createdAt).toLocaleDateString(),
       amount: o.amount,
       icon: <ShoppingBag className="size-3.5" />,
-      tone: "bg-lime/[0.16] text-lime",
+      tone: "bg-white/[0.08] text-muted",
     }));
   return [...fromNotifs, ...fromOrders]
     .sort((a, b) => (a.sub < b.sub ? 1 : -1))

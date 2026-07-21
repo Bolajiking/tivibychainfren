@@ -86,7 +86,7 @@ export function InstallButton({
 
       <Sheet open={iosOpen} onOpenChange={setIosOpen} title={`Add ${target} to your device`}>
         <div className="flex items-center gap-3">
-          <span className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-blue-light">
+          <span className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-beam-soft">
             <SmartphoneNfc className="size-5" />
           </span>
           <div>
@@ -95,13 +95,13 @@ export function InstallButton({
           </div>
         </div>
         <ol className="mt-4 flex flex-col gap-2.5">
-          <IosStep n={1} icon={<Share className="size-4 text-blue-light" />}>
+          <IosStep n={1} icon={<Share className="size-4 text-beam-soft" />}>
             Tap the <span className="font-semibold text-white">Share</span> icon in Safari&apos;s toolbar.
           </IosStep>
-          <IosStep n={2} icon={<Plus className="size-4 text-blue-light" />}>
+          <IosStep n={2} icon={<Plus className="size-4 text-beam-soft" />}>
             Choose <span className="font-semibold text-white">Add to Home Screen</span>.
           </IosStep>
-          <IosStep n={3} icon={<Check className="size-4 text-blue-light" />}>
+          <IosStep n={3} icon={<Check className="size-4 text-beam-soft" />}>
             Tap <span className="font-semibold text-white">Add</span> — the {target} icon lands on your Home Screen.
           </IosStep>
         </ol>

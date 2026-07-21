@@ -36,7 +36,7 @@ export default function LivepeerVideo({
         <LP.Video title="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         <LP.LoadingIndicator asChild>
           <div className="absolute inset-0 grid place-items-center bg-black/45 backdrop-blur-[2px]">
-            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/45 px-4 py-3 text-white/85 shadow-[0_18px_60px_rgba(0,0,0,.45)]">
+            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/45 px-4 py-3 text-white/85">
               <Loader2 className="size-5 animate-spin" />
               <span className="text-[12px] font-semibold">{mode === "live" ? "Connecting to live video" : "Opening replay"}</span>
             </div>
@@ -48,25 +48,48 @@ export default function LivepeerVideo({
   );
 }
 
+/**
+ * Stage grammar (Package 3): flat icon chrome on a scrim — no boxes, no
+ * shadows, no backdrop panels. The UI may never out-bright the stream.
+ * Every target is ≥44px.
+ */
 function LiveControls() {
   return (
-    <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2 rounded-full border border-white/12 bg-black/45 px-2.5 py-2 text-white shadow-[0_18px_50px_rgba(0,0,0,.45)] backdrop-blur-md">
-      <span className="hidden items-center gap-1.5 rounded-full bg-red-500/20 px-2.5 py-1 text-[9px] font-bold tracking-[0.08em] text-red-50 sm:inline-flex">
-        <span className="size-[5px] rounded-full bg-live animate-[tvLive_1.4s_infinite]" />
-        LIVE
-      </span>
-      <LP.PlayPauseTrigger className="flex size-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 hover:text-white" title="Play or pause live video">
-        <LP.PlayingIndicator asChild matcher={false}><Play className="ml-0.5 size-[17px] fill-current" /></LP.PlayingIndicator>
-        <LP.PlayingIndicator asChild matcher={true}><Pause className="size-[17px] fill-current" /></LP.PlayingIndicator>
-      </LP.PlayPauseTrigger>
-      <LP.MuteTrigger className="flex size-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 hover:text-white" title="Mute or unmute">
-        <LP.VolumeIndicator asChild matcher={false}><VolumeX className="size-[17px]" /></LP.VolumeIndicator>
-        <LP.VolumeIndicator asChild matcher={(volume) => volume > 0}><Volume2 className="size-[17px]" /></LP.VolumeIndicator>
-      </LP.MuteTrigger>
-      <LP.FullscreenTrigger className="flex size-8 items-center justify-center rounded-full text-white/90 hover:bg-white/10 hover:text-white" title="Fullscreen">
-        <Maximize className="size-[16px]" />
-      </LP.FullscreenTrigger>
-    </div>
+    <>
+      {/* Muted autoplay is the platform muscle memory fans arrive with, so the
+          unmute affordance is the loudest thing on the frame until it's used. */}
+      <LP.VolumeIndicator asChild matcher={false}>
+        <LP.MuteTrigger
+          className="absolute left-1/2 top-[46%] z-20 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-2.5 rounded-full border border-white/20 bg-black/60 px-[18px] py-[11px] text-[13px] font-semibold text-ink-soft"
+          title="Tap for sound"
+        >
+          <VolumeX className="size-4" />
+          Tap for sound
+        </LP.MuteTrigger>
+      </LP.VolumeIndicator>
+
+      <div className="scrim-bottom pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[34%]" />
+
+      {/* The live edge, in live-red — its one non-chip use. */}
+      <div className="absolute inset-x-4 bottom-[52px] z-20 h-[3px] rounded-full bg-white/20">
+        <span className="block h-full w-[98.5%] rounded-full bg-live" />
+      </div>
+
+      <div className="absolute inset-x-2 bottom-1 z-20 flex items-center gap-1 text-ink-soft">
+        <LP.PlayPauseTrigger className="grid size-11 place-items-center rounded-full text-white/90 hover:text-white" title="Play or pause live video">
+          <LP.PlayingIndicator asChild matcher={false}><Play className="ml-0.5 size-[22px] fill-current" /></LP.PlayingIndicator>
+          <LP.PlayingIndicator asChild matcher={true}><Pause className="size-[22px] fill-current" /></LP.PlayingIndicator>
+        </LP.PlayPauseTrigger>
+        <LP.MuteTrigger className="grid size-11 place-items-center rounded-full text-white/90 hover:text-white" title="Mute or unmute">
+          <LP.VolumeIndicator asChild matcher={false}><VolumeX className="size-[22px]" /></LP.VolumeIndicator>
+          <LP.VolumeIndicator asChild matcher={(volume) => volume > 0}><Volume2 className="size-[22px]" /></LP.VolumeIndicator>
+        </LP.MuteTrigger>
+        <span className="receipt ml-1 text-[11px] text-ink-dim [text-shadow:0_1px_6px_rgba(0,0,0,.6)]">LIVE · −0:00</span>
+        <LP.FullscreenTrigger className="ml-auto grid size-11 place-items-center rounded-full text-white/90 hover:text-white" title="Fullscreen">
+          <Maximize className="size-[20px]" />
+        </LP.FullscreenTrigger>
+      </div>
+    </>
   );
 }
 
@@ -77,7 +100,7 @@ function VodControls() {
       <LP.Seek className="relative flex h-4 items-center">
         <LP.Track className="relative h-[3px] grow rounded-full bg-white/25">
           <LP.SeekBuffer className="absolute h-full rounded-full bg-white/30" />
-          <LP.Range className="absolute h-full rounded-full bg-blue" />
+          <LP.Range className="absolute h-full rounded-full bg-beam" />
         </LP.Track>
         <LP.Thumb className="block size-2.5 rounded-full bg-white" />
       </LP.Seek>

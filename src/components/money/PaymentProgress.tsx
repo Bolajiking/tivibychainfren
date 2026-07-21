@@ -59,7 +59,7 @@ export function Confetti() {
 }
 
 export function SuccessBurst({ title, subtitle, tone = "blue" }: { title: string; subtitle?: string; tone?: "blue" | "green" }) {
-  const ring = tone === "green" ? "bg-earn shadow-[0_14px_40px_rgba(34,197,94,.35)]" : "bg-beam shadow-[0_14px_40px_rgba(64,172,255,.35)]";
+  const ring = tone === "green" ? "bg-earn" : "bg-beam";
   return (
     <div className="flex flex-col items-center justify-center gap-3.5 py-8 text-center animate-[tvPop_.5s_cubic-bezier(.22,1,.36,1)_both]">
       <div className={`flex size-16 items-center justify-center rounded-full text-white ${ring}`}>

@@ -140,9 +140,9 @@ export function BroadcastChat({ streamId, hostName, live }: { streamId: string; 
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder="Message as host…"
-            className="h-10 flex-1 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none"
+            className="h-10 flex-1 rounded-[12px] border border-white/12 bg-white/[0.06] px-3 text-sm text-white placeholder:text-faint focus:border-beam focus:outline-none"
           />
-          <button onClick={send} disabled={sending || !draft.trim()} aria-label="Send" className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-blue text-white disabled:opacity-45">
+          <button onClick={send} disabled={sending || !draft.trim()} aria-label="Send" className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-beam text-white disabled:opacity-45">
             {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
           </button>
         </div>
@@ -154,8 +154,8 @@ export function BroadcastChat({ streamId, hostName, live }: { streamId: string; 
 function ModRow({ m, busy, onRemove }: { m: ChatMessage; busy: boolean; onRemove: () => void }) {
   if (m.kind === "donation") {
     return (
-      <div className="group flex items-center gap-2 rounded-xl border border-blue-light/40 bg-gradient-to-r from-blue/20 to-[#40ffcc]/[0.08] px-2.5 py-2">
-        <span className="flex-1 text-[11.5px] font-bold text-blue-soft">{m.sender} tipped ${m.amount}{m.message ? ` · ${m.message}` : ""}</span>
+      <div className="group flex items-center gap-2 rounded-xl border border-beam-soft/40 bg-gradient-to-r from-beam/20 to-[#40ffcc]/[0.08] px-2.5 py-2">
+        <span className="flex-1 text-[11.5px] font-bold text-beam-soft">{m.sender} tipped ${m.amount}{m.message ? ` · ${m.message}` : ""}</span>
         <RemoveBtn busy={busy} onRemove={onRemove} />
       </div>
     );

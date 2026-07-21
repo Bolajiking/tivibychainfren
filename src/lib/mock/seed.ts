@@ -30,42 +30,50 @@ export const creators: Creator[] = [
   {
     creatorId: ADDR.ada, username: "adaplays", displayName: "Ada Plays",
     bio: "Late night just chatting — ask me anything.", avatarColor: "#2b2b2b",
+    accentColor: "#FFB43D", themeVariant: "midnight",
     subscriberCount: 12400, category: "Gaming",
     socialLinks: [{ kind: "twitter", url: "https://x.com/adaplays" }],
   },
   {
     creatorId: ADDR.tunde, username: "tundefm", displayName: "Tunde FM",
     bio: "Friday mix sessions, every week.", avatarColor: "#242424",
+    accentColor: "#B79CFF", themeVariant: "dim",
     subscriberCount: 8800, category: "Music",
   },
   {
     creatorId: ADDR.studiok, username: "studiok", displayName: "Studio K",
     bio: "Build in public.", avatarColor: "#202020",
+    accentColor: "#5ACDFF", themeVariant: "midnight",
     subscriberCount: 4100, category: "Learn",
   },
   {
     creatorId: ADDR.kemi, username: "kemicooks", displayName: "Kemi Cooks",
     bio: "Lagos kitchen, live.", avatarColor: "#211f29",
+    accentColor: "#FF8AB3", themeVariant: "voltage",
     subscriberCount: 18200, category: "Learn",
   },
   {
     creatorId: ADDR.seyi, username: "seyitalkstech", displayName: "Seyi Talks Tech",
     bio: "Tech, simply.", avatarColor: "#1d2230",
+    accentColor: "#5ACDFF", themeVariant: "midnight",
     subscriberCount: 9400, category: "Learn",
   },
   {
     creatorId: ADDR.lagospod, username: "thelagospod", displayName: "The Lagos Pod",
     bio: "Culture, weekly.", avatarColor: "#262028",
+    accentColor: "#C8EB6D", themeVariant: "midnight",
     subscriberCount: 31000, category: "Music",
   },
   {
     creatorId: ADDR.fitada, username: "fitwithada", displayName: "Fit With Ada",
     bio: "Move daily.", avatarColor: "#1f2622",
+    accentColor: "#3FD8C2", themeVariant: "midnight",
     subscriberCount: 6100, category: "Learn",
   },
   {
     creatorId: ADDR.lola, username: "lolawrites", displayName: "Lola Writes",
     bio: "Morning pages.", avatarColor: "#262626",
+    accentColor: "#B79CFF", themeVariant: "midnight",
     subscriberCount: 2300, category: "Learn",
   },
 ];

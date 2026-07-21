@@ -11,7 +11,7 @@ import { authRoleFromSearch, safeNextPath } from "@/lib/auth/redirect";
 type View = "methods" | "email" | "code";
 
 const FIELD =
-  "h-[50px] rounded-[14px] border border-white/12 bg-white/[0.05] px-4 text-[14px] text-white placeholder:text-faint focus:border-blue/60 focus:outline-none";
+  "h-[50px] rounded-[14px] border border-white/12 bg-white/[0.05] px-4 text-[14px] text-white placeholder:text-faint focus:border-beam/60 focus:outline-none";
 
 /**
  * Real auth, our UI. Privy stays the backend but we drive it headlessly so the

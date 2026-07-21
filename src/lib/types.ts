@@ -16,6 +16,10 @@ export interface Creator {
   avatarColor?: string; // gradient seed for placeholder art
   avatarUrl?: string;
   headerUrl?: string; // channel stage header (shown when offline)
+  /** Tier-1 brand accent (framework §8) — contrast-guarded at render time. */
+  accentColor?: string;
+  /** Constrained theme variant: midnight (default) · dim · voltage. */
+  themeVariant?: "midnight" | "dim" | "voltage";
   subscriberCount: number;
   socialLinks?: { kind: string; url: string }[];
   category?: string;

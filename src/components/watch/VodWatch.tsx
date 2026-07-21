@@ -3,10 +3,12 @@
 import { useState, useEffect, type FormEvent } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ChevronLeft, Play, Lock, HandCoins, MessageCircle, Send, Loader2, ShoppingBag } from "lucide-react";
+import { ChevronLeft, Play, Lock, MessageCircle, Send, Loader2 } from "lucide-react";
 import { Avatar } from "@/components/ui/Media";
 import { Button } from "@/components/ui/Button";
-import { GateBadge } from "@/components/ui/Badges";
+import { GateBadge, ReplayPill } from "@/components/ui/Badges";
+import { CreatorTheme } from "@/components/channel/CreatorTheme";
+import { StoreGlyph, TipGlyph, StageGlyph } from "@/components/brand/Glyphs";
 import { UnlockGate } from "@/components/money/UnlockGate";
 import { TipSheet } from "@/components/money/TipSheet";
 import { PurchaseSheet } from "@/components/money/PurchaseSheet";
@@ -14,7 +16,7 @@ import { ProductCard } from "@/components/cards/Cards";
 import { Player } from "@/components/watch/Player";
 import { useSession } from "@/lib/store/session";
 import { useAuthIntent } from "@/lib/auth/useAuthIntent";
-import { hasAccess } from "@/lib/access";
+import { hasAccess, matchesAny } from "@/lib/access";
 import { formatCount } from "@/lib/cn";
 import { normalizeChatText } from "@/lib/realtime-state";
 import { postVideoComment } from "@/lib/video-client";
@@ -31,12 +33,28 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
   const [posting, setPosting] = useState(false);
 
   const wallets = user?.walletAddresses ?? [];
+  const isOwner = matchesAny(wallets, creator.creatorId);
   const subscribed = isSubscribed(creator.creatorId);
   const unlocked = isUnlocked(`video_access_${video.playbackId}`) || isUnlocked(`creator_access_${creator.creatorId}`);
   const gated = video.viewMode !== "free";
-  const locked = gated && !subscribed && !unlocked && !hasAccess({ resource: video, wallets });
+  // The owner always has access to their own replay — never gate them out of it.
+  const locked = !isOwner && gated && !subscribed && !unlocked && !hasAccess({ resource: video, wallets });
 
   useEffect(() => { if (locked) setGateOpen(true); }, [locked]);
+
+  /** F3 — one tap, and the creator owns the relationship. */
+  function follow() {
+    if (!requireAuth({ role: "viewer" })) return;
+    if (subscribed) return;
+    subscribe(creator.creatorId, {
+      creatorId: creator.creatorId,
+      username: creator.username,
+      displayName: creator.displayName,
+      avatarColor: creator.avatarColor,
+      avatarUrl: creator.avatarUrl,
+    });
+    toast.success(`You follow ${creator.displayName}`);
+  }
   const activeProducts = products.filter((p) => p.status === "active");
   const normalizedComment = normalizeChatText(commentText);
 
@@ -64,8 +82,9 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
   }
 
   return (
-    <div className="mx-auto min-h-screen max-w-[900px] bg-canvas px-4 pb-16 pt-4">
-      <Link href={`/${creator.username}`} className="mb-4 inline-flex size-9 items-center justify-center rounded-full bg-white/[0.06] text-ink-dim">
+    <CreatorTheme accent={creator.accentColor} variant={creator.themeVariant} className="min-h-screen">
+      <div className="mx-auto max-w-[900px] px-4 pb-16 pt-4">
+      <Link href={`/${creator.username}`} className="tap mb-4 inline-flex size-9 items-center justify-center rounded-full bg-white/[0.06] text-ink-dim">
         <ChevronLeft className="size-[18px]" />
       </Link>
 
@@ -95,22 +114,31 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
       <div className="mt-4">
         <h1 className="font-display text-[22px] font-semibold tracking-[-0.01em]">{video.title}</h1>
         <div className="mt-2 flex items-center gap-2.5 text-[12px] text-faint">
-          <span>{formatCount(video.views)} views</span>
+          <ReplayPill small />
+          <span className="receipt">{formatCount(video.views)} views</span>
           <span className="size-[3px] rounded-full bg-ghost" />
-          <span>{new Date(video.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}</span>
+          <span className="receipt">{new Date(video.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}</span>
           <GateBadge viewMode={video.viewMode} amount={video.amount} />
         </div>
 
         <div className="mt-4 flex items-center gap-3 border-t border-white/[0.06] pt-4">
-          <Avatar seed={creator.avatarColor} src={creator.avatarUrl} size={44} />
+          <Avatar seed={creator.avatarColor} src={creator.avatarUrl} size={44} ring="var(--creator-accent)" />
           <div className="flex-1">
             <div className="text-sm font-semibold">{creator.displayName}</div>
-          <div className="text-[11.5px] text-faint">{formatCount(creator.subscriberCount)} subscribers</div>
+          <div className="receipt text-[11.5px] text-faint">{formatCount(creator.subscriberCount)} fans</div>
           </div>
-          <Button size="pill" variant={subscribed ? "secondary" : "primary"} onClick={() => { if (!requireAuth({ role: "viewer" })) return; subscribed || subscribe(creator.creatorId, { creatorId: creator.creatorId, username: creator.username, displayName: creator.displayName, avatarColor: creator.avatarColor, avatarUrl: creator.avatarUrl }); }}>
-            {subscribed ? "Subscribed" : "Subscribe"}
-          </Button>
-          <Button size="pill" variant="secondary" onClick={() => { if (requireAuth({ role: "viewer" })) setTipOpen(true); }}><HandCoins className="size-4" /> Tip</Button>
+          {isOwner ? (
+            <Button asChild size="pill" variant="secondary">
+              <Link href="/dashboard/videos"><StageGlyph size={16} /> Manage</Link>
+            </Button>
+          ) : (
+            <>
+              <Button size="pill" variant={subscribed ? "secondary" : "accent"} onClick={follow}>
+                {subscribed ? "Following" : "Follow"}
+              </Button>
+              <Button size="pill" variant="secondary" onClick={() => { if (requireAuth({ role: "viewer" })) setTipOpen(true); }}><TipGlyph size={16} /> Tip</Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -118,7 +146,7 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
         <section className="mt-6 rounded-[18px] border border-white/[0.07] bg-raised p-4">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2 text-[12px] font-semibold text-ink-dim">
-              <ShoppingBag className="size-4 text-blue-light" /> Shop this replay
+              <StoreGlyph size={16} className="text-accent" /> Shop this replay
             </div>
             <span className="text-[10.5px] text-faint">{activeProducts.length} {activeProducts.length === 1 ? "item" : "items"}</span>
           </div>
@@ -133,7 +161,7 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
       <section className="mt-6 rounded-[18px] border border-white/[0.07] bg-raised p-4">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2 text-[12px] font-semibold text-ink-dim">
-            <MessageCircle className="size-4 text-blue-light" /> Comments
+            <MessageCircle className="size-4 text-beam-soft" /> Comments
           </div>
           <span className="text-[10.5px] text-faint">{comments.length}</span>
         </div>
@@ -144,12 +172,12 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
             onChange={(e) => setCommentText(e.target.value)}
             onFocus={() => requireAuth({ role: "viewer" })}
             placeholder={user ? "Add a thoughtful comment…" : "Sign in to comment"}
-            className="h-11 min-w-0 flex-1 rounded-full border border-white/10 bg-white/[0.05] px-4 text-[12.5px] text-white placeholder:text-faint focus:border-blue focus:outline-none"
+            className="h-11 min-w-0 flex-1 rounded-full border border-white/10 bg-white/[0.05] px-4 text-[12.5px] text-white placeholder:text-faint focus:border-beam focus:outline-none"
           />
           <button
             type="submit"
             disabled={!normalizedComment || posting}
-            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-blue text-white transition hover:bg-blue-light disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-beam text-white transition hover:bg-beam-soft disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="Post comment"
           >
             {posting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
@@ -182,16 +210,32 @@ export function VodWatch({ creator, video, initialComments, products }: { creato
         resource={{ kind: "video", playbackId: video.playbackId }}
         onUnlocked={(door) => { if (door === "monthly") subscribe(creator.creatorId, { creatorId: creator.creatorId, username: creator.username, displayName: creator.displayName, avatarColor: creator.avatarColor, avatarUrl: creator.avatarUrl }); }}
       />
-      <TipSheet open={tipOpen} onOpenChange={setTipOpen} creatorName={creator.displayName} recipient={creator.creatorId} presets={[1, 5, 10, 20]} avatarSeed={creator.avatarColor} onSent={() => toast.success("Tip sent")} />
-      <PurchaseSheet product={buy} open={!!buy} onOpenChange={(v) => !v && setBuy(null)} />
-    </div>
+      <TipSheet
+        open={tipOpen}
+        onOpenChange={setTipOpen}
+        creatorName={creator.displayName}
+        recipient={creator.creatorId}
+        presets={[1, 3, 5, 10]}
+        resource={{ kind: "video", playbackId: video.playbackId }}
+        onSent={() => toast.success("Tip sent")}
+        onFollow={subscribed ? undefined : follow}
+      />
+      <PurchaseSheet
+        product={buy}
+        open={!!buy}
+        onOpenChange={(v) => !v && setBuy(null)}
+        creatorName={creator.displayName}
+        onFollow={subscribed ? undefined : follow}
+      />
+      </div>
+    </CreatorTheme>
   );
 }
 
 function CommentRow({ comment }: { comment: VodComment }) {
   return (
     <div className="flex gap-3 rounded-[14px] bg-white/[0.035] p-3">
-      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-blue/[0.16] text-[11px] font-bold text-blue-light">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-beam/[0.16] text-[11px] font-bold text-beam-soft">
         {comment.sender.slice(0, 1).toUpperCase()}
       </div>
       <div className="min-w-0 flex-1">

@@ -292,7 +292,7 @@ export function VideoManager() {
             <div className="mb-1 font-display text-[16px] font-semibold">Upload a replay</div>
             <p className="mb-3.5 text-[11.5px] text-faint">Share a recorded video your fans can watch any time.</p>
             <div className="flex flex-col gap-2.5">
-              <input ref={titleRef} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Video title" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3.5 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none" />
+              <input ref={titleRef} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Video title" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3.5 text-sm text-white placeholder:text-faint focus:border-beam focus:outline-none" />
 
               <div>
                 <div className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.06em] text-faint">Access</div>
@@ -301,7 +301,7 @@ export function VideoManager() {
                     <button
                       key={m.id}
                       onClick={() => setViewMode(m.id)}
-                      className={`rounded-[10px] py-2 text-[11px] font-semibold transition ${viewMode === m.id ? "bg-blue text-white" : "bg-white/[0.05] text-muted hover:text-white"}`}
+                      className={`rounded-[10px] py-2 text-[11px] font-semibold transition ${viewMode === m.id ? "bg-beam text-white" : "bg-white/[0.05] text-muted hover:text-white"}`}
                     >
                       {m.label}
                     </button>
@@ -320,15 +320,15 @@ export function VideoManager() {
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={(e) => { e.preventDefault(); setDragOver(false); chooseFile(e.dataTransfer.files?.[0] ?? null); }}
-                className={`flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[12px] border border-dashed px-3 py-6 text-center transition ${dragOver ? "border-blue bg-blue/[0.08]" : "border-white/14 bg-white/[0.03] hover:border-blue/50"}`}
+                className={`flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[12px] border border-dashed px-3 py-6 text-center transition ${dragOver ? "border-beam bg-beam/[0.08]" : "border-white/14 bg-white/[0.03] hover:border-beam/50"}`}
               >
-                <UploadCloud className={`size-6 ${dragOver ? "text-blue-light" : "text-ink-dim"}`} />
+                <UploadCloud className={`size-6 ${dragOver ? "text-beam-soft" : "text-ink-dim"}`} />
                 <span className="max-w-full truncate text-[12px] font-semibold text-ink-dim">{file ? file.name : "Drag a video here, or browse"}</span>
                 <span className="text-[10.5px] text-faint">{file ? `${formatFileSize(file.size)} · resumable upload` : "MP4 / MOV / WebM · up to 5 GB"}</span>
                 <input ref={fileRef} type="file" accept="video/*,.mp4,.mov,.m4v,.webm" className="hidden" onChange={(e) => chooseFile(e.target.files?.[0] ?? null)} />
               </label>
 
-              <label className="flex cursor-pointer items-center gap-3 rounded-[12px] border border-white/12 bg-white/[0.04] p-3 transition hover:border-blue/50">
+              <label className="flex cursor-pointer items-center gap-3 rounded-[12px] border border-white/12 bg-white/[0.04] p-3 transition hover:border-beam/50">
                 <span className="relative flex size-[70px] shrink-0 items-center justify-center overflow-hidden rounded-[12px] border border-white/10 bg-white/[0.05] text-faint">
                   {thumbnailPreview ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -346,13 +346,13 @@ export function VideoManager() {
               </label>
 
               {(phase === "requesting" || phase === "uploading") && (
-                <div className="rounded-[14px] border border-blue/20 bg-blue/[0.08] p-3">
-                  <div className="mb-2 flex items-center justify-between text-[11px] font-semibold text-blue-soft">
+                <div className="rounded-[14px] border border-beam/20 bg-beam/[0.08] p-3">
+                  <div className="mb-2 flex items-center justify-between text-[11px] font-semibold text-beam-soft">
                     <span>{phase === "requesting" ? "Preparing upload" : "Uploading video"}</span>
                     <span>{phase === "uploading" ? `${progress}%` : "secure"}</span>
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full rounded-full bg-blue transition-[width] duration-300" style={{ width: `${phase === "uploading" ? progress : 18}%` }} />
+                    <div className="h-full rounded-full bg-beam transition-[width] duration-300" style={{ width: `${phase === "uploading" ? progress : 18}%` }} />
                   </div>
                   <div className="mt-2 flex items-center justify-between gap-3">
                     <p className="text-[11px] leading-relaxed text-muted">
@@ -433,7 +433,7 @@ function VideoRow({ video, username, busy, onSync, onEdit, onRemove }: { video: 
         </div>
       </div>
       {ready && username ? (
-        <Link href={`/${username}/video/${video.playbackId}`} className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-blue hover:text-blue-light">
+        <Link href={`/${username}/video/${video.playbackId}`} className="inline-flex items-center gap-1 text-[11.5px] font-semibold text-beam hover:text-beam-soft">
           <LinkIcon className="size-3.5" /> <span className="hidden sm:inline">View</span>
         </Link>
       ) : (
@@ -448,7 +448,7 @@ function VideoRow({ video, username, busy, onSync, onEdit, onRemove }: { video: 
           </button>
         </Menu.Trigger>
         <Menu.Portal>
-          <Menu.Content align="end" className="z-50 min-w-36 rounded-xl border border-white/10 bg-elevated p-1.5 text-[12px] text-ink-dim shadow-[0_18px_50px_rgba(0,0,0,.45)]">
+          <Menu.Content align="end" className="z-50 min-w-36 rounded-xl border border-white/10 bg-elevated p-1.5 text-[12px] text-ink-dim">
             <Menu.Item onSelect={onEdit} className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 outline-none hover:bg-white/[0.07] hover:text-white">
               <Pencil className="size-3.5" /> Edit
             </Menu.Item>
@@ -479,14 +479,14 @@ function EditDialog({ video, onClose, onSave }: { video: Video | null; onClose: 
     <Modal.Root open={!!video} onOpenChange={(v) => !v && onClose()}>
       <Modal.Portal>
         <Modal.Overlay className="fixed inset-0 z-50 bg-black/55 backdrop-blur-sm data-[state=open]:animate-[tvFadeIn_.2s_ease]" />
-        <Modal.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100vw-32px)] max-w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-[20px] border border-white/12 bg-elevated p-5 text-white shadow-[0_24px_60px_rgba(0,0,0,.6)] focus:outline-none data-[state=open]:animate-[tvCenterIn_.26s_cubic-bezier(.22,1,.36,1)]">
+        <Modal.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100vw-32px)] max-w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-[20px] border border-white/12 bg-elevated p-5 text-white focus:outline-none data-[state=open]:animate-[tvCenterIn_.26s_cubic-bezier(.22,1,.36,1)]">
           <Modal.Title className="font-display text-[17px] font-semibold">Edit video</Modal.Title>
           <Modal.Description asChild><VisuallyHidden>Edit video details</VisuallyHidden></Modal.Description>
           <div className="mt-4 flex flex-col gap-3">
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Video title" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3.5 text-sm text-white placeholder:text-faint focus:border-blue focus:outline-none" />
+            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Video title" className="h-11 rounded-[12px] border border-white/12 bg-white/[0.06] px-3.5 text-sm text-white placeholder:text-faint focus:border-beam focus:outline-none" />
             <div className="grid grid-cols-3 gap-1.5">
               {MODES.map((m) => (
-                <button key={m.id} onClick={() => setViewMode(m.id)} className={`rounded-[10px] py-2 text-[11px] font-semibold transition ${viewMode === m.id ? "bg-blue text-white" : "bg-white/[0.05] text-muted hover:text-white"}`}>{m.label}</button>
+                <button key={m.id} onClick={() => setViewMode(m.id)} className={`rounded-[10px] py-2 text-[11px] font-semibold transition ${viewMode === m.id ? "bg-beam text-white" : "bg-white/[0.05] text-muted hover:text-white"}`}>{m.label}</button>
               ))}
             </div>
             {viewMode !== "free" && (
@@ -512,7 +512,7 @@ function ConfirmDialog({ video, onClose, onConfirm }: { video: Video | null; onC
     <Modal.Root open={!!video} onOpenChange={(v) => !v && onClose()}>
       <Modal.Portal>
         <Modal.Overlay className="fixed inset-0 z-50 bg-black/55 backdrop-blur-sm data-[state=open]:animate-[tvFadeIn_.2s_ease]" />
-        <Modal.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100vw-32px)] max-w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-[20px] border border-white/12 bg-elevated p-5 text-white shadow-[0_24px_60px_rgba(0,0,0,.6)] focus:outline-none data-[state=open]:animate-[tvCenterIn_.26s_cubic-bezier(.22,1,.36,1)]">
+        <Modal.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100vw-32px)] max-w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-[20px] border border-white/12 bg-elevated p-5 text-white focus:outline-none data-[state=open]:animate-[tvCenterIn_.26s_cubic-bezier(.22,1,.36,1)]">
           <Modal.Title className="font-display text-[17px] font-semibold">Delete this video?</Modal.Title>
           <Modal.Description className="mt-2 text-[12.5px] leading-relaxed text-muted">
             “{video?.title}” will be removed and fans will no longer see it. This can’t be undone.
@@ -529,7 +529,7 @@ function ConfirmDialog({ video, onClose, onConfirm }: { video: Video | null; onC
 
 function StatusBadge({ status }: { status: Video["status"] }) {
   if (status === "ready") {
-    return <span className="inline-flex items-center gap-1 text-blue-soft"><CheckCircle2 className="size-3.5" /> Ready</span>;
+    return <span className="inline-flex items-center gap-1 text-beam-soft"><CheckCircle2 className="size-3.5" /> Ready</span>;
   }
   if (status === "not_found") return <span className="text-red-300">Missing</span>;
   return <span className="inline-flex items-center gap-1 text-faint"><Loader2 className="size-3 animate-spin" /> Processing</span>;

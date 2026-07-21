@@ -14,15 +14,25 @@ import { shareLink } from "@/lib/share";
 export function GoLiveMoment({ live, name, handle }: { live: boolean; name: string; handle: string }) {
   const prev = useRef(live);
   const [show, setShow] = useState(false);
+  // The on-air clock starts the moment the mark flips — the creator sees the
+  // stream counting from their first second, not from a page load.
+  const [onAir, setOnAir] = useState(0);
 
   useEffect(() => {
     if (live && !prev.current) {
       setShow(true);
+      setOnAir(0);
       const t = setTimeout(() => setShow(false), 3600);
       return () => clearTimeout(t);
     }
     prev.current = live;
   }, [live]);
+
+  useEffect(() => {
+    if (!show) return;
+    const tick = setInterval(() => setOnAir((seconds) => seconds + 1), 1000);
+    return () => clearInterval(tick);
+  }, [show]);
 
   useEffect(() => {
     prev.current = live;
@@ -54,7 +64,10 @@ export function GoLiveMoment({ live, name, handle }: { live: boolean; name: stri
         <div className="font-display text-[28px] font-semibold tracking-[-0.02em] text-ink-soft">
           You&apos;re live, {name}
         </div>
-        <div className="receipt text-xs text-muted">tvin.bio/{handle}</div>
+        <div className="receipt text-xs text-muted">
+          tvin.bio/{handle} · {String(Math.floor(onAir / 60)).padStart(2, "0")}:
+          {String(onAir % 60).padStart(2, "0")}
+        </div>
         <span
           role="button"
           tabIndex={0}
