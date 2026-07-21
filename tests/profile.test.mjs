@@ -33,6 +33,8 @@ test("parseCreatorProfileInput normalizes a valid profile", () => {
     displayName: "Ada Plays",
     bio: "Late night streams and drops.",
     avatarColor: "#2a2a2a",
+    accentColor: "#FFB43D",
+    themeVariant: "midnight",
     socialLinks: [{ kind: "youtube", url: "https://youtube.com/@ada" }],
     category: "gaming",
   });
