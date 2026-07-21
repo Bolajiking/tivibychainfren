@@ -36,7 +36,7 @@ export function PersonaSwitch({ variant = "full" }: { variant?: "full" | "compac
     }
     if (!isCreator) {
       // Become a creator → invite-gated claim flow. Real auth preserves intent.
-      router.push(config.privy.enabled ? buildAuthHref({ role: "creator", next: "/onboarding" }) : "/onboarding");
+      router.push(config.privy.enabled ? buildAuthHref({ role: "creator", next: "/onboarding", reason: "claim" }) : "/onboarding");
       return;
     }
     if (persona === "owner") {

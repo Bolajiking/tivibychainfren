@@ -6,7 +6,7 @@ import { usePrivy, useLoginWithEmail, useLoginWithOAuth } from "@privy-io/react-
 import { Mail, Apple, Chrome, ArrowLeft, Loader2 } from "lucide-react";
 import { AuthCard } from "@/app/auth/AuthCard";
 import { Button } from "@/components/ui/Button";
-import { authRoleFromSearch, safeNextPath } from "@/lib/auth/redirect";
+import { authReasonFromSearch, authRoleFromSearch, safeNextPath } from "@/lib/auth/redirect";
 
 type View = "methods" | "email" | "code";
 
@@ -27,6 +27,8 @@ export function PrivyAuth() {
   const { ready, authenticated } = usePrivy();
   const role = authRoleFromSearch(searchParams.get("role"));
   const next = safeNextPath(searchParams.get("next"), "/explore");
+  const reason = authReasonFromSearch(searchParams.get("reason"));
+  const subject = searchParams.get("subject");
 
   const [view, setView] = useState<View>("methods");
   const [email, setEmail] = useState("");
@@ -95,7 +97,7 @@ export function PrivyAuth() {
   }
 
   return (
-    <AuthCard role={role} busy={!ready} error={error}>
+    <AuthCard role={role} reason={reason} subject={subject} busy={!ready} error={error}>
       {view === "methods" && (
         <>
           <Button size="lg" className="w-full" onClick={() => { setError(null); setView("email"); }} disabled={!ready || busy}>

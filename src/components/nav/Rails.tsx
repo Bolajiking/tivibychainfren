@@ -33,7 +33,7 @@ export function Sidebar({ query = "", active }: { query?: string; active?: "expl
   const openWallet = useSession((s) => s.openWallet);
 
   function onWallet() {
-    if (!useSession.getState().user) router.push(buildAuthHref({ role: "viewer", next: "/wallet" }));
+    if (!useSession.getState().user) router.push(buildAuthHref({ role: "viewer", next: "/wallet", reason: "wallet" }));
     else openWallet();
   }
 
@@ -321,7 +321,7 @@ export function ViewerTabBar() {
   const subscriptions = useSession((s) => s.subscriptions);
 
   function onWallet() {
-    if (!useSession.getState().user) router.push(buildAuthHref({ role: "viewer", next: "/wallet" }));
+    if (!useSession.getState().user) router.push(buildAuthHref({ role: "viewer", next: "/wallet", reason: "wallet" }));
     else openWallet();
   }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LiveFavicon } from "@/components/brand/LiveFavicon";
 import { toast } from "sonner";
 import { ChevronLeft, Play } from "lucide-react";
@@ -49,6 +50,7 @@ export function LiveWatch({
   initialChat: ChatMessage[];
   featured: FeaturedProductWithProduct[];
 }) {
+  const router = useRouter();
   const { user, isSubscribed, isUnlocked, subscribe } = useSession();
   const [liveStream, setLiveStream] = useState<Stream>(stream);
   const [messages, setMessages] = useState<ChatMessage[]>(initialChat);
@@ -66,12 +68,14 @@ export function LiveWatch({
   const gated = liveStream.viewMode !== "free";
   // The owner is never gated out of their own stream.
   const locked = !isOwner && gated && !subscribed && !unlocked && !hasAccess({ resource: liveStream, wallets });
+  // Ended while watching (started active, now idle) — a calm close for the fan.
+  const ended = !liveStream.isActive && !isOwner;
   const availableFeaturedItems = featuredItems.filter((item) => canFeatureProduct(item.product));
   const featuredProduct = selectFeaturedProduct(availableFeaturedItems);
   const liveShopProducts = Array.from(
     new Map(availableFeaturedItems.map((item) => [item.product.id, item.product])).values(),
   );
-  const mobileShopVisible = liveShopProducts.length > 0 && !locked;
+  const mobileShopVisible = liveShopProducts.length > 0 && !locked && !ended;
   const livePlaybackId = liveStream.livepeerPlaybackId ?? liveStream.playbackId;
   const showLivePlayer = shouldMountLivePlayback({
     isActive: liveStream.isActive,
@@ -144,6 +148,13 @@ export function LiveWatch({
   useEffect(() => {
     if (locked) setGateOpen(true);
   }, [locked]);
+
+  // When it ends, drift back to the channel — the live surface never lingers.
+  useEffect(() => {
+    if (!ended) return;
+    const t = window.setTimeout(() => router.replace(`/${creator.username}`), 6000);
+    return () => window.clearTimeout(t);
+  }, [ended, creator.username, router]);
 
   /** F3 — post-tip capture. The creator, not the platform, owns the fan. */
   function onFollow() {
@@ -225,7 +236,7 @@ export function LiveWatch({
         <div className="scrim-top pointer-events-none absolute inset-x-0 top-0 z-20 h-[110px]" />
         <div className="absolute inset-x-0 top-0 z-20 flex items-center gap-2.5 p-4">
           <Link
-            href={`/${creator.username}?view=channel`}
+            href={`/${creator.username}`}
             aria-label={`${creator.displayName}'s channel`}
             className="tap grid size-11 shrink-0 place-items-center rounded-full text-white"
           >
@@ -260,6 +271,23 @@ export function LiveWatch({
               </span>
             </div>
           </Player>
+        ) : ended ? (
+          /* The stream ended while watching — a calm close, not a dead frame.
+             We return to the channel on our own after a beat. */
+          <div className="absolute inset-0 z-10 grid place-items-center px-6">
+            <div className="flex max-w-[300px] flex-col items-center text-center">
+              <Avatar seed={creator.avatarColor} src={creator.avatarUrl} size={64} ring="var(--creator-accent)" />
+              <div className="font-display mt-4 text-[20px] font-semibold tracking-[-0.01em] text-ink-soft">
+                {creator.displayName.split(" ")[0]}&apos;s stream ended
+              </div>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+                Thanks for watching. The replay will be on the channel shortly.
+              </p>
+              <Button asChild size="pill" variant="accent" className="mt-5">
+                <Link href={`/${creator.username}`}>Back to channel</Link>
+              </Button>
+            </div>
+          </div>
         ) : !locked ? (
           <div className="absolute inset-0 grid place-items-center">
             <span className="grid size-16 place-items-center rounded-full border border-white/25 bg-white/[0.14]">
@@ -331,30 +359,36 @@ export function LiveWatch({
 
           <div className="scrim-bottom pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[190px]" />
 
-          {/* Identity row — the creator's name is the largest thing on the frame. */}
-          <div className="absolute inset-x-4 bottom-[70px] z-20 flex items-center gap-2.5">
-            <Avatar seed={creator.avatarColor} src={creator.avatarUrl} size={36} ring="var(--creator-accent)" />
-            <Link href={`/${creator.username}?view=channel`} className="min-w-0 flex-1">
-              <span className="font-display block truncate text-[17px] font-semibold leading-tight tracking-[-0.01em] text-white [text-shadow:0_1px_6px_rgba(0,0,0,.7)]">
-                {creator.displayName}
-              </span>
-              <span className="block truncate text-[12px] text-ink-dim">{liveStream.title}</span>
-            </Link>
-            {liveShopProducts.length > 0 && (
-              <Button
-                variant="secondary"
-                size="sm"
-                className="shrink-0 bg-black/40"
-                onClick={() => setBuy(liveShopProducts[0])}
-              >
-                <StoreGlyph size={15} /> Store
-              </Button>
-            )}
-          </div>
+          {/* Identity + composer are for a running stream — the ended card
+              takes over when it's over (and we head back shortly). */}
+          {!ended && (
+            <>
+              {/* Identity row — the creator's name is the largest thing on the frame. */}
+              <div className="absolute inset-x-4 bottom-[74px] z-20 flex items-center gap-2.5">
+                <Avatar seed={creator.avatarColor} src={creator.avatarUrl} size={36} ring="var(--creator-accent)" />
+                <Link href={`/${creator.username}`} className="min-w-0 flex-1">
+                  <span className="font-display block truncate text-[17px] font-semibold leading-tight tracking-[-0.01em] text-white [text-shadow:0_1px_6px_rgba(0,0,0,.7)]">
+                    {creator.displayName}
+                  </span>
+                  <span className="block truncate text-[12px] text-ink-dim">{liveStream.title}</span>
+                </Link>
+                {liveShopProducts.length > 0 && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="shrink-0 bg-black/40"
+                    onClick={() => setBuy(liveShopProducts[0])}
+                  >
+                    <StoreGlyph size={15} /> Store
+                  </Button>
+                )}
+              </div>
 
-          <div className="absolute inset-x-0 bottom-0 z-20 p-3.5">
-            <TipComposer creatorName={creator.displayName} onMessage={onChatSent} onTip={() => setTipOpen(true)} showTip={!isOwner} />
-          </div>
+              <div className="absolute inset-x-0 bottom-0 z-20 px-3.5 pt-3.5 pb-[max(14px,env(safe-area-inset-bottom))]">
+                <TipComposer creatorName={creator.displayName} onMessage={onChatSent} onTip={() => setTipOpen(true)} showTip={!isOwner} />
+              </div>
+            </>
+          )}
         </div>
       </div>
 

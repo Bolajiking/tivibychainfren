@@ -110,7 +110,7 @@ export function DashboardHome() {
           title="Sign in to your dashboard"
           body="Your streams, store and earnings live behind sign-in."
           action="Sign in"
-          href={buildAuthHref({ role: "creator", next: "/dashboard" })}
+          href={buildAuthHref({ role: "creator", next: "/dashboard", reason: "claim" })}
         />
       </DashboardShell>
     );

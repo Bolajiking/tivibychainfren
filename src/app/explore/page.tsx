@@ -1,11 +1,11 @@
 import { Search } from "lucide-react";
 import { getLiveStreams, listCreators } from "@/lib/data";
 import { Sidebar, ViewerTabBar } from "@/components/nav/Rails";
-import { LiveCard, CreatorCard } from "@/components/cards/Cards";
+import { CreatorCard } from "@/components/cards/Cards";
+import { ExploreLive } from "@/components/cards/ExploreLive";
 import { Logo } from "@/components/brand/Logo";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SectionLabel } from "@/components/ui/Badges";
-import { OnAirGlyph } from "@/components/brand/Glyphs";
 import { WalletButton } from "@/components/wallet/WalletButton";
 import { filterExploreResults, normalizeExploreQuery } from "@/lib/explore";
 
@@ -60,21 +60,10 @@ export default async function ExplorePage({
             />
           </form>
 
-          {/* Live now — full-width tiles, creator identity leading each one. */}
+          {/* Live now — client-polled so it reflects go-lives and, crucially,
+              reverts the moment a stream ends. Creator identity leads each tile. */}
           <div className="mt-5">
-            {results.liveItems.length ? (
-              <div className="stagger flex flex-col gap-2.5">
-                {results.liveItems.map(({ stream, creator }) => (
-                  <LiveCard key={stream.playbackId} stream={stream} creator={creator} wide />
-                ))}
-              </div>
-            ) : (
-              <EmptyState
-                icon={<OnAirGlyph size={30} />}
-                title={query ? "Nothing live matches that" : "Nobody's on air right now"}
-                outcome={query ? undefined : "the stage is dark, not empty"}
-              />
-            )}
+            <ExploreLive initial={results.liveItems} query={query} />
           </div>
 
           <SectionLabel className="mb-3 mt-7">Featured channels</SectionLabel>

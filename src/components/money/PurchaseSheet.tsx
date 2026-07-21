@@ -51,7 +51,7 @@ export function PurchaseSheet({
   if (!product) return null;
 
   async function buy() {
-    if (!requireAuth({ role: "viewer" })) return;
+    if (!requireAuth({ role: "viewer", reason: "buy", subject: creatorName })) return;
     if (unavailable) return;
     const tx = await run({
       moment: "buy",

@@ -281,6 +281,14 @@ body {
 .onair-glow { box-shadow: 0 0 24px rgba(239, 68, 68, 0.18); }
 .beam-glow { box-shadow: 0 0 24px rgba(64, 172, 255, 0.18); }
 
+/* Live banner backdrop when a creator has no cover art — a warm ON-AIR wash,
+   live-red glow over the canvas (framework: the one glow in the system). */
+.onair-wash {
+  background-image:
+    radial-gradient(70% 80% at 50% 25%, rgba(239, 68, 68, 0.22), transparent 68%),
+    linear-gradient(150deg, #1a1012, #0a0708 78%);
+}
+
 @keyframes tvMeter {
   0%, 100% { transform: scaleY(0.3); }
   50% { transform: scaleY(1); }

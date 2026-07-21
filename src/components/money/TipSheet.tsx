@@ -55,7 +55,7 @@ export function TipSheet({
   const balance = user?.balanceUsd ?? 0;
 
   async function send() {
-    if (!requireAuth({ role: "viewer" })) return;
+    if (!requireAuth({ role: "viewer", reason: "tip", subject: creatorName })) return;
     const sender = getAuthedUser()?.displayName ?? "You";
     const tx = await run({
       moment: "tip",

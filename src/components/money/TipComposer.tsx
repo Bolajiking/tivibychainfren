@@ -35,7 +35,7 @@ export function TipComposer({
   async function submitChat(event: FormEvent) {
     event.preventDefault();
     if (!normalized || sending || !onMessage) return;
-    if (!requireAuth({ role: "viewer" })) return;
+    if (!requireAuth({ role: "viewer", reason: "comment", subject: creatorName })) return;
     setSending(true);
     try {
       const ok = await onMessage(normalized);

@@ -49,7 +49,7 @@ export function UnlockGate({
   const contentNoun = resource?.kind === "video" ? "replay" : "stream";
 
   async function pay() {
-    if (!requireAuth({ role: "viewer" })) return;
+    if (!requireAuth({ role: "viewer", reason: "unlock", subject: creatorName })) return;
     const tx = await run({
       moment: door === "monthly" ? "subscribe" : "unlock",
       amountUsd: amount, recipient, unlockKeys: unlockKeysForDoor(unlockKeys, door),
