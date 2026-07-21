@@ -164,6 +164,11 @@ export function DashboardHome() {
           </Button>
         </div>
 
+        {/* A fresh channel still needs to reach every room on mobile — the
+            bottom nav is only a triad, so surface the rest here too (the
+            running-channel view below shows the same grid). */}
+        <MobileManageGrid className="mt-8" />
+
         <p className="outcome mt-8 text-center text-[14px] text-muted">a channel you own</p>
       </DashboardShell>
     );
@@ -298,18 +303,7 @@ export function DashboardHome() {
 
       {/* Every room, one tap from the Channel tab — the mobile bottom nav is a
           triad, so the other rooms live here (desktop uses the left rail). */}
-      <div className="mt-5 md:hidden">
-        <SectionLabel className="mb-3">Manage</SectionLabel>
-        <div className="stagger grid grid-cols-3 gap-2.5">
-          <RoomLink href="/dashboard/streams" label="Streams" icon={<GoLiveGlyph size={18} />} />
-          <RoomLink href="/dashboard/videos" label="Videos" icon={<ClipGlyph size={18} />} />
-          <RoomLink href="/dashboard/store" label="Store" icon={<StoreGlyph size={18} />} />
-          <RoomLink href="/dashboard/monetization" label="Money" icon={<WalletGlyph size={18} />} />
-          <RoomLink href="/dashboard/analytics" label="Analytics" icon={<BarChart3 className="size-[18px]" />} />
-          <RoomLink href="/dashboard/chat" label="Chat" icon={<MessageSquare className="size-[18px]" />} />
-          <RoomLink href="/dashboard/settings" label="Settings" icon={<Settings className="size-[18px]" />} />
-        </div>
-      </div>
+      <MobileManageGrid className="mt-5" />
 
       {/* Who arrived? */}
       <div className="mt-5">
@@ -357,6 +351,29 @@ function DashboardShell({
           <CreatorBottomNav />
         </div>
       </main>
+    </div>
+  );
+}
+
+/**
+ * The mobile "Manage" grid — every dashboard room the bottom-nav triad
+ * (Channel · Store · Wallet) leaves out. Shown on both the first-run landing
+ * and the running-channel view so a creator can always reach Settings,
+ * Streams, Analytics and Chat on a phone. Desktop uses the left rail instead.
+ */
+function MobileManageGrid({ className }: { className?: string }) {
+  return (
+    <div className={`md:hidden ${className ?? ""}`}>
+      <SectionLabel className="mb-3">Manage</SectionLabel>
+      <div className="stagger grid grid-cols-3 gap-2.5">
+        <RoomLink href="/dashboard/streams" label="Streams" icon={<GoLiveGlyph size={18} />} />
+        <RoomLink href="/dashboard/videos" label="Videos" icon={<ClipGlyph size={18} />} />
+        <RoomLink href="/dashboard/store" label="Store" icon={<StoreGlyph size={18} />} />
+        <RoomLink href="/dashboard/monetization" label="Money" icon={<WalletGlyph size={18} />} />
+        <RoomLink href="/dashboard/analytics" label="Analytics" icon={<BarChart3 className="size-[18px]" />} />
+        <RoomLink href="/dashboard/chat" label="Chat" icon={<MessageSquare className="size-[18px]" />} />
+        <RoomLink href="/dashboard/settings" label="Settings" icon={<Settings className="size-[18px]" />} />
+      </div>
     </div>
   );
 }
