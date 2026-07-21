@@ -29,6 +29,34 @@ test("verifyLivepeerSignature rejects wrong secret, tampered body, and missing i
   assert.equal(wh.verifyLivepeerSignature(body, null, SECRET), false);
 });
 
+test("an unmapped stream is acknowledged, not retried", () => {
+  // Livepeer redelivers on any non-2xx and disables a webhook that keeps
+  // failing. A stream it knows and we don't (deleted channel, stream created
+  // directly in Studio, an e2e test's temp stream) can never produce a row, so
+  // a 500 here is an infinite retry loop that takes live status down with it.
+  const outcome = wh.streamUpdateOutcome({ updateFailed: false, playbackId: null });
+  assert.equal(outcome.status, 200);
+  assert.deepEqual(outcome.body, { ok: true, ignored: "unmapped_stream" });
+});
+
+test("a database failure still returns 500 so Livepeer redelivers", () => {
+  const outcome = wh.streamUpdateOutcome({ updateFailed: true, playbackId: null });
+  assert.equal(outcome.status, 500);
+  assert.equal(outcome.body.ok, false);
+  assert.equal(outcome.body.error, "stream_status_update_failed");
+});
+
+test("a mapped stream reports the playback id it flipped", () => {
+  const outcome = wh.streamUpdateOutcome({ updateFailed: false, playbackId: "live-ada" });
+  assert.equal(outcome.status, 200);
+  assert.deepEqual(outcome.body, { ok: true, playbackId: "live-ada" });
+});
+
+test("an update failure outranks a matched row", () => {
+  const outcome = wh.streamUpdateOutcome({ updateFailed: true, playbackId: "live-ada" });
+  assert.equal(outcome.status, 500, "never report success when the write failed");
+});
+
 test("parseStreamWebhook extracts event + stream id from varied shapes", () => {
   assert.deepEqual(wh.parseStreamWebhook({ event: "stream.started", stream: { id: "abc" } }), { event: "stream.started", livepeerStreamId: "abc" });
   assert.deepEqual(wh.parseStreamWebhook({ event: "stream.idle", payload: { id: "def" } }), { event: "stream.idle", livepeerStreamId: "def" });
