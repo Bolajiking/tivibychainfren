@@ -45,6 +45,34 @@ function timingSafeHexEqual(a: string, b: string): boolean {
   return timingSafeEqual(ab, bb);
 }
 
+export type StreamWebhookOutcome =
+  | { status: 200; body: { ok: true; playbackId: string } }
+  | { status: 200; body: { ok: true; ignored: string } }
+  | { status: 500; body: { ok: false; error: string } };
+
+/**
+ * What to answer Livepeer after attempting the `streams.is_active` flip.
+ *
+ * The distinction that matters is retryable vs not. Livepeer re-delivers on any
+ * non-2xx and disables a webhook that keeps failing, which would take live
+ * status down with it.
+ *
+ *  - update failed  → 500. A transient database fault; redelivery may succeed.
+ *  - no row matched → 200. The stream exists in Livepeer but not in our DB: a
+ *    channel deleted here, a stream created directly in Studio, or an e2e
+ *    test's temporary stream. That is not our error and no number of retries
+ *    will produce a row, so acknowledging it keeps the webhook healthy. Treated
+ *    exactly like the unknown-event case the route already ignores.
+ */
+export function streamUpdateOutcome(input: {
+  updateFailed: boolean;
+  playbackId: string | null;
+}): StreamWebhookOutcome {
+  if (input.updateFailed) return { status: 500, body: { ok: false, error: "stream_status_update_failed" } };
+  if (!input.playbackId) return { status: 200, body: { ok: true, ignored: "unmapped_stream" } };
+  return { status: 200, body: { ok: true, playbackId: input.playbackId } };
+}
+
 interface StreamWebhookBody {
   event?: unknown;
   stream?: unknown;

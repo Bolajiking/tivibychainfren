@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/db/client";
-import { verifyLivepeerSignature, parseStreamWebhook } from "@/lib/livepeer/webhook";
+import { verifyLivepeerSignature, parseStreamWebhook, streamUpdateOutcome } from "@/lib/livepeer/webhook";
 
 /**
  * Livepeer webhook receiver. Subscribe a webhook in Livepeer Studio to
@@ -52,14 +52,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, ignored: "event" });
   }
 
+  const outcome = streamUpdateOutcome({
+    updateFailed: Boolean(result.error),
+    playbackId: result.data?.playback_id ?? null,
+  });
+
   if (result.error) {
     console.error("[livepeer webhook] stream status update failed:", result.error);
-    return NextResponse.json({ ok: false, error: "stream_status_update_failed" }, { status: 500 });
-  }
-  if (!result.data) {
-    console.error("[livepeer webhook] stream mapping not found:", livepeerStreamId);
-    return NextResponse.json({ ok: false, error: "stream_mapping_not_found" }, { status: 500 });
+  } else if (!result.data) {
+    // Not an error: Livepeer knows this stream, we don't. Acknowledged rather
+    // than 500'd so redelivery doesn't loop and get the webhook disabled.
+    console.warn("[livepeer webhook] ignoring unmapped stream:", livepeerStreamId);
   }
 
-  return NextResponse.json({ ok: true, playbackId: result.data.playback_id });
+  return NextResponse.json(outcome.body, { status: outcome.status });
 }

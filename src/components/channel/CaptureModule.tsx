@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { SaveChannelRow } from "@/components/pwa/SaveChannelRow";
 import { cn } from "@/lib/cn";
 
 /**
@@ -59,6 +60,10 @@ export function CaptureModule({
           {name} now owns this relationship — it travels with {name === creatorName ? "them" : "them"}, off-platform.
           You&apos;ll hear about lives by email.
         </p>
+        {/* Following is the moment they've decided this channel is worth
+            returning to — the natural place to offer the Home Screen icon.
+            Removes itself when install isn't possible. */}
+        <SaveChannelRow creatorName={creatorName} className="mt-3 bg-canvas" />
       </div>
     );
   }

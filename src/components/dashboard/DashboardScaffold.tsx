@@ -94,12 +94,16 @@ export function useCreatorProfile() {
 }
 
 /**
- * The mobile bottom-nav destinations (Channel · Store · Wallet). A page that
- * IS a bottom tab never shows a back button; every other room does, so nothing
- * is reachable only by the browser's chrome. Must stay in sync with
- * `CreatorBottomNav`.
+ * The mobile bottom-nav destinations. A page that IS a bottom tab never shows a
+ * back button; every other room does, so nothing is reachable only by the
+ * browser's chrome. Must stay in sync with `CreatorBottomNav`.
+ *
+ * Store and Money left this set when they left the tab bar — without that,
+ * both rooms would be trapped on mobile (reachable from the Manage grid, with
+ * no way back). Same class of bug the 2026-07-20 pass fixed for
+ * Streams/Analytics.
  */
-const PRIMARY_DASHBOARD_TABS = new Set(["overview", "store", "money"]);
+const PRIMARY_DASHBOARD_TABS = new Set(["overview"]);
 
 /**
  * Mobile-only top bar for dashboard pages: a back affordance (only where the

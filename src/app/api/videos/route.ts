@@ -48,11 +48,27 @@ export async function POST(req: Request) {
   if (error) {
     // Surface the real cause server-side (FK to creators, enum, constraint, etc.).
     console.error("[api/videos] draft insert failed:", { code: error.code, message: error.message, details: error.details, creatorId: row.creator_id });
-    const reason = error.code === "23503" ? "creator_profile_missing" : "video_write_failed";
-    return NextResponse.json({ ok: false, error: reason }, { status: 500 });
+    return NextResponse.json({ ok: false, error: classifyInsertError(error.code) }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, video: rowToVideo(data) });
+}
+
+/**
+ * Distinguish "retry might work" from "retrying will never work".
+ *
+ * A missing column or table is a deployment gap, not a transient fault — an
+ * unapplied migration. Telling the creator to "try again" sends them into a
+ * loop that cannot succeed, which is exactly what happened when
+ * `0013_vod_thumbnails_comments.sql` had not been applied to production and
+ * every VOD upload failed with 42703 mapped to a generic retry message.
+ * `scripts/schema-drift-check.mjs` catches this class before a creator does.
+ */
+function classifyInsertError(code: string | undefined): string {
+  if (code === "23503") return "creator_profile_missing";
+  // 42703 undefined_column · 42P01 undefined_table · 42883 undefined_function
+  if (code === "42703" || code === "42P01" || code === "42883") return "schema_out_of_date";
+  return "video_write_failed";
 }
 
 function bad(error: string) {

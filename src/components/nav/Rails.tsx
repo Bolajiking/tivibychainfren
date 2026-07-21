@@ -276,35 +276,48 @@ function CollapsedRailToggle({ onClick }: { onClick: () => void }) {
 }
 
 /**
- * The creator's mobile triad (F6): Channel · Store · Wallet. Streams and
- * analytics are reached from the dashboard home, which already leads with
- * "Go live" — a five-item bar would dilute the one dominant action.
+ * The creator's mobile bar: Dashboard · My channel.
+ *
+ * Store and Wallet used to sit here, but both are already tiles in the
+ * overview's "Manage" grid — a tab bar that repeats the grid beneath it spends
+ * its two most valuable slots on duplicates. The slot they vacate solves a real
+ * gap instead: on mobile there was no way out of the dashboard back to the
+ * public page, so a creator checking how their channel looks had to retype the
+ * URL.
+ *
+ * "My channel" is the same vocabulary `ViewerTabBar` uses for `/{username}`,
+ * and the creator page carries its own history-aware `BackButton`, so the
+ * round trip closes.
+ *
+ * Must stay in sync with `PRIMARY_DASHBOARD_TABS` in `DashboardScaffold`:
+ * anything not reachable from this bar has to show a mobile back button, or
+ * the room is trapped.
  */
 export function CreatorBottomNav() {
   const path = usePathname();
-  const items = [
-    { label: "Channel", icon: <OnAirGlyph size={19} />, href: "/dashboard" },
-    { label: "Store", icon: <StoreGlyph size={19} />, href: "/dashboard/store" },
-    { label: "Wallet", icon: <WalletGlyph size={19} />, href: "/dashboard/monetization" },
-  ];
+  const creator = useSession((s) => s.creator);
+  const channelHref = creator?.username ? `/${creator.username}` : null;
+
   return (
-    <div className="sticky bottom-0 z-30 flex shrink-0 items-center border-t border-white/[0.06] bg-surface-2/95 pt-1 backdrop-blur pb-[max(4px,env(safe-area-inset-bottom))]">
-      {items.map((item) => {
-        const active = path === item.href;
-        return (
-          <Link
-            key={item.label}
-            href={item.href}
-            className={cn(
-              "flex h-[54px] flex-1 flex-col items-center justify-center gap-[3px] transition-[color,transform] duration-150 ease-[cubic-bezier(.22,1,.36,1)] active:scale-[0.96]",
-              active ? "text-beam" : "text-faint hover:text-ink-dim",
-            )}
-          >
-            {item.icon}
-            <span className="text-[10px] font-semibold">{item.label}</span>
-          </Link>
-        );
-      })}
+    <div className="sticky bottom-0 z-30 shrink-0 border-t border-white/[0.06] bg-surface-2/95 pt-1 backdrop-blur pb-[max(4px,env(safe-area-inset-bottom))]">
+      {/* Centred and width-capped: with two items, edge-to-edge `flex-1` would
+          strand the labels at the far corners on wider phones. */}
+      <div className="mx-auto flex w-full max-w-[420px] items-center">
+        <TabItem
+          href="/dashboard"
+          label="Dashboard"
+          active={path === "/dashboard"}
+          icon={<StageGlyph size={19} />}
+        />
+        {channelHref && (
+          <TabItem
+            href={channelHref}
+            label="My channel"
+            active={path === channelHref}
+            icon={<OnAirGlyph size={19} />}
+          />
+        )}
+      </div>
     </div>
   );
 }
